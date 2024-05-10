@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
 
-export default function Dashboard({ navigation }: any) {
+export default function TabGioHang() {
   return (
     <View style={style.container}>
-      <Text>home</Text>
+      <Text>list gio hang</Text>
     </View>
   );
 }
@@ -11,7 +11,7 @@ export default function Dashboard({ navigation }: any) {
 const style = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "yellow",
+    backgroundColor: "red",
     justifyContent: "center",
     alignItems: "center",
   },

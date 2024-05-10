@@ -5,32 +5,44 @@ import {
   Text,
   TextInput,
   View,
+  KeyboardAvoidingView,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useState } from "react";
 import loginService from "../../api/login/loginService";
 import { ILoginModel, TenantStatus } from "../../api/login/loginDto";
 import commonFunc from "../../utils/commonFunc";
-export default function Login() {
+import * as SecureStore from "expo-secure-store";
+
+export default function Login({ gotoHome }: any) {
   const [tenancyName, setTenancyName] = useState("");
   const [userName, setUserName] = useState("");
   const [passWord, setPassWord] = useState("");
+  const [errors, setErrors] = useState({ userName: "", passWord: "" });
 
   const [tenancyName_MsgErr, setTenancyName_MsgErr] = useState("");
   const [userName_MsgErr, setUserName_MsgErr] = useState("");
   const [passWord_MsgErr, setPassWord_MsgErr] = useState("");
 
   const onPressLogin = async () => {
+    // if (validateForm()) {
     const tenantData = await loginService.CheckExistTenant(tenancyName);
     if (tenantData.state == TenantStatus.AVAILABLE) {
       const input = {
         userNameOrEmailAddress: userName,
         password: passWord,
-        rememberClient: false,
+        rememberClient: true,
+        tenantId: tenantData.tenantId,
       } as ILoginModel;
-      const user = await loginService.CheckUser(input, tenantData.tenantId);
-      if (user == "") {
-        // goto home
+      const token = await loginService.CheckUser(input, tenantData.tenantId);
+      if (token != null) {
+        SecureStore.setItem("accessToken", token.accessToken);
+        if (input.rememberClient) {
+          SecureStore.setItem("user", JSON.stringify(input));
+        }
+        gotoHome(true);
+      } else {
+        gotoHome(false);
       }
     } else {
       switch (tenantData.state) {
@@ -51,9 +63,22 @@ export default function Login() {
           break;
       }
     }
+    // }
+  };
+
+  const validateForm = () => {
+    let errors = { userName: "", passWord: "" };
+    if (!userName) errors.userName = "Username required";
+    if (!passWord) errors.passWord = "passWord required";
+    setErrors(errors);
+    return Object.keys(errors).length == 0;
   };
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior="padding"
+      keyboardVerticalOffset={100}
+    >
       <Image
         source={require("../../assets/logo_Luckybeauty_full.png")}
         style={{ resizeMode: "stretch", width: 200, height: 50 }}
@@ -98,7 +123,9 @@ export default function Login() {
               style={styles.inputBox}
               onChangeText={(newVal) => setUserName(newVal)}
             />
-            <Text style={styles.msgErr}>{userName_MsgErr}</Text>
+            {errors?.userName ? (
+              <Text style={styles.msgErr}>{errors?.userName}</Text>
+            ) : null}
           </View>
         </View>
         <View style={styles.inputContainer}>
@@ -114,7 +141,9 @@ export default function Login() {
               style={styles.inputBox}
               onChangeText={(newVal) => setPassWord(newVal)}
             />
-            <Text style={styles.msgErr}>{passWord_MsgErr}</Text>
+            {errors?.passWord ? (
+              <Text style={styles.msgErr}>{errors.passWord}</Text>
+            ) : null}
           </View>
         </View>
       </View>
@@ -123,7 +152,7 @@ export default function Login() {
           <Text style={styles.textButton}>Login</Text>
         </Pressable>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -174,5 +203,6 @@ const styles = StyleSheet.create({
   msgErr: {
     color: "red",
     fontSize: 12,
+    marginTop: 8,
   },
 });

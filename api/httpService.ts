@@ -1,76 +1,59 @@
-import axios from "axios";
-const http = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL,
-  paramsSerializer: function (params) {
-    return new URLSearchParams(params).toString();
-  },
-});
-http.interceptors.request.use(
-  (config) => {
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+import * as SecureStore from "expo-secure-store";
 
-http.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    if (
-      !!error.response &&
-      !!error.response.data.error &&
-      !!error.response.data.error.message &&
-      error.response.data.error.details
-    ) {
-    } else if (
-      !!error.response &&
-      !!error.response.data.error &&
-      !!error.response.data.error.message
-    ) {
-      //
-    } else if (!error.response) {
-    }
-    return Promise.reject(error);
-  }
-);
-export default http;
-
-export class htpService {
+class htpService {
   get = async (serviceUrl: string, input: {}) => {
     const param = new URLSearchParams(input).toString();
     try {
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}${serviceUrl}?${param}`,
-        {
+      const accessToken = SecureStore.getItem("accessToken");
+      if (accessToken) {
+        const myHeaders = new Headers();
+        myHeaders.append("Authorization", `Bearer ${accessToken}`);
+        myHeaders.append("Accept", "application/json");
+        myHeaders.append("Content-Type", "application/json");
+
+        const requestOptions: RequestInit = {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const jsonData = await response.json();
+          headers: myHeaders,
+        };
+
+        const response = await fetch(
+          `${process.env.EXPO_PUBLIC_API_URL}${serviceUrl}?${param}`,
+          requestOptions
+        );
+        const jsonData = await response.json();
+        return jsonData.result;
+      }
     } catch (error) {}
+    return null;
   };
   post = async (serviceUrl: string, input: {}) => {
-    // todo header
     try {
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}${serviceUrl}`,
-        {
+      const accessToken = SecureStore.getItem("accessToken");
+      if (accessToken) {
+        const myHeaders = new Headers();
+        myHeaders.append("Authorization", `Bearer ${accessToken}`);
+        myHeaders.append("Accept", "application/json");
+        myHeaders.append("Content-Type", "application/json");
+
+        const requestOptions: RequestInit = {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: myHeaders,
           body: JSON.stringify(input),
-        }
-      );
-      const jsonData = await response.json();
-      return jsonData.result;
+        };
+
+        const response = await fetch(
+          `${process.env.EXPO_PUBLIC_API_URL}${serviceUrl}`,
+          requestOptions
+        );
+
+        const jsonData = await response.json();
+        return jsonData.result;
+      }
+      return null;
     } catch (error) {
+      console.log("jsonData_error ", error);
       return null;
     }
   };
 }
+export default new htpService();

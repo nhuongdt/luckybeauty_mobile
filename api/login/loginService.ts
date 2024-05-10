@@ -1,8 +1,24 @@
 import http from "../httpService";
-import { ILoginModel } from "./loginDto";
-import * as Keychain from "react-native-keychain";
+import { IAuthenResultModel, ILoginModel } from "./loginDto";
+import * as SecureStore from "expo-secure-store";
 
 class LoginService {
+  CheckUser_fromCache = async (): Promise<ILoginModel | null> => {
+    let user = await SecureStore.getItemAsync("user");
+    if (user) {
+      const dataUser = JSON.parse(user);
+      console.log("user ", JSON.parse(user));
+
+      const userLogin: ILoginModel = {
+        userNameOrEmailAddress: dataUser.userNameOrEmailAddress,
+        password: dataUser.password,
+        rememberClient: dataUser.rememberClient,
+        tenantId: dataUser?.tennatId ?? 0,
+      };
+      return userLogin;
+    }
+    return null;
+  };
   CheckExistTenant = async (
     tenantName: string
   ): Promise<{ state: number; tenantId: number }> => {
@@ -27,8 +43,10 @@ class LoginService {
     }
     return { state: 0, tenantId: 0 };
   };
-  CheckUser = async (input: ILoginModel, tennatId: number): Promise<any> => {
-    let errMsg = "";
+  CheckUser = async (
+    input: ILoginModel,
+    tennatId: number
+  ): Promise<IAuthenResultModel | null> => {
     try {
       const myHeaders = new Headers();
       myHeaders.append("Abp.TenantId", tennatId.toString());
@@ -45,47 +63,11 @@ class LoginService {
         requestOptions
       );
       const jsonData = await response.json();
-
-      if (jsonData.success && jsonData.result != null) {
-        if (input.rememberClient) {
-          await Keychain.setGenericPassword(
-            input.userNameOrEmailAddress,
-            jsonData.result.accessToken
-          );
-        }
-        // set cookies
-        console.log("jsonData.result_OK  ", jsonData.result);
-        return "";
-      }
-      errMsg = jsonData.error;
-      return jsonData.error;
+      return jsonData.result;
     } catch (error) {
       console.log("loginuee ", error);
     }
-    return errMsg;
-  };
-
-  checkuser2 = async (input: ILoginModel, tennatId: number) => {
-    console.log("input ", input, "tennatId ", tennatId);
-    const param = {
-      userNameOrEmailAddress: input.userNameOrEmailAddress,
-      password: input.password,
-      rememberClient: input.rememberClient,
-    };
-    try {
-      const apiResult = await http.post(
-        "https://api.luckybeauty.vn/api/TokenAuth/Authenticate",
-        param,
-        {
-          headers: {
-            "Abp.TenantId": tennatId,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    } catch (error) {
-      console.error("error ", error);
-    }
+    return null;
   };
 }
 export default new LoginService();
