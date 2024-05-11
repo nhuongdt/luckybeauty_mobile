@@ -1,6 +1,8 @@
 import { StyleSheet, Text, View } from "react-native";
 import TabListProduct from "./TabListProduct";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Ionicons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 
@@ -11,31 +13,26 @@ const TabTop = createMaterialTopTabNavigator();
 
 export default function PageThuNgan() {
   return (
-    <TabTop.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color }) => {
-          let iconName: any;
-
-          if (route.key === "thungan_listProduct") {
-            iconName = focused ? "list" : "list";
-          } else if (route.key === "thungan_shoppingcar") {
-            iconName = focused ? "shopping-cart" : "shopping-cart";
-          }
-          return <MaterialIcons name={iconName} color={color} />;
-        },
-        tabBarActiveTintColor: "red",
-        tabBarInactiveTintColor: "gray",
-      })}
-    >
+    <TabTop.Navigator>
       <TabTop.Screen
         name="Sản phẩm"
         key={"thungan_listProduct"}
         component={TabListProduct}
+        options={{
+          tabBarIcon: ({ focused, color }) => (
+            <MaterialIcons name={"list"} size={20} />
+          ),
+        }}
       />
       <TabTop.Screen
         name="Giỏ hàng"
         key={"thungan_shoppingcar"}
         component={TabGioHang}
+        options={{
+          tabBarIcon: ({ focused, color }) => (
+            <MaterialIcons name={"add-shopping-cart"} size={20} />
+          ),
+        }}
       />
     </TabTop.Navigator>
   );

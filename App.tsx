@@ -1,29 +1,38 @@
 import "react-native-gesture-handler";
+import { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-
-import { StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  ImageBackground,
+  useWindowDimensions,
+  View,
+  Pressable,
+} from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-// import { createDrawerNavigator } from '@react-navigation';
 import { createDrawerNavigator } from "@react-navigation/drawer";
-
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import * as SecureStore from "expo-secure-store";
+import { FontAwesome5 } from "@expo/vector-icons";
 import dashboard from "./page/dashboard/dashboard";
 import PageInvoice from "./page/invoice/PageInvoice";
 import Login from "./page/login/login";
-import * as Keychain from "react-native-keychain";
-import * as SecureStore from "expo-secure-store";
-import { useEffect, useState } from "react";
 import loginService from "./api/login/loginService";
 import PageThuNgan from "./page/thu_ngan/PageThuNgan";
-
-// const Stack = createNativeStackNavigator();
+import { ILoginModel } from "./api/login/loginDto";
+import NavBarUser from "./page/user/navbarUser";
+const bgImage = require("./assets/bg_01.png");
 const Drawer = createDrawerNavigator();
 
 export default function App() {
+  const [isLoadingForm, setIsLoadingForm] = useState(true);
   const [isLogin, setIsLogin] = useState(false);
+  const [openUser, setOpenUser] = useState(false);
+  const windowWidth = useWindowDimensions().width;
+  const windowHeight = useWindowDimensions().height;
+  const [userLogin, setUserLogin] = useState<ILoginModel>({} as ILoginModel);
+
   const CheckUser_HasLogin = async () => {
     try {
-      // SecureStore.deleteItemAsync("user");
       const dataUser = await loginService.CheckUser_fromCache();
       if (dataUser != null) {
         const token = await loginService.CheckUser(
@@ -32,6 +41,11 @@ export default function App() {
         );
         if (token != null) {
           setIsLogin(true);
+          setUserLogin({
+            ...userLogin,
+            userNameOrEmailAddress: dataUser.userNameOrEmailAddress,
+          });
+
           SecureStore.setItem("accessToken", token.accessToken);
         } else {
           setIsLogin(false);
@@ -41,27 +55,79 @@ export default function App() {
       }
     } catch (error) {
       setIsLogin(false);
-      Keychain.resetGenericPassword();
     }
+    setIsLoadingForm(false);
   };
-  const checkA = (value: boolean) => {
+
+  const GetInforUserLogin = async () => {
+    //
+  };
+  const onLoginOK = (value: boolean) => {
     setIsLogin(value);
+  };
+
+  const onLogout = () => {
+    setIsLogin(false);
+    SecureStore.deleteItemAsync("user");
   };
 
   useEffect(() => {
     CheckUser_HasLogin();
   }, []);
 
+  if (isLoadingForm) {
+    return (
+      <ImageBackground
+        source={bgImage}
+        resizeMode="stretch"
+        style={{ flex: 1, justifyContent: "center" }}
+      >
+        <ActivityIndicator color="#0000ff" />
+      </ImageBackground>
+    );
+  }
+
   return (
     <>
+      <StatusBar backgroundColor="yellow" />
       {!isLogin ? (
-        <Login gotoHome={checkA} />
+        <Login gotoHome={onLoginOK} />
       ) : (
         <NavigationContainer>
-          <Drawer.Navigator>
-            <Drawer.Screen name="home" component={dashboard} />
-            <Drawer.Screen name="invoice" component={PageInvoice} />
-            <Drawer.Screen name="thungan" component={PageThuNgan} />
+          <Drawer.Navigator
+            screenOptions={{
+              headerRight: () => (
+                <Pressable
+                  style={{ padding: 4, position: "relative" }}
+                  onPressIn={() => setOpenUser(!openUser)}
+                >
+                  <FontAwesome5 name="user-circle" size={24} />
+                  <NavBarUser
+                    open={openUser}
+                    dataUser={userLogin}
+                    onClose={onLogout}
+                  />
+                </Pressable>
+              ),
+            }}
+          >
+            <Drawer.Screen
+              name="home"
+              options={{
+                title: "Trang chủ",
+              }}
+              component={dashboard}
+            />
+            <Drawer.Screen
+              name="invoice"
+              options={{ title: "Hóa đơn" }}
+              component={PageInvoice}
+            />
+            <Drawer.Screen
+              name="thungan"
+              options={{ title: "Thu ngân" }}
+              component={PageThuNgan}
+            />
           </Drawer.Navigator>
         </NavigationContainer>
       )}

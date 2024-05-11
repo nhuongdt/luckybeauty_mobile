@@ -1,10 +1,18 @@
-import { ScrollView, StyleSheet, Text, View, FlatList } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  ActivityIndicator,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Ionicons } from "@expo/vector-icons";
 import { TextInput } from "react-native-gesture-handler";
 import React, { useEffect, useRef, useState } from "react";
 import ProductService from "../../api/products/ProductService";
 import { IParamSearchProductDto, IProductBasic } from "../../api/products/dto";
+import { IPageResult } from "../../api/dto/CommonDto";
+import ModalAddGioHang from "./ModalAddGioHang";
+import { IHoaDonChiTietDto } from "../../api/invoices/hoaDonDto";
 
 export type IPropProduct = {
   product: IProductBasic;
@@ -20,6 +28,7 @@ const ProductItem = (props: IPropProduct) => {
           borderWidth: 1,
           borderColor: "#ccc",
           borderRadius: 8,
+          backgroundColor: "#f0ffff",
         }}
       >
         <View
@@ -34,7 +43,6 @@ const ProductItem = (props: IPropProduct) => {
             style={{
               gap: 8,
               padding: 8,
-              backgroundColor: "powderblue",
               flex: 6,
             }}
           >
@@ -49,13 +57,12 @@ const ProductItem = (props: IPropProduct) => {
               alignItems: "center",
             }}
           >
-            {/* <Ionicons
-              name="add"
+            <MaterialIcons
+              name="add-circle-outline"
               size={24}
               color={"red"}
               onPress={() => choseItem(product)}
-            /> */}
-            <Text onPress={() => choseItem(product)}>add</Text>
+            />
           </View>
         </View>
       </View>
@@ -64,31 +71,50 @@ const ProductItem = (props: IPropProduct) => {
 };
 
 export default function TabListProduct() {
-  const [lstProduct, setLstProduct] = useState<IProductBasic[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const isFirstLoad = useRef(true);
   const [txtSearchProduct, setTxtSearchProduct] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
-  const [refresh, setRefresh] = useState(true);
+  const [pageDataProducts, setPageDataProducts] =
+    useState<IPageResult<IProductBasic>>();
+  const [paramSearch, setParamSearch] = useState<IParamSearchProductDto>({
+    currentPage: 0,
+    pageSize: 10,
+  });
+  const [objModal, setObjModal] = useState({ modalNumber: -1, isShow: false });
+  const [ctDoing, setCTDoing] = useState<IHoaDonChiTietDto>(
+    {} as IHoaDonChiTietDto
+  );
 
   const GetListproduct = async (txt: string) => {
-    const input: IParamSearchProductDto = {
-      currentPage: currentPage,
-      pageSize: 5,
-      textSearch: txt,
-    };
-    console.log("input ", input);
+    const input = { ...paramSearch };
+    input.textSearch = txt;
 
     const data = await ProductService.GetListproduct(input);
     if (data != null) {
-      setLstProduct(data?.items);
+      setPageDataProducts({
+        ...pageDataProducts,
+        items: [...data?.items, ...(pageDataProducts?.items ?? [])],
+        totalCount: data?.totalCount,
+        totalPage: Math.ceil(data?.totalCount / (paramSearch?.pageSize ?? 10)),
+      });
     } else {
-      setLstProduct([]);
+      setPageDataProducts({
+        ...pageDataProducts,
+        items: [],
+        totalCount: 0,
+        totalPage: 0,
+      });
     }
-    setRefresh(false);
+    setIsLoading(false);
   };
 
   useEffect(() => {
+    if (isFirstLoad) {
+      isFirstLoad.current = false;
+      return;
+    }
     GetListproduct("");
-  }, [currentPage]);
+  }, [paramSearch.currentPage]);
 
   useEffect(() => {
     const getData = setTimeout(async () => {
@@ -98,11 +124,25 @@ export default function TabListProduct() {
   }, [txtSearchProduct]);
 
   const addToGioHang = (item: IProductBasic) => {
-    //
+    setObjModal({ ...objModal, isShow: true, modalNumber: 1 });
+    // check cache
+    setCTDoing({
+      ...ctDoing,
+      soLuong: 1,
+      donGiaTruocCK: item?.giaBan ?? 0,
+      thanhTienTruocCK: item?.giaBan ?? 0,
+      donGiaSauCK: item?.giaBan ?? 0,
+      thanhTienSauCK: item?.giaBan ?? 0,
+    });
   };
 
   return (
     <View style={styles.container}>
+      <ModalAddGioHang
+        visibleModal={objModal.isShow}
+        onCloseModal={() => setObjModal({ ...objModal, isShow: false })}
+        productItem={ctDoing}
+      />
       <View
         style={{
           flexDirection: "row",
@@ -123,17 +163,31 @@ export default function TabListProduct() {
       </View>
       <FlatList
         initialNumToRender={5}
-        data={lstProduct}
-        // refreshing={refresh}
-        // onRefresh={() => {
-        //   setCurrentPage(() => currentPage + 1);
-        //   console.log("cu", currentPage);
-        // }}
+        data={pageDataProducts?.items}
+        progressViewOffset={0}
+        onEndReached={() => {
+          if (
+            (paramSearch?.currentPage ?? 1) * (paramSearch.pageSize ?? 10) <
+            (pageDataProducts?.totalCount ?? 0)
+          ) {
+            setParamSearch({
+              ...paramSearch,
+              currentPage: (paramSearch?.currentPage ?? 0) + 1,
+            });
+          }
+        }}
         renderItem={({ item }) => (
           <ProductItem product={item} choseItem={addToGioHang} />
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.idDonViQuyDoi}
         style={{ width: "100%" }}
+        ListFooterComponent={
+          isLoading ? (
+            <View style={{ marginTop: 10, alignItems: "center" }}>
+              <ActivityIndicator size="large" color="#1f1f1f" />
+            </View>
+          ) : null
+        }
       />
     </View>
   );

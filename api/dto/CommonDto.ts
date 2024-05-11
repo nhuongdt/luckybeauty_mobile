@@ -10,6 +10,6 @@ export interface IParamSearchDto {
 
 export interface IPageResult<T> {
   totalCount: number;
-  totaPage: number;
+  totalPage: number;
   items: T[];
 }

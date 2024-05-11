@@ -8,70 +8,87 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { useState } from "react";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Octicons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
 import loginService from "../../api/login/loginService";
 import { ILoginModel, TenantStatus } from "../../api/login/loginDto";
-import commonFunc from "../../utils/commonFunc";
 import * as SecureStore from "expo-secure-store";
+
+const logo = require("../../assets/logo_Luckybeauty_full.png");
 
 export default function Login({ gotoHome }: any) {
   const [tenancyName, setTenancyName] = useState("");
   const [userName, setUserName] = useState("");
   const [passWord, setPassWord] = useState("");
-  const [errors, setErrors] = useState({ userName: "", passWord: "" });
+  const [errors, setErrors] = useState({
+    userName: "",
+    passWord: "",
+    tenancyName: "",
+  });
 
-  const [tenancyName_MsgErr, setTenancyName_MsgErr] = useState("");
-  const [userName_MsgErr, setUserName_MsgErr] = useState("");
-  const [passWord_MsgErr, setPassWord_MsgErr] = useState("");
+  useEffect(() => {
+    setErrors({
+      userName: "",
+      passWord: "",
+      tenancyName: "",
+    });
+  }, []);
 
   const onPressLogin = async () => {
-    // if (validateForm()) {
-    const tenantData = await loginService.CheckExistTenant(tenancyName);
-    if (tenantData.state == TenantStatus.AVAILABLE) {
-      const input = {
-        userNameOrEmailAddress: userName,
-        password: passWord,
-        rememberClient: true,
-        tenantId: tenantData.tenantId,
-      } as ILoginModel;
-      const token = await loginService.CheckUser(input, tenantData.tenantId);
-      if (token != null) {
-        SecureStore.setItem("accessToken", token.accessToken);
-        if (input.rememberClient) {
-          SecureStore.setItem("user", JSON.stringify(input));
+    if (validateForm()) {
+      const tenantData = await loginService.CheckExistTenant(tenancyName);
+      if (tenantData.state == TenantStatus.AVAILABLE) {
+        const input = {
+          userNameOrEmailAddress: userName,
+          password: passWord,
+          rememberClient: true,
+          tenantId: tenantData.tenantId,
+        } as ILoginModel;
+        const token = await loginService.CheckUser(input, tenantData.tenantId);
+        if (token != null) {
+          SecureStore.setItem("accessToken", token.accessToken);
+          if (input.rememberClient) {
+            SecureStore.setItem("user", JSON.stringify(input));
+          }
+          gotoHome(true);
+        } else {
+          gotoHome(false);
         }
-        gotoHome(true);
       } else {
-        gotoHome(false);
-      }
-    } else {
-      switch (tenantData.state) {
-        case TenantStatus.NOTFOUND:
-          {
-            setTenancyName_MsgErr("Id cửa hàng không tồn tại");
-          }
-          break;
-        case TenantStatus.INACTIVE:
-          {
-            setTenancyName_MsgErr("Cửa hàng ngừng hoạt động");
-          }
-          break;
-        default:
-          {
-            // loix serrverr
-          }
-          break;
+        switch (tenantData.state) {
+          case TenantStatus.NOTFOUND:
+            {
+              setErrors({
+                ...errors,
+                tenancyName: "Id cửa hàng không tồn tại",
+              });
+            }
+            break;
+          case TenantStatus.INACTIVE:
+            {
+              setErrors({ ...errors, tenancyName: "Cửa hàng ngừng hoạt động" });
+            }
+            break;
+          default:
+            {
+              //
+            }
+            break;
+        }
       }
     }
-    // }
   };
 
   const validateForm = () => {
-    let errors = { userName: "", passWord: "" };
-    if (!userName) errors.userName = "Username required";
-    if (!passWord) errors.passWord = "passWord required";
+    let errors = { userName: "", passWord: "", tenancyName: "" };
+    if (!userName) errors.userName = "Vui lòng nhập tên đăng nhập";
+    if (!passWord) errors.passWord = "Vui lòng nhập mật khẩu";
+    if (!tenancyName) errors.tenancyName = "Vui lòng nhập Id cửa hàng";
     setErrors(errors);
-    return Object.keys(errors).length == 0;
+    return (
+      errors.userName == "" && errors.passWord == "" && errors.tenancyName == ""
+    );
   };
   return (
     <KeyboardAvoidingView
@@ -80,48 +97,47 @@ export default function Login({ gotoHome }: any) {
       keyboardVerticalOffset={100}
     >
       <Image
-        source={require("../../assets/logo_Luckybeauty_full.png")}
+        source={logo}
         style={{ resizeMode: "stretch", width: 200, height: 50 }}
       />
-      <Text style={styles.lable}>Login</Text>
+      <Text style={styles.lable}>Đăng nhập</Text>
       <View
         style={{
           width: "100%",
           padding: 20,
-          columnGap: 10,
+          gap: 10,
         }}
       >
         <View style={styles.inputContainer}>
-          <FontAwesome5 name="database" size={24} color="#aaa" />
-          <View
-            style={[
-              styles.inputBoxErr,
-              !commonFunc.checkNull(tenancyName_MsgErr) && { rowGap: 8 },
-            ]}
-          >
+          <MaterialCommunityIcons
+            name="database-outline"
+            size={24}
+            color="#aaa"
+          />
+          <View style={{ width: "100%" }}>
             <TextInput
               placeholder="Id"
               style={styles.inputBox}
               onChangeText={(newVal) => {
                 setTenancyName(newVal);
-                setTenancyName_MsgErr("");
+                setErrors({ ...errors, tenancyName: "" });
               }}
             />
-            <Text style={styles.msgErr}>{tenancyName_MsgErr}</Text>
+            {errors?.tenancyName ? (
+              <Text style={styles.msgErr}>{errors?.tenancyName}</Text>
+            ) : null}
           </View>
         </View>
         <View style={styles.inputContainer}>
           <FontAwesome5 name="user-circle" size={24} color="#aaa" />
-          <View
-            style={[
-              styles.inputBoxErr,
-              !commonFunc.checkNull(userName_MsgErr) && { rowGap: 8 },
-            ]}
-          >
+          <View style={{ width: "100%" }}>
             <TextInput
               placeholder="Username"
               style={styles.inputBox}
-              onChangeText={(newVal) => setUserName(newVal)}
+              onChangeText={(newVal) => {
+                setUserName(newVal);
+                setErrors({ ...errors, userName: "" });
+              }}
             />
             {errors?.userName ? (
               <Text style={styles.msgErr}>{errors?.userName}</Text>
@@ -129,17 +145,15 @@ export default function Login({ gotoHome }: any) {
           </View>
         </View>
         <View style={styles.inputContainer}>
-          <FontAwesome5 name="key" size={24} color="#aaa" />
-          <View
-            style={[
-              styles.inputBoxErr,
-              !commonFunc.checkNull(passWord_MsgErr) && { rowGap: 8 },
-            ]}
-          >
+          <Octicons name="key" size={24} color="#aaa" />
+          <View style={{ width: "100%" }}>
             <TextInput
               placeholder="Password"
               style={styles.inputBox}
-              onChangeText={(newVal) => setPassWord(newVal)}
+              onChangeText={(newVal) => {
+                setPassWord(newVal);
+                setErrors({ ...errors, passWord: "" });
+              }}
             />
             {errors?.passWord ? (
               <Text style={styles.msgErr}>{errors.passWord}</Text>
@@ -180,9 +194,6 @@ const styles = StyleSheet.create({
     padding: 10,
     width: "100%",
     borderBottomWidth: 1,
-  },
-  inputBoxErr: {
-    width: "100%",
   },
   buttonBox: {
     alignItems: "center",

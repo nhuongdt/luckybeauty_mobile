@@ -7,8 +7,6 @@ class LoginService {
     let user = await SecureStore.getItemAsync("user");
     if (user) {
       const dataUser = JSON.parse(user);
-      console.log("user ", JSON.parse(user));
-
       const userLogin: ILoginModel = {
         userNameOrEmailAddress: dataUser.userNameOrEmailAddress,
         password: dataUser.password,
