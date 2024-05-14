@@ -1,59 +1,91 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Pressable, Modal, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { TextInput } from "react-native-gesture-handler";
 import { IHoaDonChiTietDto } from "../../api/invoices/hoaDonDto";
 
 const productImg = require("../../assets/product_goidau.jpg");
+import { IPropModal } from "../../api/dto/CommonProp";
 
 export default function ModalAddGioHang({
-  visibleModal,
-  onCloseModal,
-  productItem,
-}: any) {
+  isShow,
+  objUpdate,
+  onClose,
+  onSave,
+}: IPropModal<IHoaDonChiTietDto>) {
   const [ctDoing, setCTDoing] = useState<IHoaDonChiTietDto>(
     {} as IHoaDonChiTietDto
   );
 
   useEffect(() => {
-    setCTDoing({
-      ...ctDoing,
-      soLuong: productItem.soLuong,
-      donGiaTruocCK: productItem?.donGiaTruocCK ?? 0,
-      thanhTienTruocCK: productItem?.thanhTienTruocCK ?? 0,
-      thanhTienSauCK: productItem?.thanhTienSauCK ?? 0,
-    });
-  }, [visibleModal]);
+    if (isShow) {
+      setCTDoing({
+        ...ctDoing,
+        id: objUpdate?.id ?? "",
+        maHangHoa: objUpdate?.maHangHoa ?? "",
+        tenHangHoa: objUpdate?.tenHangHoa ?? "",
+        idDonViQuyDoi: objUpdate?.idDonViQuyDoi ?? "",
+        idHangHoa: objUpdate?.idHangHoa ?? "",
+        idHoaDon: objUpdate?.idHoaDon ?? "",
+        soLuong: objUpdate?.soLuong ?? 0,
+        donGiaTruocCK: objUpdate?.donGiaTruocCK ?? 0,
+        donGiaSauCK: objUpdate?.donGiaSauCK ?? 0,
+        donGiaSauVAT: objUpdate?.donGiaSauVAT ?? 0,
+        thanhTienTruocCK: objUpdate?.thanhTienTruocCK ?? 0,
+        thanhTienSauCK: objUpdate?.thanhTienSauCK ?? 0,
+        thanhTienSauVAT: objUpdate?.thanhTienSauVAT ?? 0,
+      });
+    }
+  }, [isShow, objUpdate?.idDonViQuyDoi]);
 
-  const onShowModal = () => {
+  const PageLoad = async () => {};
+
+  const tangSoLuong = () => {
+    const slNew = ctDoing.soLuong + 1;
     setCTDoing({
       ...ctDoing,
-      soLuong: productItem.soLuong,
-      donGiaTruocCK: productItem?.donGiaTruocCK ?? 0,
-      thanhTienTruocCK: productItem?.thanhTienTruocCK ?? 0,
-      thanhTienSauCK: productItem?.thanhTienSauCK ?? 0,
+      soLuong: slNew,
+      thanhTienTruocCK: slNew * (ctDoing?.donGiaTruocCK ?? 0),
+      thanhTienSauCK: slNew * (ctDoing?.donGiaSauCK ?? 0),
+      thanhTienSauVAT: slNew * (ctDoing?.donGiaSauVAT ?? 0),
     });
+  };
+
+  const giamSoLuong = () => {
+    let slNew = ctDoing.soLuong;
+    if (slNew > 0) {
+      slNew = slNew - 1;
+    }
+    setCTDoing({
+      ...ctDoing,
+      soLuong: slNew,
+      thanhTienTruocCK: slNew * ctDoing?.donGiaTruocCK ?? 0,
+      thanhTienSauCK: slNew * ctDoing?.donGiaSauCK ?? 0,
+      thanhTienSauVAT: slNew * ctDoing?.donGiaSauVAT ?? 0,
+    });
+  };
+
+  const agreeGioHang = async () => {
+    onSave(ctDoing);
   };
 
   return (
     <View style={styles.container}>
       <Modal
-        visible={visibleModal}
+        visible={isShow}
         transparent={true}
         animationType="slide"
-        onRequestClose={onCloseModal}
-        // onShow={onShowModal}
+        onRequestClose={onClose}
       >
         <View style={styles.modalView}>
-          <Pressable onPress={onCloseModal}>
+          <Pressable onPress={onClose}>
             <Ionicons name="close" size={24} color={"#c0c0c0"} />
           </Pressable>
           <View style={{ gap: 16, alignItems: "center" }}>
             <Image source={productImg} resizeMode="stretch" />
-            <Text style={styles.productName}>{productItem?.tenHangHoa}</Text>
+            <Text style={styles.productName}>{ctDoing?.tenHangHoa}</Text>
             <Text style={styles.productPrice}>
               {new Intl.NumberFormat("vi-VN").format(
-                productItem?.donGiaTruocCK
+                ctDoing?.donGiaTruocCK ?? 0
               )}
             </Text>
 
@@ -66,11 +98,21 @@ export default function ModalAddGioHang({
               }}
             >
               <Text style={{ textAlign: "left" }}>Số lượng</Text>
-              <Ionicons name="remove-circle-outline" size={30} color={"#ccc"} />
+              <Ionicons
+                name="remove-circle-outline"
+                size={30}
+                color={"#ccc"}
+                onPress={giamSoLuong}
+              />
               <Text style={[styles.productPrice, { textAlign: "center" }]}>
-                1
+                {ctDoing.soLuong}
               </Text>
-              <Ionicons name="add-circle-outline" size={30} color={"#ccc"} />
+              <Ionicons
+                name="add-circle-outline"
+                size={30}
+                color={"#ccc"}
+                onPress={tangSoLuong}
+              />
             </View>
           </View>
           <View
@@ -90,13 +132,12 @@ export default function ModalAddGioHang({
             >
               <Text style={[styles.productPrice]}>Tổng tiền</Text>
               <Text style={[styles.productName]}>
-                {" "}
                 {new Intl.NumberFormat("vi-VN").format(ctDoing?.thanhTienSauCK)}
               </Text>
             </View>
             <Pressable
               style={[styles.button, styles.buttonOpen]}
-              onPress={onCloseModal}
+              onPress={agreeGioHang}
             >
               <Text>Thêm vào giỏ hàng</Text>
             </Pressable>

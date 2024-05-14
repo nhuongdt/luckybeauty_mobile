@@ -1,48 +1,70 @@
-import { StyleSheet, Text, View } from "react-native";
 import TabListProduct from "./TabListProduct";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Ionicons } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 
 import TabGioHang from "./TabGioHang";
-const Tab = createBottomTabNavigator();
+import React, { useEffect, useState } from "react";
+import sqllite from "../../lib/sqllite";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const TabTop = createMaterialTopTabNavigator();
+const TabBottom = createBottomTabNavigator();
 
-export default function PageThuNgan() {
+export default function PageThuNgan({ navigation, route }: any) {
+  const [countGioHang, setCountGioHang] = useState(0);
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    if (route?.params) {
+      console.log(44, route?.params);
+      setCountGioHang(route?.params?.countGioHang);
+    }
+  }, [route]);
+
+  useEffect(() => {
+    pageLoad();
+  }, []);
+
+  const pageLoad = async () => {
+    const db = await sqllite.OpenDatabase();
+    await sqllite.CreateTable_HoaDon(db);
+    await sqllite.CreateTable_HoaDonChiTiet(db);
+  };
+
   return (
-    <TabTop.Navigator>
-      <TabTop.Screen
-        name="Sản phẩm"
-        key={"thungan_listProduct"}
+    <TabBottom.Navigator
+      screenOptions={{
+        header: () => {
+          return null;
+        },
+        tabBarStyle: {
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+        },
+      }}
+    >
+      <TabBottom.Screen
+        name="TabSanPham"
         component={TabListProduct}
         options={{
+          title: "",
+          tabBarLabel: "Sản phẩm",
           tabBarIcon: ({ focused, color }) => (
             <MaterialIcons name={"list"} size={20} />
           ),
         }}
       />
-      <TabTop.Screen
-        name="Giỏ hàng"
-        key={"thungan_shoppingcar"}
+      <TabBottom.Screen
+        name="TabGioHang"
         component={TabGioHang}
         options={{
+          tabBarStyle: { position: "relative" },
+          title: "Giỏ hàng",
           tabBarIcon: ({ focused, color }) => (
             <MaterialIcons name={"add-shopping-cart"} size={20} />
           ),
+          tabBarBadge: countGioHang,
         }}
       />
-    </TabTop.Navigator>
+    </TabBottom.Navigator>
   );
 }
-
-const style = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});

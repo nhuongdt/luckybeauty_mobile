@@ -5,7 +5,6 @@ export interface IParamSearchProductDto extends IParamSearchDto {
 }
 
 export interface IProductBasic {
-  id: string;
   idHangHoa: string;
   idDonViQuyDoi: string;
   maHangHoa: string;

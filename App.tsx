@@ -8,9 +8,11 @@ import {
   useWindowDimensions,
   View,
   Pressable,
+  SafeAreaView,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
 import { FontAwesome5 } from "@expo/vector-icons";
 import dashboard from "./page/dashboard/dashboard";
@@ -88,7 +90,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <SafeAreaProvider>
       <StatusBar backgroundColor="yellow" />
       {!isLogin ? (
         <Login gotoHome={onLoginOK} />
@@ -131,7 +133,7 @@ export default function App() {
           </Drawer.Navigator>
         </NavigationContainer>
       )}
-    </>
+    </SafeAreaProvider>
 
     // <NavigationContainer>
     //   {isLogin == false ? (
