@@ -1,10 +1,13 @@
 import { TenantStatus } from "../../enum/TenantStatus";
 import { mmkvStorage } from "../../store/mmkvStore";
 import { IAuthenResultModel, ILoginModel } from "./LoginDto";
+// import { REACT_NATIVE_API_URL } from '@env';
+
+const REACT_NATIVE_API_URL ='https://api.luckybeauty.vn/';
 
 class LoginService {
-  checkUser_fromCache = async (): Promise<ILoginModel | null> => {
-    let user = await mmkvStorage.getString("user");
+  checkUser_fromCache =  (): ILoginModel | null => {
+    let user =  mmkvStorage.getString("user");
     if (user) {
       const dataUser = JSON.parse(user);
       const userLogin: ILoginModel = {
@@ -24,7 +27,7 @@ class LoginService {
       };
 
       const response = await fetch(
-        `${process.env.REACT_NATIVE_API_UTL}/api/services/app/Account/IsTenantAvailable`,
+        `${REACT_NATIVE_API_URL}/api/services/app/Account/IsTenantAvailable`,
         {
           method: "POST",
           headers: {
@@ -58,7 +61,7 @@ class LoginService {
         body: JSON.stringify(input),
       };
       const response = await fetch(
-        `${process.env.REACT_NATIVE_API_UTL}api/TokenAuth/Authenticate`,
+        `${REACT_NATIVE_API_URL}api/TokenAuth/Authenticate`,
         requestOptions
       );
       const jsonData = await response.json();

@@ -22,12 +22,14 @@ export default function AppNavigation() {
   const CheckUser_HasLogin = async () => {
     try {
       // await SecureStore.deleteItemAsync("user");
-      const dataUser = await LoginService.checkUser_fromCache();
+      const dataUser = LoginService.checkUser_fromCache();
+      console.log('dataUser ',dataUser)
       if (dataUser != null) {
         const token = await LoginService.checkUserLogin(
           dataUser,
           dataUser.tenantId ?? 0
         );
+
         if (token != null) {
           setIsLogin(true);
 

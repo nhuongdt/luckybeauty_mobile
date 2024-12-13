@@ -7,7 +7,7 @@ const tblHoaDon: Realm.ObjectSchema = {
   properties: {
     id: 'string',
     idLoaiChungTu: {type: 'int', default: LoaiChungTu.HOA_DON_BAN_LE},
-    isOpenLastest: {type: 'bool', default: false},
+    isOpenLastest: {type: 'bool', default: true},
     maHoaDon: 'string?',
     ngayLapHoaDon: 'string?',
     idChiNhanh: 'string?',

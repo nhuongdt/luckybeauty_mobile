@@ -5,6 +5,13 @@ import {IconType} from '../enum/IconType';
 import TempInvoices from '../screens/sale/temp_invoices';
 import Products from '../screens/sale/products';
 import {ListBottomTab} from '../enum/ListBottomTab';
+import uuid from 'react-native-uuid';
+import realmQuery from '../store/realm/realmQuery';
+import CommonFunc from '../utils/CommonFunc';
+import {KiHieuChungTu, TenLoaiChungTu} from '../enum/LoaiChungTu';
+import {HoaDonDto} from '../services/hoadon/dto';
+import realmDatabase from '../store/realm/database';
+import {useState} from 'react';
 
 export type BottomTabParamList = {
   TempInvoice: {idHoaDon: string; maHoaDon: string};
@@ -16,16 +23,69 @@ export type BottomTabParamList = {
   Product: {idHoaDon: string; maHoaDon: string; tongThanhToan?: number};
 };
 
+export enum SaleHeader_ListTab {
+  HOA_DON = 1,
+  GOI_DICH_VU = 2,
+  CREATE_NEW = 0,
+}
+
 type PropsSaleNavigatonHeader = {
   //   onPress: (typeAction: number) => void;
   navigation: any;
 };
 
 const SaleNavigatonHeader = ({navigation}: PropsSaleNavigatonHeader) => {
-  const onClickActionHeader = (actionId: number) => {
-    navigation.navigate(ListBottomTab.TEMP_INVOICE, {
-      headerActionId: actionId,
+  const db = realmDatabase;
+  const [tabActive, setTabActive] = useState(SaleHeader_ListTab.HOA_DON);
+
+  const arrTab = [
+    {id: SaleHeader_ListTab.HOA_DON, text: 'Hóa đơn'},
+    {id: SaleHeader_ListTab.GOI_DICH_VU, text: 'Gói dịch vụ'},
+  ];
+
+  const createNewInvoice = () => {
+    const newId = uuid.v4().toString();
+    // gan lai giatri cot isOpenLastest = false cho all hoadon
+    realmQuery.HoaDon_ResetValueForColumn_isOpenLastest(tabActive);
+
+    const lstHoaDon = realmQuery.GetListHoaDon_ByLoaiChungTu(tabActive);
+
+    const max = CommonFunc.getMaxNumberFromMaHoaDon(lstHoaDon);
+    const kiHieuMaChungTu =
+      tabActive == SaleHeader_ListTab.HOA_DON
+        ? TenLoaiChungTu.HOA_DON_BAN_LE
+        : TenLoaiChungTu.GOI_DICH_VU;
+
+    const newHD = new HoaDonDto({
+      id: newId,
+      maHoaDon: `${kiHieuMaChungTu} ${max}`,
     });
+    realmQuery.InsertTo_HoaDon(db, newHD);
+
+    navigation.navigate(ListBottomTab.PRODUCT, {
+      idHoaDon: newId,
+      maHoaDon: newHD.maHoaDon,
+      tongThanhToan: 0,
+    });
+  };
+
+  const onClickActionHeader = (actionId: number) => {
+    switch (actionId) {
+      case SaleHeader_ListTab.CREATE_NEW:
+        {
+          createNewInvoice();
+        }
+        break;
+      case SaleHeader_ListTab.HOA_DON:
+      case SaleHeader_ListTab.GOI_DICH_VU:
+        {
+          navigation.navigate(ListBottomTab.TEMP_INVOICE, {
+            headerActionId: actionId,
+          });
+          setTabActive(actionId);
+        }
+        break;
+    }
   };
 
   return (
@@ -36,21 +96,34 @@ const SaleNavigatonHeader = ({navigation}: PropsSaleNavigatonHeader) => {
         padding: 8,
         backgroundColor: '#FFF2CC',
       }}>
-      <View style={[styleHeader.boxItem, styleHeader.boxItemActive]}>
-        <Icon
-          name="documents-outline"
-          type={IconType.IONICON}
-          size={18}
-          color={'white'}
-        />
-        <Text style={{color: 'white', fontWeight: 500}}>Hóa đơn</Text>
-      </View>
-      <View style={[styleHeader.boxItem, styleHeader.boxItemNotActive]}>
-        <Icon name="documents-outline" type="ionicon" size={18} />
-        <Text style={{color: 'black', fontWeight: 500}}>Gói dịch vụ</Text>
-      </View>
+      {arrTab?.map(item => (
+        <Pressable
+          style={[
+            styleHeader.boxItem,
+            tabActive === item.id
+              ? styleHeader.boxItemActive
+              : styleHeader.boxItemNotActive,
+          ]}
+          onPress={() => onClickActionHeader(item.id)}>
+          <Icon
+            name="documents-outline"
+            type={IconType.IONICON}
+            size={18}
+            color={tabActive === item.id ? 'white' : 'black'}
+          />
+          <Text
+            style={{
+              color: tabActive === item.id ? 'white' : 'black',
+              fontWeight: 500,
+            }}>
+            {item.text}
+          </Text>
+        </Pressable>
+      ))}
+
       <View style={[styleHeader.boxItem, styleHeader.boxAdd]}>
-        <Pressable onPress={() => onClickActionHeader(0)}>
+        <Pressable
+          onPress={() => onClickActionHeader(SaleHeader_ListTab.CREATE_NEW)}>
           <Icon name="add" size={20} />
           <Text style={{fontWeight: 500}}>Tạo đơn mới</Text>
         </Pressable>
@@ -83,7 +156,7 @@ export default function SaleNavigation() {
 
   return (
     <Tabs.Navigator
-      initialRouteName="TempInvoice"
+      initialRouteName={ListBottomTab.TEMP_INVOICE}
       screenOptions={{
         tabBarActiveTintColor: 'red',
         tabBarInactiveTintColor: 'gray',
@@ -107,7 +180,7 @@ export default function SaleNavigation() {
         },
       }}>
       <Tabs.Screen
-        name="TempInvoice"
+        name={ListBottomTab.TEMP_INVOICE}
         component={TempInvoices}
         options={({navigation, route}: any) => ({
           title: 'Hóa đơn tạm',
@@ -124,7 +197,7 @@ export default function SaleNavigation() {
         })}
       />
       <Tabs.Screen
-        name="Product"
+        name={ListBottomTab.PRODUCT}
         component={Products}
         options={({navigation, route}: any) => ({
           title: `${route.params?.maHoaDon} _ ${new Intl.NumberFormat(
@@ -138,17 +211,17 @@ export default function SaleNavigation() {
               size={24}
             />
           ),
-            headerLeft: () => (
-              <Pressable
-                style={{padding: 16}}
-                onPress={() => {
-                  navigation.navigate(ListBottomTab.TEMP_INVOICE, {
-                    tongThanhToan: route.params?.tongThanhToan,
-                  });
-                }}>
-                <Icon name="arrow-back-ios" type="material" />
-              </Pressable>
-            ),
+          headerLeft: () => (
+            <Pressable
+              style={{padding: 16}}
+              onPress={() => {
+                navigation.navigate(ListBottomTab.TEMP_INVOICE, {
+                  tongThanhToan: route.params?.tongThanhToan,
+                });
+              }}>
+              <Icon name="arrow-back-ios" type="material" />
+            </Pressable>
+          ),
           headerRight: () => (
             <Pressable
               style={{padding: 16}}

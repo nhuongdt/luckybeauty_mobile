@@ -12,6 +12,7 @@ export interface IHoaDonDto extends ICustomerBasic {
   idNhanVien: string | null;
   maHoaDon: string;
   ngayLapHoaDon: string;
+  isOpenLastest: boolean;
 
   tongTienHangChuaChietKhau: number;
   ptChietKhauHang: number;
@@ -58,6 +59,7 @@ export class HoaDonDto implements IHoaDonDto {
   idNhanVien: string | null;
   maHoaDon: string;
   ngayLapHoaDon: string;
+  isOpenLastest: boolean;
 
   tongTienHangChuaChietKhau: number;
   ptChietKhauHang: number;
@@ -86,6 +88,7 @@ export class HoaDonDto implements IHoaDonDto {
     idNhanVien = null,
     maHoaDon = '',
     ngayLapHoaDon = format(new Date(), 'yyyy-MM-dd HH:mm'),
+    isOpenLastest = true,
     tongTienHangChuaChietKhau = 0,
     ptChietKhauHang = 0,
     tongChietKhauHangHoa = 0,
@@ -110,6 +113,7 @@ export class HoaDonDto implements IHoaDonDto {
     this.idChiNhanh = idChiNhanh;
     this.idKhachHang = idKhachHang;
     this.idNhanVien = idNhanVien;
+    this.isOpenLastest = isOpenLastest;
 
     this.maHoaDon = maHoaDon;
     this.ngayLapHoaDon = ngayLapHoaDon;

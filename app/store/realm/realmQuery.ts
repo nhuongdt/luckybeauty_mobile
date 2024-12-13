@@ -13,7 +13,15 @@ enum ListTable {
 
 const db = realmDatabase;
 
-class dbQuery {
+class realmQuery {
+  GetListHoaDon_ByLoaiChungTu = (idLoaiChungTu: number): IHoaDonDto[] => {
+    const lst = db
+      .objects(ListTable.HOA_DON)
+      .filtered(`idLoaiChungTu = ${idLoaiChungTu}`)
+      .toJSON() as unknown as IHoaDonDto[];
+    return lst;
+  };
+
   GetHoaDon_byId = (db: Realm, id: string): IHoaDonDto | null => {
     try {
       const data = db.objectForPrimaryKey(ListTable.HOA_DON, id);
@@ -127,6 +135,16 @@ class dbQuery {
       console.log('InsertTo_HoaDonChiTiet ', err);
     }
   };
+  HoaDon_ResetValueForColumn_isOpenLastest = (idLoaiChungTu: number) => {
+    db.write(() => {
+      const lst = db
+        .objects(ListTable.HOA_DON)
+        .filtered(`idLoaiChungTu=${idLoaiChungTu}`);
+      lst.forEach(item => {
+        item.isOpenLastest = false;
+      });
+    });
+  };
   UpdateHoaDon = (db: Realm, itemNew: HoaDonDto) => {
     try {
       db.write(() => {
@@ -228,7 +246,7 @@ class dbQuery {
         const lst = db
           .objects(ListTable.HOA_DON_CHI_TIET)
           .filtered(
-            `iHoaDon= '${idHoaDon}' and idDonViQuyDoi = '${idDonViQuyDoi}'`,
+            `idHoaDon= '${idHoaDon}' and idDonViQuyDoi = '${idDonViQuyDoi}'`,
           );
         db.delete(lst);
       });
@@ -237,3 +255,5 @@ class dbQuery {
     }
   };
 }
+
+export default new realmQuery();

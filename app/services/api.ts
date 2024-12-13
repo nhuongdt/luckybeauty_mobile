@@ -1,5 +1,7 @@
 import { mmkvStorage } from "../store/mmkvStore";
+// import { REACT_NATIVE_API_URL } from '@env';
 
+const REACT_NATIVE_API_URL ='https://api.luckybeauty.vn/';
 class api {
   headerConfig = () => {
     const accessToken = mmkvStorage.getString("accessToken");
@@ -10,7 +12,7 @@ class api {
   };
   get = async (urlApi: string, input?: any) => {
     try {
-      let newUrl = `${process.env.REACT_NATIVE_API_UTL}${urlApi}`;
+      let newUrl = `${REACT_NATIVE_API_URL}${urlApi}`;
       if (input) {
         const inputQuery = new URLSearchParams(input).toString();
         newUrl = `${newUrl}?${inputQuery}`;
@@ -31,7 +33,7 @@ class api {
   post = async (urlApi: string, input?: any) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_NATIVE_API_UTL}${urlApi}`,
+        `${REACT_NATIVE_API_URL}${urlApi}`,
         {
           method: "POST",
           body: input ? JSON.stringify(input) : null,
