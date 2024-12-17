@@ -1,10 +1,10 @@
 import {format} from 'date-fns';
-import {ICustomerBasic} from '../customer/dto';
+import {ICustomerBasicDto} from '../customer/ICustomerBasicDto';
 import {IProductBasic} from '../product/dto';
 import {LoaiChungTu} from '../../enum/LoaiChungTu';
 import {InvoiceStatus} from '../../enum/InvoiceStatus';
 
-export interface IHoaDonDto extends ICustomerBasic {
+export interface IHoaDonDto extends ICustomerBasicDto {
   id: string;
   idLoaiChungTu: number;
   idChiNhanh: string;

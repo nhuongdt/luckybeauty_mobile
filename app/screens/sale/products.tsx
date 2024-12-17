@@ -1,24 +1,46 @@
-import { View, StyleSheet, FlatList, Pressable } from "react-native";
-import { useEffect, useRef, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Icon, SearchBar } from "@rneui/themed";
-import uuid from "react-native-uuid";
-import { Text } from "@rneui/base";
-import ModalAddGioHang from "./modal_add_gio_hang";
-import realmQuery from "../../store/realm/realmQuery";
-import { HoaDonDto, IHoaDonChiTietDto } from "../../services/hoadon/dto";
-import { InvoiceStatus } from "../../enum/InvoiceStatus";
-import { IParamSearchProductDto, IProductBasic } from "../../services/product/dto";
-import ProductService from "../../services/product/ProductService";
-import { IPageResult } from "../../services/commonDto/pageResult";
-import realmDatabase from "../../store/realm/database";
-import { BottomTabParamList } from "../../navigation/sale_navigation";
-import { ListBottomTab } from "../../enum/ListBottomTab";
+import {View, StyleSheet, FlatList, Pressable} from 'react-native';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {Icon, SearchBar} from '@rneui/themed';
+import uuid from 'react-native-uuid';
+import {Text} from '@rneui/base';
+import ModalAddGioHang from './modal_add_gio_hang';
+import realmQuery from '../../store/realm/realmQuery';
+import {HoaDonDto, IHoaDonChiTietDto} from '../../services/hoadon/dto';
+import {InvoiceStatus} from '../../enum/InvoiceStatus';
+import {
+  IParamSearchProductDto,
+  IProductBasic,
+} from '../../services/product/dto';
+import ProductService from '../../services/product/ProductService';
+import {IPageResultDto} from '../../services/commonDto/IPageResultDto';
+import realmDatabase from '../../store/realm/database';
+import {BottomTabParamList} from '../../navigation/sale_navigation';
+import {ListBottomTab} from '../../enum/ListBottomTab';
+import {LoaiChungTu, TenLoaiChungTu} from '../../enum/LoaiChungTu';
+import CommonFunc from '../../utils/CommonFunc';
 
 type ProductSaleProps = NativeStackNavigationProp<
   BottomTabParamList,
   ListBottomTab.PRODUCT
+>;
+
+type ProductSaleRouteProp = RouteProp<
+  {
+    params: {
+      idHoaDon: string;
+      // maHoaDon:  string;
+      // tongThanhToan: number;
+      idLoaiChungTu: number;
+    };
+  },
+  'params'
 >;
 
 type IPropItemProduct = {
@@ -26,22 +48,21 @@ type IPropItemProduct = {
   choseItem: (itemm: IProductBasic) => void;
 };
 
-export const ItemProduct = ({ item, choseItem }: IPropItemProduct) => {
+export const ItemProduct = ({item, choseItem}: IPropItemProduct) => {
   return (
     <Pressable
       style={[
         styleItemProduct.container,
-        { borderBottomWidth: 1, borderBottomColor: "#ccc" },
+        {borderBottomWidth: 1, borderBottomColor: '#ccc'},
       ]}
-      onPress={() => choseItem(item)}
-    >
-      <View style={{ gap: 8 }}>
+      onPress={() => choseItem(item)}>
+      <View style={{gap: 8}}>
         <Text>{item.tenHangHoa}</Text>
-        <Text style={{ color: "green" }}>{item.maHangHoa}</Text>
+        <Text style={{color: 'green'}}>{item.maHangHoa}</Text>
       </View>
-      <View style={{ gap: 8 }}>
-        <Text style={{ fontWeight: 500 }}>
-          {new Intl.NumberFormat("vi-VN").format(item.giaBan)}
+      <View style={{gap: 8}}>
+        <Text style={{fontWeight: 500}}>
+          {new Intl.NumberFormat('vi-VN').format(item.giaBan)}
         </Text>
       </View>
     </Pressable>
@@ -52,36 +73,37 @@ const styleItemProduct = StyleSheet.create({
   container: {
     flex: 1,
     padding: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
 });
 
-const ProductSale = ({ route }: any) => {
+const ProductSale = () => {
   const firstLoad = useRef(true);
   const db = realmDatabase;
+  const route = useRoute<ProductSaleRouteProp>();
+  const navigation = useNavigation<ProductSaleProps>();
   const {
     idHoaDon = uuid.v4().toString(),
-    maHoaDon = "Hóa đơn 1",
-    tongThanhToan = 0,
+    // maHoaDon = 'Hóa đơn 1',
+    idLoaiChungTu = LoaiChungTu.HOA_DON_BAN_LE,
   } = route?.params || {};
-  const navigation = useNavigation<ProductSaleProps>();
   const [isShowModalAddGioHang, setIsShowModalAddGioHang] = useState(false);
-  const [txtSearchProduct, setTxtSearchProduct] = useState("");
+  const [txtSearchProduct, setTxtSearchProduct] = useState('');
   const [paramSearchProduct, setParamSearchProduct] =
     useState<IParamSearchProductDto>({
-      textSearch: "",
+      textSearch: '',
       currentPage: 0,
       pageSize: 10,
       idNhomHangHoas: [],
     });
   const [pageResultProduct, setPageResultProduct] = useState<
-    IPageResult<IProductBasic>
-  >({ items: [], totalCount: 0, totalPage: 0 });
+    IPageResultDto<IProductBasic>
+  >({items: [], totalCount: 0, totalPage: 0});
 
   const [ctDoing, setCTDoing] = useState<IHoaDonChiTietDto>(
-    {} as IHoaDonChiTietDto
+    {} as IHoaDonChiTietDto,
   );
 
   const PageLoad = async () => {};
@@ -91,36 +113,82 @@ const ProductSale = ({ route }: any) => {
   }, []);
 
   useEffect(() => {
-    //creatwNewHD_ifNotExist();
-  }, [idHoaDon]);
+    checkRouteParam();
+  }, [idHoaDon, idLoaiChungTu]);
 
   const getListProduct = async () => {
-    const param = { ...paramSearchProduct };
+    const param = {...paramSearchProduct};
     param.textSearch = txtSearchProduct;
     const data = await ProductService.GetListproduct(param);
-    setPageResultProduct({
-      ...pageResultProduct,
-      items: data?.items,
-      totalCount: data?.totalCount,
-    });
+
+    if (data?.items?.length > 0) {
+      setPageResultProduct({
+        ...pageResultProduct,
+        items: data?.items,
+        totalCount: data?.totalCount,
+      });
+    } else {
+      const lst = realmQuery.GetListHangHoa_fromCacche();
+      setPageResultProduct({
+        ...pageResultProduct,
+        items: lst,
+        totalCount: lst?.length,
+      });
+    }
   };
 
   // sử dụng khi chưa click tạo hóa đơn, mà chọn tab Sản phẩm
-  const creatwNewHD_ifNotExist = async () => {
-    const itemHD = realmQuery.GetHoaDon_byId(db, idHoaDon);
-
-    if (itemHD == null) {
-      const newObj = new HoaDonDto({
-        id: idHoaDon,
-        maHoaDon: maHoaDon,
-      });
-      realmQuery.InsertTo_HoaDon(db, newObj);
-      navigation.setParams({
-        maHoaDon: maHoaDon,
-        idHoaDon: idHoaDon,
-        tongThanhToan: 0,
-      });
+  const checkRouteParam = () => {
+    if (idHoaDon !== undefined) {
+      const itemHD = realmQuery.GetHoaDon_byId(db, idHoaDon);
+      if (itemHD === null) {
+        creatwNewHD_ifNotExist(idHoaDon);
+      } else {
+        navigation.setParams({
+          maHoaDon: itemHD?.maHoaDon,
+          idHoaDon: itemHD?.id,
+          tongThanhToan: itemHD?.tongThanhToan,
+        });
+      }
+    } else {
+      // get hdOpenLast
+      const hdOpenLast = realmQuery.GetHoaDonOpenLastest();
+      if (hdOpenLast !== null) {
+        navigation.setParams({
+          maHoaDon: hdOpenLast?.maHoaDon,
+          idHoaDon: hdOpenLast?.id,
+          tongThanhToan: hdOpenLast?.tongThanhToan,
+        });
+      } else {
+        const newId = uuid.v4().toString();
+        creatwNewHD_ifNotExist(newId);
+      }
     }
+  };
+
+  const creatwNewHD_ifNotExist = (newIdHoaDon: string) => {
+    realmQuery.HoaDon_ResetValueForColumn_isOpenLastest(idLoaiChungTu);
+
+    const lstHoaDon = realmQuery.GetListHoaDon_ByLoaiChungTu(idLoaiChungTu);
+
+    const max = CommonFunc.getMaxNumberFromMaHoaDon(lstHoaDon);
+    const kiHieuMaChungTu =
+      idLoaiChungTu == LoaiChungTu.HOA_DON_BAN_LE
+        ? TenLoaiChungTu.HOA_DON_BAN_LE
+        : TenLoaiChungTu.GOI_DICH_VU;
+
+    const newHD = new HoaDonDto({
+      id: newIdHoaDon,
+      idLoaiChungTu: idLoaiChungTu,
+      maHoaDon: `${kiHieuMaChungTu} ${max}`,
+    });
+    realmQuery.InsertTo_HoaDon(db, newHD);
+
+    navigation.setParams({
+      maHoaDon: newHD?.maHoaDon,
+      idHoaDon: newHD?.id,
+      tongThanhToan: 0,
+    });
   };
 
   useEffect(() => {
@@ -141,11 +209,10 @@ const ProductSale = ({ route }: any) => {
   const choseProduct = async (item: IProductBasic) => {
     const idQuyDoi = item?.idDonViQuyDoi;
 
-
     const itemCTHD = realmQuery.GetChiTietHoaDon_byIdQuyDoi(
       db,
       idHoaDon,
-      idQuyDoi
+      idQuyDoi,
     );
 
     if (itemCTHD != null) {
@@ -156,8 +223,8 @@ const ProductSale = ({ route }: any) => {
         idHoaDon: idHoaDon,
         idDonViQuyDoi: idQuyDoi,
         idHangHoa: item.idHangHoa,
-        maHangHoa: item?.maHangHoa ?? "",
-        tenHangHoa: item?.tenHangHoa ?? "",
+        maHangHoa: item?.maHangHoa ?? '',
+        tenHangHoa: item?.tenHangHoa ?? '',
         soLuong: itemCTHD.soLuong,
         donGiaTruocCK: itemCTHD?.donGiaTruocCK ?? 0,
         ptChietKhau: itemCTHD?.ptChietKhau ?? 0,
@@ -175,8 +242,8 @@ const ProductSale = ({ route }: any) => {
         stt: 1,
         id: uuid.v4().toString(),
         idHoaDon: idHoaDon,
-        maHangHoa: item?.maHangHoa ?? "",
-        tenHangHoa: item?.tenHangHoa ?? "",
+        maHangHoa: item?.maHangHoa ?? '',
+        tenHangHoa: item?.tenHangHoa ?? '',
         idDonViQuyDoi: idQuyDoi,
         idHangHoa: item.idHangHoa,
         soLuong: 1,
@@ -202,9 +269,8 @@ const ProductSale = ({ route }: any) => {
 
     // delete & add again
     const idQuyDoi = ctAfter?.idDonViQuyDoi;
-    realmQuery.DeleteHoaDonChiTiet_byIdQuyDoi( idHoaDon, idQuyDoi);
+    realmQuery.DeleteHoaDonChiTiet_byIdQuyDoi(idHoaDon, idQuyDoi);
     realmQuery.InsertTo_HoaDonChiTiet(db, ctAfter);
-    //    const cthd = realmQuery.GetChiTietHoaDon_byIdHoaDon(db, idHoaDon);
 
     // update tocache
     const hdAfter = realmQuery.UpdateHD_fromCTHD(db, idHoaDon);
@@ -223,29 +289,29 @@ const ProductSale = ({ route }: any) => {
         onClose={() => setIsShowModalAddGioHang(false)}
         onSave={agreeAddGioHang}
       />
-      <View style={{ padding: 8 }}>
+      <View style={{padding: 8}}>
         <SearchBar
           placeholder="Tìm kiếm sản phẩm"
           value={txtSearchProduct}
-          onChangeText={(text) => setTxtSearchProduct(text)}
+          onChangeText={text => setTxtSearchProduct(text)}
           containerStyle={{
             borderTopWidth: 0,
             padding: 0,
-            borderBottomColor: "#ccc",
-            backgroundColor: "white",
+            borderBottomColor: '#ccc',
+            backgroundColor: 'white',
           }}
-          inputContainerStyle={{ backgroundColor: "white" }}
+          inputStyle={{fontSize: 14}}
+          inputContainerStyle={{backgroundColor: 'white'}}
         />
         <View
           style={[
             styles.flexRow,
             styles.boxContainer,
-            { backgroundColor: "rgba(0,0,0,.03)" },
-          ]}
-        >
+            {backgroundColor: 'rgba(0,0,0,.03)'},
+          ]}>
           <View style={styles.flexRow}>
             <Icon type="font-awesome-5" name="user" size={16} />
-            <Text style={{ paddingLeft: 10 }}>Khach le</Text>
+            <Text style={{paddingLeft: 10}}>Khach le</Text>
           </View>
           <Icon type="material-community" name="chevron-double-right" />
         </View>
@@ -253,26 +319,24 @@ const ProductSale = ({ route }: any) => {
           style={[
             styles.flexRow,
             styles.boxContainer,
-            { borderBottomColor: "#ccc", borderBottomWidth: 1 },
-          ]}
-        >
+            {borderBottomColor: '#ccc', borderBottomWidth: 1},
+          ]}>
           <View style={styles.flexRow}>
             <Icon type="ionicon" name="filter" />
-            <Text style={{ paddingLeft: 8 }}>Tất cả</Text>
+            <Text style={{paddingLeft: 8}}>Tất cả</Text>
           </View>
           <View style={styles.flexRow}>
             <Icon type="ionicon" name="checkmark" />
-            <Text style={{ paddingLeft: 8 }}>Chọn nhiều</Text>
+            <Text style={{paddingLeft: 8}}>Chọn nhiều</Text>
           </View>
         </View>
         <FlatList
           data={pageResultProduct?.items}
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <ItemProduct item={item} choseItem={choseProduct} />
           )}
-          keyExtractor={(item) => item.idDonViQuyDoi}
-          style={{ paddingBottom: 8 }}
-        ></FlatList>
+          keyExtractor={item => item.idDonViQuyDoi}
+          style={{paddingBottom: 8}}></FlatList>
       </View>
     </View>
   );
@@ -281,18 +345,18 @@ export default ProductSale;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: 'white',
   },
   flexRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   boxContainer: {
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
     padding: 10,
   },
   boxCustomer: {
-    backgroundColor: "yellow",
+    backgroundColor: 'yellow',
     padding: 8,
   },
   textRightIcon: {

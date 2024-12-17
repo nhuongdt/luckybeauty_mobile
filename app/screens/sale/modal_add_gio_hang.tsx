@@ -1,9 +1,9 @@
-import { Icon } from "@rneui/base";
-import { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Pressable, Modal, Image } from "react-native";
-import { IHoaDonChiTietDto } from "../../services/hoadon/dto";
-import { PropModal } from "../../type/PropModal";
-import { InvoiceStatus } from "../../enum/InvoiceStatus";
+import {Icon} from '@rneui/base';
+import {useEffect, useState} from 'react';
+import {StyleSheet, Text, View, Pressable, Modal, Image} from 'react-native';
+import {IHoaDonChiTietDto} from '../../services/hoadon/dto';
+import {PropModal} from '../../type/PropModal';
+import {InvoiceStatus} from '../../enum/InvoiceStatus';
 
 export default function ModalAddGioHang({
   isShow,
@@ -12,25 +12,25 @@ export default function ModalAddGioHang({
   onSave,
 }: PropModal<IHoaDonChiTietDto>) {
   const [ctDoing, setCTDoing] = useState<IHoaDonChiTietDto>(
-    {} as IHoaDonChiTietDto
+    {} as IHoaDonChiTietDto,
   );
 
   useEffect(() => {
     if (isShow) {
       setCTDoing({
         ...ctDoing,
-        id: objUpdate?.id ?? "",
+        id: objUpdate?.id ?? '',
         stt: objUpdate?.stt ?? 1,
-        maHangHoa: objUpdate?.maHangHoa ?? "",
-        tenHangHoa: objUpdate?.tenHangHoa ?? "",
-        idDonViQuyDoi: objUpdate?.idDonViQuyDoi ?? "",
-        idHangHoa: objUpdate?.idHangHoa ?? "",
-        idHoaDon: objUpdate?.idHoaDon ?? "",
+        maHangHoa: objUpdate?.maHangHoa ?? '',
+        tenHangHoa: objUpdate?.tenHangHoa ?? '',
+        idDonViQuyDoi: objUpdate?.idDonViQuyDoi ?? '',
+        idHangHoa: objUpdate?.idHangHoa ?? '',
+        idHoaDon: objUpdate?.idHoaDon ?? '',
         soLuong: objUpdate?.soLuong ?? 0,
-        ptChietKhau: objUpdate?.ptChietKhau??0,
-        tienChietKhau: objUpdate?.tienChietKhau??0,
-        ptThue: objUpdate?.ptThue??0,
-        tienThue: objUpdate?.tienThue??0,
+        ptChietKhau: objUpdate?.ptChietKhau ?? 0,
+        tienChietKhau: objUpdate?.tienChietKhau ?? 0,
+        ptThue: objUpdate?.ptThue ?? 0,
+        tienThue: objUpdate?.tienThue ?? 0,
         donGiaTruocCK: objUpdate?.donGiaTruocCK ?? 0,
         donGiaSauCK: objUpdate?.donGiaSauCK ?? 0,
         donGiaSauVAT: objUpdate?.donGiaSauVAT ?? 0,
@@ -81,42 +81,42 @@ export default function ModalAddGioHang({
         visible={isShow}
         transparent={true}
         animationType="slide"
-        onRequestClose={onClose}
-      >
+        onRequestClose={onClose}>
         <View style={styles.modalView}>
-          <Pressable onPress={onClose}>
-            <Icon name="close" size={24} color={"#c0c0c0"} />
+          <Pressable
+            onPress={onClose}
+            style={{position: 'absolute', left: 10, top: 10}}>
+            <Icon name="close" size={24} color={'#c0c0c0'} />
           </Pressable>
-          <View style={{ gap: 16, alignItems: "center" }}>
+          <View style={{gap: 16, alignItems: 'center'}}>
             <Text style={styles.productName}>{ctDoing?.tenHangHoa}</Text>
             <Text style={styles.productPrice}>
-              {new Intl.NumberFormat("vi-VN").format(
-                ctDoing?.donGiaTruocCK ?? 0
+              {new Intl.NumberFormat('vi-VN').format(
+                ctDoing?.donGiaTruocCK ?? 0,
               )}
             </Text>
 
             <View
               style={{
                 gap: 24,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text style={{ textAlign: "left" }}>Số lượng</Text>
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <Text style={{textAlign: 'left'}}>Số lượng</Text>
               <Icon
                 name="remove-circle-outline"
                 size={30}
-                color={"#ccc"}
+                color={'#ccc'}
                 onPress={giamSoLuong}
               />
-              <Text style={[styles.productPrice, { textAlign: "center" }]}>
+              <Text style={[styles.productPrice, {textAlign: 'center'}]}>
                 {ctDoing.soLuong}
               </Text>
               <Icon
                 name="add-circle-outline"
                 size={30}
-                color={"#ccc"}
+                color={'#ccc'}
                 onPress={tangSoLuong}
               />
             </View>
@@ -124,29 +124,26 @@ export default function ModalAddGioHang({
           <View
             style={{
               marginTop: 20,
-              borderTopColor: "#cccc",
+              borderTopColor: '#cccc',
               borderTopWidth: 1,
-            }}
-          >
+            }}>
             <View
               style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
                 marginTop: 20,
-              }}
-            >
+              }}>
               <Text style={[styles.productPrice]}>Thành tiền</Text>
               <Text style={[styles.productName]}>
-                {new Intl.NumberFormat("vi-VN").format(
-                  ctDoing?.thanhTienSauCK ?? 0
+                {new Intl.NumberFormat('vi-VN').format(
+                  ctDoing?.thanhTienSauCK ?? 0,
                 )}
               </Text>
             </View>
             <Pressable
               style={[styles.button, styles.buttonOpen]}
-              onPress={agreeGioHang}
-            >
+              onPress={agreeGioHang}>
               <Text>Thêm vào giỏ hàng</Text>
             </Pressable>
           </View>
@@ -158,15 +155,16 @@ export default function ModalAddGioHang({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalView: {
-    backgroundColor: "white",
+    position: 'relative',
+    backgroundColor: 'white',
     borderRadius: 20,
     padding: 30,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -175,16 +173,16 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  productName: { fontSize: 16, fontWeight: "600" },
-  productPrice: { fontSize: 14, fontWeight: "500" },
+  productName: {fontSize: 16, fontWeight: '600'},
+  productPrice: {fontSize: 14, fontWeight: '500'},
   button: {
     borderRadius: 20,
     padding: 10,
     elevation: 2,
-    alignItems: "center",
+    alignItems: 'center',
   },
   buttonOpen: {
-    backgroundColor: "#ffe4c4",
+    backgroundColor: '#ffe4c4',
     marginTop: 16,
   },
 });

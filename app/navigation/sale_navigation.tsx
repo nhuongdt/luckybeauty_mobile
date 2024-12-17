@@ -8,10 +8,11 @@ import {ListBottomTab} from '../enum/ListBottomTab';
 import uuid from 'react-native-uuid';
 import realmQuery from '../store/realm/realmQuery';
 import CommonFunc from '../utils/CommonFunc';
-import {KiHieuChungTu, TenLoaiChungTu} from '../enum/LoaiChungTu';
+import {KiHieuChungTu, LoaiChungTu, TenLoaiChungTu} from '../enum/LoaiChungTu';
 import {HoaDonDto} from '../services/hoadon/dto';
 import realmDatabase from '../store/realm/database';
 import {useState} from 'react';
+import { TempInvoiceDetails } from '../screens/sale/teamp_invoice_details';
 
 export type BottomTabParamList = {
   TempInvoice: {idHoaDon: string; maHoaDon: string};
@@ -21,6 +22,7 @@ export type BottomTabParamList = {
     tongThanhToan?: number;
   };
   Product: {idHoaDon: string; maHoaDon: string; tongThanhToan?: number};
+  Customer :{idKhachHang: string}
 };
 
 export enum SaleHeader_ListTab {
@@ -43,37 +45,16 @@ const SaleNavigatonHeader = ({navigation}: PropsSaleNavigatonHeader) => {
     {id: SaleHeader_ListTab.GOI_DICH_VU, text: 'Gói dịch vụ'},
   ];
 
-  const createNewInvoice = () => {
-    const newId = uuid.v4().toString();
-    // gan lai giatri cot isOpenLastest = false cho all hoadon
-    realmQuery.HoaDon_ResetValueForColumn_isOpenLastest(tabActive);
-
-    const lstHoaDon = realmQuery.GetListHoaDon_ByLoaiChungTu(tabActive);
-
-    const max = CommonFunc.getMaxNumberFromMaHoaDon(lstHoaDon);
-    const kiHieuMaChungTu =
-      tabActive == SaleHeader_ListTab.HOA_DON
-        ? TenLoaiChungTu.HOA_DON_BAN_LE
-        : TenLoaiChungTu.GOI_DICH_VU;
-
-    const newHD = new HoaDonDto({
-      id: newId,
-      maHoaDon: `${kiHieuMaChungTu} ${max}`,
-    });
-    realmQuery.InsertTo_HoaDon(db, newHD);
-
-    navigation.navigate(ListBottomTab.PRODUCT, {
-      idHoaDon: newId,
-      maHoaDon: newHD.maHoaDon,
-      tongThanhToan: 0,
-    });
-  };
 
   const onClickActionHeader = (actionId: number) => {
     switch (actionId) {
       case SaleHeader_ListTab.CREATE_NEW:
         {
-          createNewInvoice();
+          navigation.navigate(ListBottomTab.PRODUCT, {
+            idHoaDon:  uuid.v4().toString(),
+            idLoaiChungTu: tabActive,
+            tongThanhToan: 0,
+          });
         }
         break;
       case SaleHeader_ListTab.HOA_DON:
@@ -98,6 +79,7 @@ const SaleNavigatonHeader = ({navigation}: PropsSaleNavigatonHeader) => {
       }}>
       {arrTab?.map(item => (
         <Pressable
+          key={item.id}
           style={[
             styleHeader.boxItem,
             tabActive === item.id
@@ -188,7 +170,7 @@ export default function SaleNavigation() {
           tabBarIcon: ({color, focused}) => (
             <Icon
               type={IconType.IONICON}
-              name={focused ? 'home-sharp' : 'home-outline'}
+              name={focused ? 'book-outline' : 'book'}
               color={color}
               size={24}
             />
@@ -206,7 +188,8 @@ export default function SaleNavigation() {
           tabBarLabel: 'Sản phẩm',
           tabBarIcon: ({focused, color}) => (
             <Icon
-              name={focused ? 'event-note' : 'note'}
+              type={IconType.IONICON}
+              name={focused ? 'list' : 'list-sharp'}
               color={color}
               size={24}
             />
@@ -217,9 +200,10 @@ export default function SaleNavigation() {
               onPress={() => {
                 navigation.navigate(ListBottomTab.TEMP_INVOICE, {
                   tongThanhToan: route.params?.tongThanhToan,
+                  idHoaDon: route.params?.idHoaDon,
                 });
               }}>
-              <Icon name="arrow-back-ios" type="material" />
+              <Icon name="arrow-back-ios" type={IconType.MATERIAL}/>
             </Pressable>
           ),
           headerRight: () => (
@@ -232,33 +216,11 @@ export default function SaleNavigation() {
                   tongThanhToan: route.params?.tongThanhToan,
                 });
               }}>
-              <Icon name="arrow-forward-ios" type="material" />
+              <Icon name="arrow-forward-ios" type={IconType.MATERIAL} />
             </Pressable>
           ),
         })}
       />
-      {/* <Tabs.Screen
-        name="TempInvoiceDetails"
-        component={TempInvoiceDetails}
-        options={({navigation, route}: any) => ({
-          title: `${route.params?.maHoaDon}`,
-          tabBarButton: () => null,
-          tabBarStyle: {display: 'none'}, // ẩn tabbar
-          headerLeft: () => (
-            <Pressable
-              style={{padding: 16}}
-              onPress={() => {
-                navigation.navigate(ListBottomTab.PRODUCT, {
-                  idHoaDon: route.params?.idHoaDon,
-                  maHoaDon: route.params?.maHoaDon,
-                  tongThanhToan: route.params?.tongThanhToan,
-                });
-              }}>
-              <Icon name="arrow-back-ios" type="material" />
-            </Pressable>
-          ),
-        })}
-      /> */}
     </Tabs.Navigator>
   );
 }

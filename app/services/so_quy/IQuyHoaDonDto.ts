@@ -1,0 +1,14 @@
+export interface IQuyHoaDonDto {
+  id: string;
+  idChiNhanh?: string;
+  idBrandname?: string;
+  idNhanVien?: string | null;
+  idLoaiChungTu: number;
+  maHoaDon?: string;
+  tongTienThu: number;
+  ngayLapHoaDon: string;
+  trangThai?: number;
+  noiDungThu?: string;
+  hachToanKinhDoanh?: boolean;
+}
+

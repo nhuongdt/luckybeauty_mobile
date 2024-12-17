@@ -1,4 +1,4 @@
-import { IParamSearchDto } from "../commonDto/paramSearch";
+import { IParamSearchDto } from "../commonDto/IParamSearchDto";
 
 export interface IProductBasic {
   idHangHoa: string;

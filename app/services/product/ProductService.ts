@@ -1,5 +1,5 @@
 import api from "../api";
-import { IPageResult } from "../commonDto/pageResult";
+import { IPageResult } from "../commonDto/IPageResultDto";
 import { IParamSearchProductDto, IProductBasic } from "./dto";
 
 class ProductSevice {

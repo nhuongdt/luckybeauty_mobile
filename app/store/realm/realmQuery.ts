@@ -1,19 +1,92 @@
 import Realm from 'realm';
+import uuid from 'react-native-uuid';
+
 import {
   HoaDonDto,
   IHoaDonChiTietDto,
   IHoaDonDto,
 } from '../../services/hoadon/dto';
 import realmDatabase from './database';
+import {IProductBasic} from '../../services/product/dto';
 
 enum ListTable {
   HOA_DON = 'tblHoaDon',
   HOA_DON_CHI_TIET = 'tblHoaDonChiTiet',
+  HANG_HOA = 'tblHangHoa',
+  KHACH_HANG = 'tblKhachHang',
 }
 
 const db = realmDatabase;
 
 class realmQuery {
+  Init_DanhMucHangHoa = (db: Realm) => {
+    const arrProduct: IProductBasic[] = [
+      {
+        idHangHoa: '1',
+        idDonViQuyDoi: '1',
+        maHangHoa: 'HD001',
+        tenHangHoa: 'Hoa hồng tươi',
+        giaBan: 10000,
+        tyLeChuyenDoi: 1,
+        tenNhomHang: 'Hoa tươi',
+      },
+      {
+        idHangHoa: '2',
+        idDonViQuyDoi: '2',
+        maHangHoa: 'HD002',
+        tenHangHoa: 'Hoa cúc tươi',
+        giaBan: 6000,
+        tyLeChuyenDoi: 1,
+        tenNhomHang: 'Hoa tươi',
+      },
+      {
+        idHangHoa: '3',
+        idDonViQuyDoi: '3',
+        maHangHoa: 'HD003',
+        tenHangHoa: 'Hoa ly',
+        giaBan: 15000,
+        tyLeChuyenDoi: 1,
+        tenNhomHang: 'Hoa tươi',
+      },
+      {
+        idHangHoa: '4',
+        idDonViQuyDoi: '4',
+        maHangHoa: 'HD003',
+        tenHangHoa: 'Hoa cẩm chướng',
+        giaBan: 9000,
+        tyLeChuyenDoi: 1,
+        tenNhomHang: 'Hoa tươi',
+      },
+    ];
+    try {
+      db.write(() => {
+        arrProduct?.forEach(item => {
+          db.create(ListTable.HANG_HOA, {
+            idHangHoa: item.idHangHoa,
+            idDonViQuyDoi: item.idDonViQuyDoi,
+            maHangHoa: item.maHangHoa,
+            tenHangHoa: item.tenHangHoa,
+            giaBan: item.giaBan,
+            tyLeChuyenDoi: item.tyLeChuyenDoi,
+            tenNhomHang: item.tenNhomHang,
+          });
+        });
+      });
+    } catch (error) {
+      console.log(`Init_DanhMucHangHoa ${error}`);
+    }
+  };
+  GetListHangHoa_fromCacche = (): IProductBasic[] => {
+    try {
+      const lst = db
+        .objects(ListTable.HANG_HOA)
+        .toJSON() as unknown as IProductBasic[];
+      return lst;
+    } catch (error) {
+      console.log(`GetListHangHoa_fromCacche ${error}`);
+    }
+    return [];
+  };
   GetListHoaDon_ByLoaiChungTu = (idLoaiChungTu: number): IHoaDonDto[] => {
     const lst = db
       .objects(ListTable.HOA_DON)
@@ -22,7 +95,7 @@ class realmQuery {
     return lst;
   };
 
-  GetHoaDon_byId = (db: Realm, id: string): IHoaDonDto | null => {
+  GetHoaDon_byId = (id: string): IHoaDonDto | null => {
     try {
       const data = db.objectForPrimaryKey(ListTable.HOA_DON, id);
       if (data) {
@@ -32,6 +105,17 @@ class realmQuery {
       console.log('GetHoaDon_byId ', err);
     }
 
+    return null;
+  };
+  GetHoaDonOpenLastest = (): IHoaDonDto | null => {
+    try {
+      const data = db.objects(ListTable.HOA_DON).filtered(`isOpenLastest = true`);
+      if (data) {
+        return data.toJSON() as unknown as IHoaDonDto;
+      }
+    } catch (err) {
+      console.log('GetHoaDonOpenLastest ', err);
+    }
     return null;
   };
   GetListChiTietHoaDon_byIdHoaDon = (
@@ -135,6 +219,24 @@ class realmQuery {
       console.log('InsertTo_HoaDonChiTiet ', err);
     }
   };
+  UpdateTo_HoaDonChiTiet = (itemNew: IHoaDonChiTietDto) => {
+    try {
+      db.write(() => {
+        const data = db.objectForPrimaryKey(
+          ListTable.HOA_DON_CHI_TIET,
+          itemNew?.id,
+        );
+        if (data) {
+          data.soLuong = itemNew?.soLuong;
+          data.thanhTienTruocCK = itemNew?.thanhTienTruocCK;
+          data.thanhTienSauCK = itemNew?.thanhTienSauCK;
+          data.thanhTienSauVAT = itemNew?.thanhTienSauVAT;
+        }
+      });
+    } catch (err) {
+      console.log('UpdateTo_HoaDonChiTiet ', err);
+    }
+  };
   HoaDon_ResetValueForColumn_isOpenLastest = (idLoaiChungTu: number) => {
     db.write(() => {
       const lst = db
@@ -188,7 +290,7 @@ class realmQuery {
         tongTienThue += element.soLuong * (element?.tienThue ?? 0);
       }
 
-      const hd = this.GetHoaDon_byId(db, idHoaDon);
+      const hd = this.GetHoaDon_byId(idHoaDon);
       if (hd != null) {
         const sumThanhTienSauCK = tongTienHangChuaChietKhau - tongChietKhauHang;
         hd.tongTienHangChuaChietKhau = tongTienHangChuaChietKhau;

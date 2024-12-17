@@ -8,6 +8,7 @@ class api {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Authorization", `Bearer ${accessToken}`);
+
     return myHeaders;
   };
   get = async (urlApi: string, input?: any) => {
@@ -26,12 +27,14 @@ class api {
       }
       return null;
     } catch (error) {
-      console.log(`${urlApi} error ${error}`);
+      console.log(`${urlApi}: ${error}`);
       return null;
     }
   };
   post = async (urlApi: string, input?: any) => {
     try {
+      console.log(`${urlApi}: ${input}`);
+
       const response = await fetch(
         `${REACT_NATIVE_API_URL}${urlApi}`,
         {
@@ -46,7 +49,7 @@ class api {
       }
       return null;
     } catch (error) {
-      console.log(`${urlApi} error ${error}`);
+      console.log(`${urlApi}: ${error}`);
       return null;
     }
   };
