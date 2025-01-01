@@ -109,7 +109,9 @@ class realmQuery {
   };
   GetHoaDonOpenLastest = (): IHoaDonDto | null => {
     try {
-      const data = db.objects(ListTable.HOA_DON).filtered(`isOpenLastest = true`);
+      const data = db
+        .objects(ListTable.HOA_DON)
+        .filtered(`isOpenLastest = true`);
       if (data) {
         return data.toJSON() as unknown as IHoaDonDto;
       }
@@ -276,6 +278,14 @@ class realmQuery {
     } catch (err) {
       console.log('UpdateHoaDon ', err);
     }
+  };
+  UpdateKhachHang_toHoaDon = (idHoaDon: string, idKhachHang: string) => {
+    db.write(() => {
+      const data = db.objectForPrimaryKey(ListTable.HOA_DON, idHoaDon);
+      if (data) {
+        data.idKhachHang = idKhachHang;
+      }
+    });
   };
   UpdateHD_fromCTHD = (db: Realm, idHoaDon: string): IHoaDonDto | null => {
     try {

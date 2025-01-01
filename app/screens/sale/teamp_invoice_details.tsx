@@ -1,31 +1,38 @@
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useEffect, useState} from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {Pressable, StyleSheet, TextInput, View} from 'react-native';
 import {Button, Icon} from '@rneui/themed';
 import realmDatabase from '../../store/realm/database';
 import realmQuery from '../../store/realm/realmQuery';
 import {IHoaDonChiTietDto, IHoaDonDto} from '../../services/hoadon/dto';
-import {BottomTabParamList} from '../../navigation/sale_navigation';
 import {ListBottomTab} from '../../enum/ListBottomTab';
-import {SearchBar, Text} from '@rneui/base';
+import {Input, SearchBar, Text} from '@rneui/base';
 import {IconType} from '../../enum/IconType';
 import CommonFunc from '../../utils/CommonFunc';
+import KhachHangService from '../../services/customer/KhachHangService';
+import {IKhachHangItemDto} from '../../services/customer/IKhachHangItemDto';
+import {InvoiceStackParamList} from '../../type/InvoiceStackParamList';
+import {ListInvoiceStack} from '../../enum/ListInvoiceStack';
 
 type TempInvoiceDetailsProps = NativeStackNavigationProp<
-  BottomTabParamList,
+  InvoiceStackParamList,
   ListBottomTab.TEMP_INVOICE_DETAIL
 >;
 
 type InvoiceDetailRouteProp = RouteProp<
-  {params: {idHoaDon: string; tongThanhToan: number}},
+  {params: {idHoaDon: string; tongThanhToan: number; idKhachHang: string}},
   'params'
 >;
 
 export const TempInvoiceDetails = () => {
   const route = useRoute<InvoiceDetailRouteProp>();
   const navigation = useNavigation<TempInvoiceDetailsProps>();
-  const {idHoaDon = '', tongThanhToan = 0} = route.params || {};
+  const {
+    idHoaDon = '',
+    idKhachHang = '',
+    tongThanhToan = 0,
+  } = route.params || {};
   const db = realmDatabase;
   const [txtSearchProduct, setTxtSearchProduct] = useState('');
   const [lstCTHD, setLstCTHD] = useState<IHoaDonChiTietDto[]>([]);
@@ -33,6 +40,8 @@ export const TempInvoiceDetails = () => {
   const [hoadonOpen, setHoaDonOpen] = useState<IHoaDonDto>({
     id: idHoaDon,
   } as IHoaDonDto);
+
+  const [custonerChosing, setCustonerChosing] = useState<IKhachHangItemDto>();
 
   // useEffect(() => {
   //   const txt = CommonFunc.convertString_toEnglish(txtSearchProduct);
@@ -50,7 +59,7 @@ export const TempInvoiceDetails = () => {
   );
 
   const GetDataHoaDon_fromCache = async () => {
-    const hd = realmQuery.GetHoaDon_byId(db, idHoaDon);
+    const hd = realmQuery.GetHoaDon_byId(idHoaDon);
     const lst = realmQuery.GetListChiTietHoaDon_byIdHoaDon(db, idHoaDon);
     if (hd != null) {
       setHoaDonOpen({...hd});
@@ -58,9 +67,28 @@ export const TempInvoiceDetails = () => {
     }
   };
 
+  const getInforCustomer = async () => {
+    const data = await KhachHangService.getDetail(idKhachHang);
+    setCustonerChosing({...data});
+  };
+
   useEffect(() => {
     GetDataHoaDon_fromCache();
   }, [idHoaDon, tongThanhToan]);
+
+  useEffect(() => {
+    if (!CommonFunc.checkNull(idKhachHang)) {
+      realmQuery.UpdateKhachHang_toHoaDon(idHoaDon, idKhachHang);
+      getInforCustomer();
+    }
+  }, [idKhachHang]);
+
+  const gotoBack = () => {
+    navigation.navigate(ListBottomTab.TEMP_INVOICE, {
+      tongThanhToan: route.params?.tongThanhToan,
+      idHoaDon: route.params?.idHoaDon,
+    });
+  };
 
   const CaculatorHD_byTongTienHang = async (tongTienHang: number) => {
     let ptGiamGiaHD = hoadonOpen.ptGiamGiaHD;
@@ -171,20 +199,43 @@ export const TempInvoiceDetails = () => {
 
   return (
     <View style={styles.container}>
+      {/* <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          padding: 8,
+          alignItems: 'center',
+          backgroundColor: '#FFF2CC',
+        }}>
+        <View style={{flexDirection: 'row', gap: 8}}>
+          <Pressable onPress={gotoBack}>
+            <Icon name="arrow-back-ios" type={IconType.MATERIAL} />
+          </Pressable>
+          <Text style={{fontWeight: 500}}>{hoadonOpen?.maHoaDon ?? ''}</Text>
+        </View>
+        <Text style={{fontWeight: 500}}>
+          {CommonFunc.formatCurrency(hoadonOpen?.tongThanhToan ?? 0)}
+        </Text>
+      </View> */}
       <View style={styles.boxCustomer}>
         <View style={styles.boxCustomer_LeftRight}>
           <Icon size={18} type={IconType.FONT_AWESOME_5} name="user" />
-          <View style={{gap: 8}}>
-            <Text style={{fontWeight: 500}}>Nguyen Thi Thu Huong</Text>
-            <Text style={{fontSize: 13}}>02562853655</Text>
+          <View style={{gap: 8, alignItems: 'center'}}>
+            <Text style={{fontWeight: 500}}>
+              {custonerChosing?.tenKhachHang ?? 'Khách lẻ'}
+            </Text>
+            {custonerChosing?.soDienThoai && (
+              <Text style={{fontSize: 13}}>{custonerChosing?.soDienThoai}</Text>
+            )}
           </View>
         </View>
         <Pressable
           style={styles.boxCustomer_LeftRight}
           onPress={() =>
-            navigation.navigate(ListBottomTab.CUSTOMER, {
-              idKhachHang: hoadonOpen?.idKhachHang ?? '',
-            })
+            // navigation.navigate(ListBottomTab.CUSTOMER, {
+            //   idKhachHang: hoadonOpen?.idKhachHang ?? '',
+            // })
+            console.log('goto customer')
           }>
           <Text style={{textDecorationLine: 'underline', fontSize: 12}}>
             Chọn lại khách
@@ -195,29 +246,46 @@ export const TempInvoiceDetails = () => {
       <View
         style={{
           flexDirection: 'row',
-          justifyContent: 'space-between',
           alignItems: 'center',
+          padding: 8,
         }}>
-        <SearchBar
-          placeholder="Tìm kiếm dịch vụ"
-          value={txtSearchProduct}
-          onChangeText={text => setTxtSearchProduct(text)}
-          containerStyle={{
-            borderTopWidth: 0,
-            borderBottomColor: '#ccc',
-            backgroundColor: 'white',
+        <View
+          style={{
+            borderRadius: 4,
+            borderColor: '#ccc',
+            borderWidth: 1,
             flex: 3,
-          }}
-          inputStyle={{fontSize: 14}}
-          inputContainerStyle={{backgroundColor: 'white'}}
-        />
-        <Text style={{textDecorationLine: 'underline', fontSize: 12, flex: 2}}>
-          Thêm sản phẩm vào giỏ
-        </Text>
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 8,
+            paddingVertical: 4,
+            backgroundColor: 'white',
+          }}>
+          <Icon type={IconType.IONICON} name="search" size={18} />
+          <TextInput style={{marginLeft: 8}} placeholder='Tìm dịch vụ' />
+        </View>
+
+        <View
+          style={{
+            flex: 1,
+            marginLeft: 8,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <Text
+            style={{
+              textDecorationLine: 'underline',
+              fontSize: 12,
+              color: 'blue',
+              textAlign: 'center',
+            }}>
+            Thêm sản phẩm vào giỏ hàng
+          </Text>
+        </View>
       </View>
 
       <View style={styles.containerDetail}>
-        <View style={{gap: 8}}>
+        <View style={{gap: 8, backgroundColor: 'white'}}>
           {lstSearchCTHD?.map((item, index) => (
             <View
               key={item?.id}
@@ -263,25 +331,42 @@ export const TempInvoiceDetails = () => {
       </View>
 
       <View style={styles.boxInvoice}>
-        <View style={{gap: 12}}>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text>Tổng tiền hàng</Text>
-            <Text style={{fontSize: 18}}>
-              {new Intl.NumberFormat('vi-VN').format(hoadonOpen?.tongTienHang)}
-            </Text>
-          </View>
+        <View
+          style={{
+            padding: 12,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: '#ccc',
+          }}>
+          <View style={{gap: 12}}>
+            <View
+              style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+              <Text>Tổng tiền hàng</Text>
+              <Text style={{fontSize: 18}}>
+                {new Intl.NumberFormat('vi-VN').format(
+                  hoadonOpen?.tongTienHang,
+                )}
+              </Text>
+            </View>
 
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text>Giảm giá</Text>
-            <Text style={{fontSize: 18}}>
-              {new Intl.NumberFormat('vi-VN').format(hoadonOpen?.tongGiamGiaHD)}
-            </Text>
-          </View>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text>Tổng cộng</Text>
-            <Text style={{fontSize: 18, fontWeight: 500}}>
-              {new Intl.NumberFormat('vi-VN').format(hoadonOpen?.tongThanhToan)}
-            </Text>
+            <View
+              style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+              <Text>Giảm giá</Text>
+              <Text style={{fontSize: 18}}>
+                {new Intl.NumberFormat('vi-VN').format(
+                  hoadonOpen?.tongGiamGiaHD,
+                )}
+              </Text>
+            </View>
+            <View
+              style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+              <Text>Tổng cộng</Text>
+              <Text style={{fontSize: 18, fontWeight: 500}}>
+                {new Intl.NumberFormat('vi-VN').format(
+                  hoadonOpen?.tongThanhToan,
+                )}
+              </Text>
+            </View>
           </View>
         </View>
       </View>
@@ -297,7 +382,10 @@ export const TempInvoiceDetails = () => {
         buttonStyle={{
           backgroundColor: '#D7681D',
           borderRadius: 4,
-        }}>
+        }}
+        onPress={() =>
+          navigation.navigate(ListInvoiceStack.THANH_TOAN, {idHoaDon: idHoaDon})
+        }>
         <Icon name="check" color="white" containerStyle={{marginRight: 10}} />
         Thanh toán
       </Button>
@@ -313,13 +401,14 @@ const styles = StyleSheet.create({
   },
   boxInvoice: {
     bottom: 75,
-    backgroundColor: 'white',
     position: 'absolute',
     width: '100%',
-    padding: 16,
+    padding: 8,
+    backgroundColor: 'white',
   },
   boxCustomer: {
-    padding: 16,
+    paddingHorizontal: 8,
+    paddingVertical: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     backgroundColor: '#DAE8FC',
@@ -330,8 +419,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   containerDetail: {
-    padding: 16,
-    flex: 1,
-    backgroundColor: 'white',
+    padding: 8,
   },
 });

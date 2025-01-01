@@ -1,11 +1,6 @@
 import {View, StyleSheet, FlatList, Pressable} from 'react-native';
-import {useCallback, useEffect, useRef, useState} from 'react';
-import {
-  RouteProp,
-  useFocusEffect,
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native';
+import {useEffect, useRef, useState} from 'react';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Icon, SearchBar} from '@rneui/themed';
 import uuid from 'react-native-uuid';
@@ -21,13 +16,13 @@ import {
 import ProductService from '../../services/product/ProductService';
 import {IPageResultDto} from '../../services/commonDto/IPageResultDto';
 import realmDatabase from '../../store/realm/database';
-import {BottomTabParamList} from '../../navigation/sale_navigation';
 import {ListBottomTab} from '../../enum/ListBottomTab';
 import {LoaiChungTu, TenLoaiChungTu} from '../../enum/LoaiChungTu';
 import CommonFunc from '../../utils/CommonFunc';
+import {SaleBottomTabParamList} from '../../type/SaleBottomTabParamList';
 
 type ProductSaleProps = NativeStackNavigationProp<
-  BottomTabParamList,
+  SaleBottomTabParamList,
   ListBottomTab.PRODUCT
 >;
 
@@ -140,7 +135,7 @@ const ProductSale = () => {
   // sử dụng khi chưa click tạo hóa đơn, mà chọn tab Sản phẩm
   const checkRouteParam = () => {
     if (idHoaDon !== undefined) {
-      const itemHD = realmQuery.GetHoaDon_byId(db, idHoaDon);
+      const itemHD = realmQuery.GetHoaDon_byId(idHoaDon);
       if (itemHD === null) {
         creatwNewHD_ifNotExist(idHoaDon);
       } else {

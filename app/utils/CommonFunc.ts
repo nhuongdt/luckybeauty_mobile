@@ -1,3 +1,4 @@
+import ApiConst from '../const/ApiConst';
 import {IHoaDonDto} from '../services/hoadon/dto';
 
 class CommonFunc {
@@ -39,6 +40,16 @@ class CommonFunc {
       input.toString().replace(/\s+/g, '') === ''
     );
   };
+  checkNull_OrEmpty = (input: string | null | undefined) => {
+    return (
+      input === 'null' ||
+      input === null ||
+      input === undefined ||
+      input === 'undefined' ||
+      input === ApiConst.GUID_EMPTY ||
+      input.toString().replace(/\s+/g, '') === ''
+    );
+  };
   getFirstLetter = (str = '', maxLen = 2) => {
     const allLetter = str
       ?.match(/(?<=(\s|^))[a-z0-9]/gi)
@@ -52,6 +63,23 @@ class CommonFunc {
       }
     }
     return '';
+  };
+  formatNumberToFloat = (objVal: any) => {
+    if (objVal === undefined || objVal === null) {
+      return 0;
+    } else {
+      const value = parseFloat(
+        objVal.toString().replaceAll('.', '').replace(',', '.'),
+      );
+      if (isNaN(value)) {
+        return 0;
+      } else {
+        return value;
+      }
+    }
+  };
+  formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('vi-VN').format(value);
   };
 }
 

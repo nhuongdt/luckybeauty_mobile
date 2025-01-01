@@ -14,6 +14,7 @@ class KhachHangService {
         return result.data.result;
     }
     public async getDetail(id: string): Promise<IKhachHangItemDto> {
+        // full infor soLanCheckin, ngayCheckinGanNhat
         const response = await api.get(`api/services/app/KhachHang/GetKhachHangDetail?id=${id}`);
         return response.data.result;
     }
@@ -22,6 +23,7 @@ class KhachHangService {
     //     return response.data.result;
     // }
     public async getKhachHang(id: string): Promise<ICreateOrEditKhachHangDto> {
+        // get infor customer from DM_KhachHang
         if (CommonFunc.checkNull(id) || id === ApiConst.GUID_EMPTY) {
             return {
                 id: '',

@@ -12,134 +12,73 @@ import {KiHieuChungTu, LoaiChungTu, TenLoaiChungTu} from '../enum/LoaiChungTu';
 import {HoaDonDto} from '../services/hoadon/dto';
 import realmDatabase from '../store/realm/database';
 import {useState} from 'react';
-import { TempInvoiceDetails } from '../screens/sale/teamp_invoice_details';
+import {TempInvoiceDetails} from '../screens/sale/teamp_invoice_details';
+import {InvoiceStackParamList} from '../type/InvoiceStackParamList';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {ListInvoiceStack} from '../enum/ListInvoiceStack';
+import ThanhToan from '../screens/sale/thanh_toan';
+import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
+import {SaleBottomTabParamList} from '../type/SaleBottomTabParamList';
 
-export type BottomTabParamList = {
-  TempInvoice: {idHoaDon: string; maHoaDon: string};
-  TempInvoiceDetails: {
-    idHoaDon: string;
-    maHoaDon: string;
-    tongThanhToan?: number;
-  };
-  Product: {idHoaDon: string; maHoaDon: string; tongThanhToan?: number};
-  Customer :{idKhachHang: string}
-};
-
-export enum SaleHeader_ListTab {
-  HOA_DON = 1,
-  GOI_DICH_VU = 2,
-  CREATE_NEW = 0,
-}
-
-type PropsSaleNavigatonHeader = {
-  //   onPress: (typeAction: number) => void;
-  navigation: any;
-};
-
-const SaleNavigatonHeader = ({navigation}: PropsSaleNavigatonHeader) => {
-  const db = realmDatabase;
-  const [tabActive, setTabActive] = useState(SaleHeader_ListTab.HOA_DON);
-
-  const arrTab = [
-    {id: SaleHeader_ListTab.HOA_DON, text: 'Hóa đơn'},
-    {id: SaleHeader_ListTab.GOI_DICH_VU, text: 'Gói dịch vụ'},
-  ];
-
-
-  const onClickActionHeader = (actionId: number) => {
-    switch (actionId) {
-      case SaleHeader_ListTab.CREATE_NEW:
-        {
-          navigation.navigate(ListBottomTab.PRODUCT, {
-            idHoaDon:  uuid.v4().toString(),
-            idLoaiChungTu: tabActive,
-            tongThanhToan: 0,
-          });
-        }
-        break;
-      case SaleHeader_ListTab.HOA_DON:
-      case SaleHeader_ListTab.GOI_DICH_VU:
-        {
-          navigation.navigate(ListBottomTab.TEMP_INVOICE, {
-            headerActionId: actionId,
-          });
-          setTabActive(actionId);
-        }
-        break;
-    }
-  };
-
+const InvoiceStackNavigation = () => {
+  const InvoiceStack = createNativeStackNavigator<InvoiceStackParamList>();
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        padding: 8,
-        backgroundColor: '#FFF2CC',
-      }}>
-      {arrTab?.map(item => (
-        <Pressable
-          key={item.id}
-          style={[
-            styleHeader.boxItem,
-            tabActive === item.id
-              ? styleHeader.boxItemActive
-              : styleHeader.boxItemNotActive,
-          ]}
-          onPress={() => onClickActionHeader(item.id)}>
-          <Icon
-            name="documents-outline"
-            type={IconType.IONICON}
-            size={18}
-            color={tabActive === item.id ? 'white' : 'black'}
-          />
-          <Text
-            style={{
-              color: tabActive === item.id ? 'white' : 'black',
-              fontWeight: 500,
-            }}>
-            {item.text}
-          </Text>
-        </Pressable>
-      ))}
+    <InvoiceStack.Navigator initialRouteName={ListInvoiceStack.TEMP_INVOICE}>
+      <InvoiceStack.Screen
+        name={ListInvoiceStack.TEMP_INVOICE}
+        component={TempInvoices}
+        options={{
+          headerShown: false,
+        }}
+      />
 
-      <View style={[styleHeader.boxItem, styleHeader.boxAdd]}>
-        <Pressable
-          onPress={() => onClickActionHeader(SaleHeader_ListTab.CREATE_NEW)}>
-          <Icon name="add" size={20} />
-          <Text style={{fontWeight: 500}}>Tạo đơn mới</Text>
-        </Pressable>
-      </View>
-    </View>
+      <InvoiceStack.Screen
+        name={ListInvoiceStack.TEMP_INVOICE_DETAIL}
+        component={TempInvoiceDetails}
+        options={({navigation, route}: any) => ({
+          title: ` ${route?.param?.maHoaDon}`,
+          headerTitleAlign: 'center',
+          presentation: 'fullScreenModal',
+          headerStyle: {backgroundColor: '#FFF2CC'},
+        })}
+      />
+      <InvoiceStack.Screen
+        name={ListInvoiceStack.THANH_TOAN}
+        component={ThanhToan}
+        options={{
+          title: 'Thanh toán',
+          headerTitleAlign: 'center',
+          presentation: 'card',
+          headerStyle: {backgroundColor: '#FFF2CC'},
+        }}
+      />
+    </InvoiceStack.Navigator>
   );
 };
 
-const styleHeader = StyleSheet.create({
-  boxItem: {
-    gap: 8,
-    minWidth: 120,
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  boxItemActive: {
-    backgroundColor: '#FA6800',
-  },
-  boxItemNotActive: {
-    backgroundColor: '#F5F5F5',
-  },
-  boxAdd: {
-    backgroundColor: 'white',
-  },
-});
-
 export default function SaleNavigation() {
-  const Tabs = createBottomTabNavigator<BottomTabParamList>();
+  const Tabs = createBottomTabNavigator<SaleBottomTabParamList>();
+
+  function getTabBarVisibility(route: any) {
+    const routeName = getFocusedRouteNameFromRoute(route) ?? 'Invoices';
+    if (
+      routeName === ListInvoiceStack.TEMP_INVOICE_DETAIL ||
+      routeName === ListInvoiceStack.THANH_TOAN
+    ) {
+      return 'none'; // Ẩn TabBar
+    }
+    return 'flex'; // Hiển thị TabBar
+  }
 
   return (
     <Tabs.Navigator
-      initialRouteName={ListBottomTab.TEMP_INVOICE}
-      screenOptions={{
+      initialRouteName={ListBottomTab.INVOICE_STACK_NAVIGATION}
+      screenOptions={({route}) => ({
+        headerShown: false,
+        tabBarStyle: {
+          display: getTabBarVisibility(route),
+          backgroundColor: '#FFF4E5',
+        },
         tabBarActiveTintColor: 'red',
         tabBarInactiveTintColor: 'gray',
         headerStyle: {
@@ -154,19 +93,15 @@ export default function SaleNavigation() {
         },
         headerTintColor: 'white',
         headerShadowVisible: false,
-        tabBarStyle: {
-          backgroundColor: '#FFF4E5',
-        },
         tabBarLabelStyle: {
           fontSize: 14,
         },
-      }}>
+      })}>
       <Tabs.Screen
-        name={ListBottomTab.TEMP_INVOICE}
-        component={TempInvoices}
+        name={ListBottomTab.INVOICE_STACK_NAVIGATION}
+        component={InvoiceStackNavigation}
         options={({navigation, route}: any) => ({
           title: 'Hóa đơn tạm',
-          headerTitleStyle: {display: 'none'},
           tabBarIcon: ({color, focused}) => (
             <Icon
               type={IconType.IONICON}
@@ -175,7 +110,6 @@ export default function SaleNavigation() {
               size={24}
             />
           ),
-          header: () => <SaleNavigatonHeader navigation={navigation} />,
         })}
       />
       <Tabs.Screen
@@ -203,7 +137,7 @@ export default function SaleNavigation() {
                   idHoaDon: route.params?.idHoaDon,
                 });
               }}>
-              <Icon name="arrow-back-ios" type={IconType.MATERIAL}/>
+              <Icon name="arrow-back-ios" type={IconType.MATERIAL} />
             </Pressable>
           ),
           headerRight: () => (

@@ -1,34 +1,30 @@
 import {View, StyleSheet, Pressable, ScrollView} from 'react-native';
 import {Icon, Button} from '@rneui/themed';
-import {useEffect, useRef, useContext, useState, FC, useCallback} from 'react';
+import {useEffect, useRef, useContext, useState} from 'react';
 import uuid from 'react-native-uuid';
 import {format} from 'date-fns';
 import {
   RouteProp,
-  useFocusEffect,
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Input, Text} from '@rneui/base';
-import {
-  BottomTabParamList,
-  SaleHeader_ListTab,
-} from '../../navigation/sale_navigation';
 import {ListBottomTab} from '../../enum/ListBottomTab';
 import realmDatabase from '../../store/realm/database';
 import realmQuery from '../../store/realm/realmQuery';
 import {HoaDonDto, IHoaDonDto} from '../../services/hoadon/dto';
 import {
-  KiHieuChungTu,
   LoaiChungTu,
   TenLoaiChungTu,
 } from '../../enum/LoaiChungTu';
 import CommonFunc from '../../utils/CommonFunc';
 import {IconType} from '../../enum/IconType';
+import {InvoiceStackParamList} from '../../type/InvoiceStackParamList';
+import {ListInvoiceStack} from '../../enum/ListInvoiceStack';
 
 type TempInvoiceProps = NativeStackNavigationProp<
-  BottomTabParamList,
+  InvoiceStackParamList,
   ListBottomTab.TEMP_INVOICE
 >;
 
@@ -44,16 +40,40 @@ type TempInvoiceRouteProp = RouteProp<
   'params'
 >;
 
-const TempInvoice = () => {
+const styleHeader = StyleSheet.create({
+  boxItem: {
+    gap: 8,
+    minWidth: 120,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  boxItemActive: {
+    backgroundColor: '#FA6800',
+  },
+  boxItemNotActive: {
+    backgroundColor: '#F5F5F5',
+  },
+  boxAdd: {
+    backgroundColor: 'white',
+  },
+});
+
+const TempInvoices = () => {
   const firstLoad = useRef(true);
   const db = realmDatabase;
   const navigation = useNavigation<TempInvoiceProps>();
   const route = useRoute<TempInvoiceRouteProp>();
 
-  const {idHoaDon = '', tongThanhToan = 0, headerActionId} = route.params || {};
+  const {idHoaDon = '', tongThanhToan = 0} = route.params || {};
   const [idHoaDonChosing, setIdHoaDonChosing] = useState('');
   const [lstHoaDon, setLstHoaDon] = useState<IHoaDonDto[]>([]);
+  const [tabActive, setTabActive] = useState(LoaiChungTu.HOA_DON_BAN_LE);
 
+  const arrTab = [
+    {id: LoaiChungTu.HOA_DON_BAN_LE, text: 'Hóa đơn'},
+    {id: LoaiChungTu.GOI_DICH_VU, text: 'Gói dịch vụ'},
+  ];
 
   const getHoaDonFromCache = (idLoaiChungTu = LoaiChungTu.HOA_DON_BAN_LE) => {
     const data = realmQuery.GetListHoaDon_ByLoaiChungTu(idLoaiChungTu);
@@ -68,34 +88,36 @@ const TempInvoice = () => {
     getInforHoadon_byId();
   }, [tongThanhToan]);
 
-  useEffect(() => {
-    getInforHoadon_byId();
-  }, [tongThanhToan]);
+  const createNewInvoice = () => {
+    const max = CommonFunc.getMaxNumberFromMaHoaDon(lstHoaDon);
+    const kiHieuMaChungTu =
+      tabActive == LoaiChungTu.HOA_DON_BAN_LE
+        ? TenLoaiChungTu.HOA_DON_BAN_LE
+        : TenLoaiChungTu.GOI_DICH_VU;
 
-  useEffect(() => {
-    onHandeleActionHeader();
-  }, [headerActionId, idHoaDon]);
+    const newHD = new HoaDonDto({
+      id: uuid.v4().toString(),
+      idLoaiChungTu: tabActive,
+      maHoaDon: `${kiHieuMaChungTu} ${max}`,
+    });
+    setLstHoaDon([newHD, ...lstHoaDon]);
 
-  const onHandeleActionHeader = () => {
-    switch (headerActionId) {
-      case SaleHeader_ListTab.CREATE_NEW:
-        {
-          const arrExists = lstHoaDon?.filter(x => x.id == idHoaDon);
-          if (arrExists?.length === 0) {
-            const objNew = realmQuery.GetHoaDon_byId(idHoaDon);
-            if (objNew !== null) {
-              setIdHoaDonChosing(idHoaDon);
-              setLstHoaDon([objNew, ...lstHoaDon]);
-            }
-          }
-        }
-        break;
-      default:
-        {
-          getHoaDonFromCache(headerActionId);
-        }
-        break;
-    }
+    setIdHoaDonChosing(newHD?.id);
+
+    realmQuery.HoaDon_ResetValueForColumn_isOpenLastest(tabActive);
+    realmQuery.InsertTo_HoaDon(db, newHD);
+
+    navigation.navigate(ListBottomTab.PRODUCT, {
+      maHoaDon: newHD?.maHoaDon,
+      idHoaDon: newHD?.id,
+      tongThanhToan: 0,
+      idLoaiChungTu: tabActive
+    });
+  };
+
+  const onChangeTab = (tabActive: number) => {
+    getHoaDonFromCache(tabActive);
+    setTabActive(tabActive);
   };
 
   const removeInvoice = async (id: string) => {
@@ -104,7 +126,7 @@ const TempInvoice = () => {
   };
 
   const goInvoiceDetail = (item: IHoaDonDto) => {
-    navigation.navigate(ListBottomTab.TEMP_INVOICE_DETAIL, {
+    navigation.navigate(ListInvoiceStack.TEMP_INVOICE_DETAIL, {
       idHoaDon: item?.id,
       maHoaDon: item?.maHoaDon,
       tongThanhToan: item?.tongThanhToan,
@@ -159,6 +181,46 @@ const TempInvoice = () => {
 
   return (
     <View style={styles.container}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          padding: 8,
+          backgroundColor: '#FFF2CC',
+        }}>
+        {arrTab?.map(item => (
+          <Pressable
+            key={item.id}
+            style={[
+              styleHeader.boxItem,
+              tabActive === item.id
+                ? styleHeader.boxItemActive
+                : styleHeader.boxItemNotActive,
+            ]}
+            onPress={() => onChangeTab(item.id)}>
+            <Icon
+              name="documents-outline"
+              type={IconType.IONICON}
+              size={18}
+              color={tabActive === item.id ? 'white' : 'black'}
+            />
+            <Text
+              style={{
+                color: tabActive === item.id ? 'white' : 'black',
+                fontWeight: 500,
+              }}>
+              {item.text}
+            </Text>
+          </Pressable>
+        ))}
+
+        <View style={[styleHeader.boxItem, styleHeader.boxAdd]}>
+          <Pressable onPress={createNewInvoice}>
+            <Icon name="add" size={20} />
+            <Text style={{fontWeight: 500}}>Tạo đơn mới</Text>
+          </Pressable>
+        </View>
+      </View>
       <View
         style={{
           flex: 1,
@@ -238,7 +300,7 @@ const TempInvoice = () => {
     </View>
   );
 };
-export default TempInvoice;
+export default TempInvoices;
 const styles = StyleSheet.create({
   container: {
     flex: 1,

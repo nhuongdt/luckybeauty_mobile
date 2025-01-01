@@ -12,20 +12,9 @@ import {Icon, Text} from '@rneui/base';
 import {IconType} from '../enum/IconType';
 import {ListRouteApp} from '../enum/ListRouteApp';
 import Customer from '../screens/customers/customers';
-import {SearchBar} from '@rneui/themed';
-import {HeaderWithSearchAndBack} from './header_with_search_and_back';
 import ThanhToan from '../screens/sale/thanh_toan';
-
-export type StackParamList = {
-  SaleNavigation: undefined;
-  PageNotFound: undefined;
-  TempInvoiceDetails: {
-    idHoaDon: string;
-    maHoaDon: string;
-    tongThanhToan?: number;
-  };
-  Customer: {idKhachHang: string};
-};
+import React from 'react';
+import {RootStackParamList} from '../type/RootStackParamList';
 
 export default function AppNavigation() {
   const [isLogin, setIsLogin] = useState(false);
@@ -64,40 +53,27 @@ export default function AppNavigation() {
 
   // if (!isLogin) return <LoginScreen onLoginOK={() => setIsLogin(true)} />;
 
-  const Stack = createNativeStackNavigator();
+  const Stack = createNativeStackNavigator<RootStackParamList>();
   return (
     <Stack.Navigator>
-      {!isLogin ? (
+      <>
         <Stack.Screen
-          name={ListRouteApp.THANH_TOAN}
-          component={ThanhToan}
-          options={{title: 'Thanh toán', headerTitleAlign: 'center'}}
+          name={ListRouteApp.SALE_NAGIGATION}
+          component={SaleNavigation}
+          options={{headerShown: false}}
         />
-      ) : (
-        <>
-          <Stack.Screen
-            name="SaleNavigation"
-            component={SaleNavigation}
-            options={{headerShown: false}}
-          />
 
-          <Stack.Screen
-            name="PageNotFound"
-            component={PageNotFound}
-            options={{title: 'Page not found'}}
-          />
-          <Stack.Screen
-            name={ListRouteApp.CUSTOMER}
-            component={Customer}
-            options={{title: 'Khách hàng'}}
-          />
-          <Stack.Screen
-            name={ListRouteApp.THANH_TOAN}
-            component={ThanhToan}
-            options={{title: 'Thanh toán', headerTitleAlign: 'center'}}
-          />
-        </>
-      )}
+        <Stack.Screen
+          name={ListRouteApp.PAGE_NOT_FOUND}
+          component={PageNotFound}
+          options={{title: 'Page not found'}}
+        />
+        <Stack.Screen
+          name={ListRouteApp.CUSTOMER}
+          component={Customer}
+          options={{headerShown: false}}
+        />
+      </>
     </Stack.Navigator>
   );
 }
