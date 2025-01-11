@@ -51,7 +51,7 @@ export default function AppNavigation() {
     setIsLoadingForm(false);
   };
 
-  // if (!isLogin) return <LoginScreen onLoginOK={() => setIsLogin(true)} />;
+  //if (!isLogin) return <LoginScreen onLoginOK={() => setIsLogin(true)} />;
 
   const Stack = createNativeStackNavigator<RootStackParamList>();
   return (

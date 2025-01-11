@@ -1,10 +1,9 @@
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {BottomTabParamList} from '../../navigation/sale_navigation';
 import {ListBottomTab} from '../../enum/ListBottomTab';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import Realm from 'realm';
 import realmDatabase from '../../store/realm/database';
-import {FlatList, StyleSheet, View} from 'react-native';
+import {FlatList, Modal, StyleSheet, View} from 'react-native';
 import {useEffect, useRef, useState} from 'react';
 import realmQuery from '../../store/realm/realmQuery';
 import KhachHangService from '../../services/customer/KhachHangService';
@@ -13,7 +12,10 @@ import {IKhachHangItemDto} from '../../services/customer/IKhachHangItemDto';
 import {CustomerItem} from './customer_item';
 import {SearchBar} from '@rneui/base';
 import {RootStackParamList} from '../../type/RootStackParamList';
-import { ListRouteApp } from '../../enum/ListRouteApp';
+import {ListRouteApp} from '../../enum/ListRouteApp';
+import {PropModal} from '../../type/PropModal';
+import {Icon, Text} from '@rneui/themed';
+import {IconType} from '../../enum/IconType';
 
 type CustomerProps = NativeStackNavigationProp<
   RootStackParamList,
@@ -21,7 +23,13 @@ type CustomerProps = NativeStackNavigationProp<
 >;
 
 type CustomerlRouteProp = RouteProp<{params: {idKhachHang: string}}, 'params'>;
-export default function Customer() {
+
+export default function Customer({
+  isShow,
+  objUpdate,
+  onClose,
+  onSave,
+}: PropModal<IKhachHangItemDto>) {
   const route = useRoute<CustomerlRouteProp>();
   const navigation = useNavigation<CustomerProps>();
   const {idKhachHang = ''} = route?.params || {};
@@ -53,8 +61,7 @@ export default function Customer() {
   ]);
 
   const getListCustomer = () => {
-    const lst = realmQuery.GetListHangHoa_fromCacche();
-    console.log('lstproduct ', lst);
+    //
   };
 
   const jqAutoCustomer = async () => {
@@ -83,42 +90,61 @@ export default function Customer() {
   }, [txtSearch]);
 
   const choseCustomer = (item: IKhachHangItemDto) => {
-    navigation.navigate(ListRouteApp.TEMP_INVOICE_DETAIL, {
-      idHoaDon: item?.idKhachHang ?? '', // todo
-      idKhachHang: item?.idKhachHang ?? '',
-    });
+    onSave(item);
   };
 
   return (
-    <View style={styles.container}>
-      <SearchBar
-        placeholder="Tìm kiếm khách hàng"
-        value={txtSearch}
-        onChangeText={text => setTxtSearch(text)}
-        containerStyle={{
-          paddingLeft: 16,
-          paddingRight: 16,
-          borderTopWidth: 0,
-          paddingBottom: 0,
-          backgroundColor: 'white',
-        }}
-        inputContainerStyle={{backgroundColor: 'white'}}
-      />
-      <FlatList
-        data={lstCustomer}
-        renderItem={({item}) => (
-          <CustomerItem item={item} choseCustomer={choseCustomer} />
-        )}
-        keyExtractor={item => item.id}
-        style={{paddingBottom: 8}}
-      />
-    </View>
+    <Modal visible={isShow} animationType="slide" transparent={true}>
+      <View style={styles.modalContent}>
+        <View
+          style={{
+            backgroundColor: '#FFF4E5',
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: 12,
+          }}>
+          <Icon
+            type={IconType.IONICON}
+            name="close"
+            color={'red'}
+            size={24}
+            style={{marginLeft: 8, flex: 1}}
+            onPress={onClose}
+          />
+          <Text style={{textAlign: 'center', flex: 11}}>Chọn khách hàng</Text>
+        </View>
+
+        <SearchBar
+          placeholder="Tìm kiếm khách hàng"
+          value={txtSearch}
+          onChangeText={text => setTxtSearch(text)}
+          containerStyle={{
+            paddingLeft: 16,
+            paddingRight: 16,
+            borderTopWidth: 0,
+            paddingBottom: 0,
+            backgroundColor: 'white',
+          }}
+          inputContainerStyle={{backgroundColor: 'white'}}
+        />
+        <FlatList
+          data={lstCustomer}
+          renderItem={({item}) => (
+            <CustomerItem item={item} choseCustomer={choseCustomer} />
+          )}
+          keyExtractor={item => item.id}
+          style={{paddingBottom: 8}}
+        />
+      </View>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  modalContent: {
+    width: '100%',
+    height: '100%',
     backgroundColor: 'white',
-    flex: 1,
+    position: 'relative',
   },
 });

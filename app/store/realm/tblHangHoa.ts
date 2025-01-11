@@ -1,6 +1,6 @@
 import Realm from 'realm';
 const tblHangHoa: Realm.ObjectSchema = {
-  name: 'idHangHoa',
+  name: 'tblHangHoa',
   primaryKey: 'idHangHoa',
   properties: {
     idHangHoa: 'string',

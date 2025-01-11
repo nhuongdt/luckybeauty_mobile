@@ -1,16 +1,13 @@
 export type InvoiceStackParamList = {
-    TempInvoice: {idHoaDon: string; maHoaDon?: string,  tongThanhToan?: number;};
+    TempInvoice: {idHoaDon: string;};
     TempInvoiceDetails: {
       idHoaDon: string;
-      maHoaDon?: string;
-      tongThanhToan?: number;
       idKhachHang?: string;
     };
     ThanhToan: {idHoaDon: string};
     Product: {
       idHoaDon: string;
       idLoaiChungTu?: number;
-      maHoaDon?: string;
-      tongThanhToan?: number;
+      countProduct?: number;
     };
   };

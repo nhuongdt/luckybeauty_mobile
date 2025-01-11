@@ -1,7 +1,7 @@
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useEffect, useState} from 'react';
-import {Pressable, StyleSheet, TextInput, View} from 'react-native';
+import {Modal, Pressable, StyleSheet, TextInput, View} from 'react-native';
 import {Button, Icon} from '@rneui/themed';
 import realmDatabase from '../../store/realm/database';
 import realmQuery from '../../store/realm/realmQuery';
@@ -14,6 +14,9 @@ import KhachHangService from '../../services/customer/KhachHangService';
 import {IKhachHangItemDto} from '../../services/customer/IKhachHangItemDto';
 import {InvoiceStackParamList} from '../../type/InvoiceStackParamList';
 import {ListInvoiceStack} from '../../enum/ListInvoiceStack';
+import {ListRouteApp} from '../../enum/ListRouteApp';
+import Customer from '../customers/customers';
+import {ActionType} from '../../enum/ActionType';
 
 type TempInvoiceDetailsProps = NativeStackNavigationProp<
   InvoiceStackParamList,
@@ -21,27 +24,27 @@ type TempInvoiceDetailsProps = NativeStackNavigationProp<
 >;
 
 type InvoiceDetailRouteProp = RouteProp<
-  {params: {idHoaDon: string; tongThanhToan: number; idKhachHang: string}},
+  {params: {idHoaDon: string; isShow: boolean}},
   'params'
 >;
 
 export const TempInvoiceDetails = () => {
   const route = useRoute<InvoiceDetailRouteProp>();
   const navigation = useNavigation<TempInvoiceDetailsProps>();
-  const {
-    idHoaDon = '',
-    idKhachHang = '',
-    tongThanhToan = 0,
-  } = route.params || {};
-  const db = realmDatabase;
+  const {idHoaDon = ''} = route.params || {};
   const [txtSearchProduct, setTxtSearchProduct] = useState('');
+  const [isShowModalCustomer, setIsShowModalCustomer] = useState(false);
   const [lstCTHD, setLstCTHD] = useState<IHoaDonChiTietDto[]>([]);
   // const [lstSearchCTHD, setLstSearchCTHD] = useState<IHoaDonChiTietDto[]>([]);
   const [hoadonOpen, setHoaDonOpen] = useState<IHoaDonDto>({
-    id: idHoaDon,
+    id: '',
   } as IHoaDonDto);
 
   const [custonerChosing, setCustonerChosing] = useState<IKhachHangItemDto>();
+
+  useEffect(() => {
+    GetDataHoaDon_fromCache(idHoaDon);
+  }, [idHoaDon]);
 
   // useEffect(() => {
   //   const txt = CommonFunc.convertString_toEnglish(txtSearchProduct);
@@ -58,39 +61,35 @@ export const TempInvoiceDetails = () => {
       ) > -1,
   );
 
-  const GetDataHoaDon_fromCache = async () => {
+  const GetDataHoaDon_fromCache = async (idHoaDon: string) => {
     const hd = realmQuery.GetHoaDon_byId(idHoaDon);
-    const lst = realmQuery.GetListChiTietHoaDon_byIdHoaDon(db, idHoaDon);
+    const lst = realmQuery.GetListChiTietHoaDon_byIdHoaDon(idHoaDon);
     if (hd != null) {
       setHoaDonOpen({...hd});
       setLstCTHD([...lst]);
+      getInforCustomer(hd?.idKhachHang ?? '');
+
+      navigation.setOptions({title: hd?.maHoaDon});
     }
   };
 
-  const getInforCustomer = async () => {
-    const data = await KhachHangService.getDetail(idKhachHang);
-    setCustonerChosing({...data});
-  };
-
-  useEffect(() => {
-    GetDataHoaDon_fromCache();
-  }, [idHoaDon, tongThanhToan]);
-
-  useEffect(() => {
-    if (!CommonFunc.checkNull(idKhachHang)) {
-      realmQuery.UpdateKhachHang_toHoaDon(idHoaDon, idKhachHang);
-      getInforCustomer();
+  const getInforCustomer = async (idKhachHang: string) => {
+    if (CommonFunc.checkNull_OrEmpty(idKhachHang)) {
+      const kle: IKhachHangItemDto = {
+        id: '',
+        idKhachHang: null,
+        maKhachHang: 'KL',
+        tenKhachHang: 'Khách lẻ',
+        soDienThoai: '',
+      };
+      setCustonerChosing({...kle});
+    } else {
+      const data = await KhachHangService.getDetail(idKhachHang);
+      setCustonerChosing({...data});
     }
-  }, [idKhachHang]);
-
-  const gotoBack = () => {
-    navigation.navigate(ListBottomTab.TEMP_INVOICE, {
-      tongThanhToan: route.params?.tongThanhToan,
-      idHoaDon: route.params?.idHoaDon,
-    });
   };
 
-  const CaculatorHD_byTongTienHang = async (tongTienHang: number) => {
+  const CaculatorHD_byTongTienHang = (tongTienHang: number) => {
     let ptGiamGiaHD = hoadonOpen.ptGiamGiaHD;
     let giamgiaHD = hoadonOpen.tongGiamGiaHD;
     let tongThue = hoadonOpen.tongTienThue;
@@ -117,10 +116,7 @@ export const TempInvoiceDetails = () => {
       tongTienHDSauVAT: tongTienHang + tongThue,
       tongThanhToan: tongThanhToan,
     });
-    realmQuery.UpdateHD_fromCTHD(db, idHoaDon);
-    navigation.setParams({
-      tongThanhToan: tongThanhToan,
-    });
+    realmQuery.UpdateHD_fromCTHD(hoadonOpen?.id);
   };
 
   const tangSoLuong = async (item: IHoaDonChiTietDto) => {
@@ -141,10 +137,13 @@ export const TempInvoiceDetails = () => {
       }),
     );
     item.soLuong = slNew;
+    item.thanhTienTruocCK = slNew * item?.donGiaTruocCK;
+    item.thanhTienSauCK = slNew * item?.donGiaTruocCK;
+    item.thanhTienSauVAT = slNew * item?.donGiaSauVAT;
     realmQuery.UpdateTo_HoaDonChiTiet(item);
 
-    let tongtien = hoadonOpen.tongTienHang + item.donGiaSauCK;
-    await CaculatorHD_byTongTienHang(tongtien);
+    let tongtien = hoadonOpen.tongTienHang + item?.donGiaSauCK;
+    CaculatorHD_byTongTienHang(tongtien);
   };
 
   const giamSoLuong = async (item: IHoaDonChiTietDto) => {
@@ -167,76 +166,57 @@ export const TempInvoiceDetails = () => {
         }),
       );
       item.soLuong = slNew;
+      item.thanhTienTruocCK = slNew * item?.donGiaTruocCK;
+      item.thanhTienSauCK = slNew * item?.donGiaTruocCK;
+      item.thanhTienSauVAT = slNew * item?.donGiaSauVAT;
+
       realmQuery.UpdateTo_HoaDonChiTiet(item);
     } else {
       // remove from list
       setLstCTHD(lstCTHD?.filter(x => x.id !== item.id));
       realmQuery.DeleteHoaDonChiTiet_byId(item.id);
     }
-    let tongtien = hoadonOpen.tongTienHang - item.donGiaSauCK;
-    await CaculatorHD_byTongTienHang(tongtien);
+    let tongtien = hoadonOpen.tongTienHang - item?.donGiaSauCK;
+    CaculatorHD_byTongTienHang(tongtien);
   };
-  if (lstSearchCTHD?.length === 0) {
-    return (
-      <View style={styles.container}>
-        <View
-          style={{
-            gap: 12,
-            flex: 1,
-            padding: 20,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'white',
-          }}>
-          <Icon type={IconType.FOUNDATION} name="page-add" size={20} />
-          <Text style={{textAlign: 'center', fontSize: 16}}>
-            Chưa có sản phẩm
-          </Text>
-        </View>
-      </View>
-    );
-  }
+
+  const showModalCustomer = () => {
+    setIsShowModalCustomer(true);
+  };
+  const choseCustomer = (cusChosed: IKhachHangItemDto) => {
+    setIsShowModalCustomer(false);
+    setCustonerChosing({...cusChosed});
+    setHoaDonOpen({...hoadonOpen, idKhachHang: cusChosed?.id});
+    realmQuery.UpdateKhachHang_toHoaDon(hoadonOpen?.id, cusChosed?.id);
+  };
+
+  const onCloseModal = (actionId: number) => {};
 
   return (
     <View style={styles.container}>
-      {/* <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          padding: 8,
-          alignItems: 'center',
-          backgroundColor: '#FFF2CC',
-        }}>
-        <View style={{flexDirection: 'row', gap: 8}}>
-          <Pressable onPress={gotoBack}>
-            <Icon name="arrow-back-ios" type={IconType.MATERIAL} />
-          </Pressable>
-          <Text style={{fontWeight: 500}}>{hoadonOpen?.maHoaDon ?? ''}</Text>
-        </View>
-        <Text style={{fontWeight: 500}}>
-          {CommonFunc.formatCurrency(hoadonOpen?.tongThanhToan ?? 0)}
-        </Text>
-      </View> */}
+      <Customer
+        isShow={isShowModalCustomer}
+        objUpdate={custonerChosing}
+        onClose={() => setIsShowModalCustomer(false)}
+        onSave={choseCustomer}
+      />
       <View style={styles.boxCustomer}>
         <View style={styles.boxCustomer_LeftRight}>
           <Icon size={18} type={IconType.FONT_AWESOME_5} name="user" />
-          <View style={{gap: 8, alignItems: 'center'}}>
+          <View style={{gap: 8}}>
             <Text style={{fontWeight: 500}}>
               {custonerChosing?.tenKhachHang ?? 'Khách lẻ'}
             </Text>
             {custonerChosing?.soDienThoai && (
-              <Text style={{fontSize: 13}}>{custonerChosing?.soDienThoai}</Text>
+              <Text style={{fontSize: 13, color: '#666666'}}>
+                {custonerChosing?.soDienThoai}
+              </Text>
             )}
           </View>
         </View>
         <Pressable
           style={styles.boxCustomer_LeftRight}
-          onPress={() =>
-            // navigation.navigate(ListBottomTab.CUSTOMER, {
-            //   idKhachHang: hoadonOpen?.idKhachHang ?? '',
-            // })
-            console.log('goto customer')
-          }>
+          onPress={showModalCustomer}>
           <Text style={{textDecorationLine: 'underline', fontSize: 12}}>
             Chọn lại khách
           </Text>
@@ -262,16 +242,17 @@ export const TempInvoiceDetails = () => {
             backgroundColor: 'white',
           }}>
           <Icon type={IconType.IONICON} name="search" size={18} />
-          <TextInput style={{marginLeft: 8}} placeholder='Tìm dịch vụ' />
+          <TextInput style={{marginLeft: 8}} placeholder="Tìm dịch vụ" />
         </View>
 
-        <View
+        <Pressable
           style={{
             flex: 1,
             marginLeft: 8,
             justifyContent: 'center',
             alignItems: 'center',
-          }}>
+          }}
+          onPress={() => onCloseModal(ActionType.INSERT)}>
           <Text
             style={{
               textDecorationLine: 'underline',
@@ -281,54 +262,71 @@ export const TempInvoiceDetails = () => {
             }}>
             Thêm sản phẩm vào giỏ hàng
           </Text>
-        </View>
+        </Pressable>
       </View>
-
-      <View style={styles.containerDetail}>
-        <View style={{gap: 8, backgroundColor: 'white'}}>
-          {lstSearchCTHD?.map((item, index) => (
-            <View
-              key={item?.id}
-              style={{
-                borderBottomWidth: index < lstSearchCTHD?.length - 1 ? 1 : 0,
-                borderBlockColor: '#ccc',
-                padding: 8,
-              }}>
+      {lstCTHD?.length == 0 ? (
+        <View style={styles.container}>
+          <View
+            style={{
+              gap: 12,
+              flex:1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'white',
+            }}>
+            <Icon type={IconType.FOUNDATION} name="page-add" size={20} />
+            <Text style={{textAlign: 'center', fontSize: 16}}>
+              Chưa có sản phẩm
+            </Text>
+          </View>
+        </View>
+      ) : (
+        <View style={styles.containerDetail}>
+          <View style={{gap: 8, backgroundColor: 'white'}}>
+            {lstSearchCTHD?.map((item, index) => (
               <View
+                key={item?.id}
                 style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  borderBottomWidth: index < lstSearchCTHD?.length - 1 ? 1 : 0,
+                  borderBlockColor: '#ccc',
+                  padding: 8,
                 }}>
-                <View style={{gap: 8}}>
-                  <Text style={{fontWeight: 500}}>{item?.tenHangHoa}</Text>
-                  <Text style={{fontSize: 18, color: 'rgb(178, 183, 187)'}}>
-                    {new Intl.NumberFormat('vi-VN').format(item?.donGiaSauCK)}
-                  </Text>
-                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}>
+                  <View style={{gap: 8}}>
+                    <Text style={{fontWeight: 500}}>{item?.tenHangHoa}</Text>
+                    <Text style={{fontSize: 18, color: 'rgb(178, 183, 187)'}}>
+                      {new Intl.NumberFormat('vi-VN').format(item?.donGiaSauCK)}
+                    </Text>
+                  </View>
 
-                <View style={{flexDirection: 'row', gap: 10}}>
-                  <Icon
-                    type={IconType.IONICON}
-                    name="remove-circle-outline"
-                    size={30}
-                    color={'#ccc'}
-                    onPress={() => giamSoLuong(item)}
-                  />
-                  <Text style={{fontSize: 18}}>{item?.soLuong}</Text>
-                  <Icon
-                    type={IconType.IONICON}
-                    name="add-circle-outline"
-                    size={30}
-                    color={'#ccc'}
-                    onPress={() => tangSoLuong(item)}
-                  />
+                  <View style={{flexDirection: 'row', gap: 10}}>
+                    <Icon
+                      type={IconType.IONICON}
+                      name="remove-circle-outline"
+                      size={30}
+                      color={'#ccc'}
+                      onPress={() => giamSoLuong(item)}
+                    />
+                    <Text style={{fontSize: 18}}>{item?.soLuong}</Text>
+                    <Icon
+                      type={IconType.IONICON}
+                      name="add-circle-outline"
+                      size={30}
+                      color={'#ccc'}
+                      onPress={() => tangSoLuong(item)}
+                    />
+                  </View>
                 </View>
               </View>
-            </View>
-          ))}
+            ))}
+          </View>
         </View>
-      </View>
+      )}
 
       <View style={styles.boxInvoice}>
         <View
@@ -384,7 +382,9 @@ export const TempInvoiceDetails = () => {
           borderRadius: 4,
         }}
         onPress={() =>
-          navigation.navigate(ListInvoiceStack.THANH_TOAN, {idHoaDon: idHoaDon})
+          navigation.navigate(ListInvoiceStack.THANH_TOAN, {
+            idHoaDon: hoadonOpen?.id,
+          })
         }>
         <Icon name="check" color="white" containerStyle={{marginRight: 10}} />
         Thanh toán

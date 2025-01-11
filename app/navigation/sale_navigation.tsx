@@ -19,6 +19,7 @@ import {ListInvoiceStack} from '../enum/ListInvoiceStack';
 import ThanhToan from '../screens/sale/thanh_toan';
 import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
 import {SaleBottomTabParamList} from '../type/SaleBottomTabParamList';
+import {Badge} from '@rneui/themed';
 
 const InvoiceStackNavigation = () => {
   const InvoiceStack = createNativeStackNavigator<InvoiceStackParamList>();
@@ -32,13 +33,23 @@ const InvoiceStackNavigation = () => {
         }}
       />
 
-      <InvoiceStack.Screen
+      {/* <InvoiceStack.Screen
         name={ListInvoiceStack.TEMP_INVOICE_DETAIL}
         component={TempInvoiceDetails}
         options={({navigation, route}: any) => ({
           title: ` ${route?.param?.maHoaDon}`,
           headerTitleAlign: 'center',
           presentation: 'fullScreenModal',
+          headerStyle: {backgroundColor: '#FFF2CC'},
+        })}
+      /> */}
+      <InvoiceStack.Screen
+        name={ListInvoiceStack.TEMP_INVOICE_DETAIL}
+        component={TempInvoiceDetails}
+        options={({navigation, route}: any) => ({
+          title: ` ${route?.param?.maHoaDon}`,
+          headerTitleAlign: 'center',
+          presentation: 'modal',
           headerStyle: {backgroundColor: '#FFF2CC'},
         })}
       />
@@ -74,7 +85,6 @@ export default function SaleNavigation() {
     <Tabs.Navigator
       initialRouteName={ListBottomTab.INVOICE_STACK_NAVIGATION}
       screenOptions={({route}) => ({
-        headerShown: false,
         tabBarStyle: {
           display: getTabBarVisibility(route),
           backgroundColor: '#FFF4E5',
@@ -101,7 +111,8 @@ export default function SaleNavigation() {
         name={ListBottomTab.INVOICE_STACK_NAVIGATION}
         component={InvoiceStackNavigation}
         options={({navigation, route}: any) => ({
-          title: 'Hóa đơn tạm',
+          tabBarLabel: 'Hóa đơn tạm',
+          headerShown: false,
           tabBarIcon: ({color, focused}) => (
             <Icon
               type={IconType.IONICON}
@@ -116,9 +127,8 @@ export default function SaleNavigation() {
         name={ListBottomTab.PRODUCT}
         component={Products}
         options={({navigation, route}: any) => ({
-          title: `${route.params?.maHoaDon} _ ${new Intl.NumberFormat(
-            'vi-VN',
-          ).format(route.params?.tongThanhToan)}`,
+          title: `Lựa chọn hàng bán`,
+          headerTitleAlign: 'center',
           tabBarLabel: 'Sản phẩm',
           tabBarIcon: ({focused, color}) => (
             <Icon
@@ -128,29 +138,28 @@ export default function SaleNavigation() {
               size={24}
             />
           ),
-          headerLeft: () => (
-            <Pressable
-              style={{padding: 16}}
-              onPress={() => {
-                navigation.navigate(ListBottomTab.TEMP_INVOICE, {
-                  tongThanhToan: route.params?.tongThanhToan,
-                  idHoaDon: route.params?.idHoaDon,
-                });
-              }}>
-              <Icon name="arrow-back-ios" type={IconType.MATERIAL} />
-            </Pressable>
-          ),
           headerRight: () => (
             <Pressable
-              style={{padding: 16}}
+              style={{padding: 16, position: 'relative'}}
               onPress={() => {
-                navigation.navigate(ListBottomTab.TEMP_INVOICE_DETAIL, {
-                  idHoaDon: route.params?.idHoaDon,
-                  maHoaDon: route.params?.maHoaDon,
-                  tongThanhToan: route.params?.tongThanhToan,
+                navigation.navigate(ListBottomTab.INVOICE_STACK_NAVIGATION, {
+                  screen: ListInvoiceStack.TEMP_INVOICE_DETAIL,
+                  params: {idHoaDon: route.params?.idHoaDon},
                 });
               }}>
-              <Icon name="arrow-forward-ios" type={IconType.MATERIAL} />
+              {(route.params?.countProduct ?? 0) > 0 && (
+                <Badge
+                  value={route.params?.countProduct}
+                  status="warning"
+                  containerStyle={{position: 'absolute', top: 10}}
+                />
+              )}
+
+              <Icon
+                name="shopping-basket"
+                type={IconType.FONT_AWESOME_5}
+                color={'blue'}
+              />
             </Pressable>
           ),
         })}

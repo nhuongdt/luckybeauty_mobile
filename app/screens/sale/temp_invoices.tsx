@@ -1,6 +1,6 @@
 import {View, StyleSheet, Pressable, ScrollView} from 'react-native';
 import {Icon, Button} from '@rneui/themed';
-import {useEffect, useRef, useContext, useState} from 'react';
+import {useEffect, useRef, useContext, useState, useCallback} from 'react';
 import uuid from 'react-native-uuid';
 import {format} from 'date-fns';
 import {
@@ -11,17 +11,16 @@ import {
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Input, Text} from '@rneui/base';
 import {ListBottomTab} from '../../enum/ListBottomTab';
-import realmDatabase from '../../store/realm/database';
 import realmQuery from '../../store/realm/realmQuery';
 import {HoaDonDto, IHoaDonDto} from '../../services/hoadon/dto';
-import {
-  LoaiChungTu,
-  TenLoaiChungTu,
-} from '../../enum/LoaiChungTu';
+import {LoaiChungTu, TenLoaiChungTu} from '../../enum/LoaiChungTu';
 import CommonFunc from '../../utils/CommonFunc';
 import {IconType} from '../../enum/IconType';
 import {InvoiceStackParamList} from '../../type/InvoiceStackParamList';
 import {ListInvoiceStack} from '../../enum/ListInvoiceStack';
+import PageEmpty from '../../components/page_empty';
+import {TempInvoiceDetails} from './teamp_invoice_details';
+import {ActionType} from '../../enum/ActionType';
 
 type TempInvoiceProps = NativeStackNavigationProp<
   InvoiceStackParamList,
@@ -32,9 +31,6 @@ type TempInvoiceRouteProp = RouteProp<
   {
     params: {
       idHoaDon: string;
-      tongThanhToan: number;
-      isClickActionHeader: number;
-      headerActionId: number;
     };
   },
   'params'
@@ -61,12 +57,9 @@ const styleHeader = StyleSheet.create({
 
 const TempInvoices = () => {
   const firstLoad = useRef(true);
-  const db = realmDatabase;
   const navigation = useNavigation<TempInvoiceProps>();
   const route = useRoute<TempInvoiceRouteProp>();
 
-  const {idHoaDon = '', tongThanhToan = 0} = route.params || {};
-  const [idHoaDonChosing, setIdHoaDonChosing] = useState('');
   const [lstHoaDon, setLstHoaDon] = useState<IHoaDonDto[]>([]);
   const [tabActive, setTabActive] = useState(LoaiChungTu.HOA_DON_BAN_LE);
 
@@ -85,8 +78,12 @@ const TempInvoices = () => {
   }, []);
 
   useEffect(() => {
-    getInforHoadon_byId();
-  }, [tongThanhToan]);
+    const unsubscribe = navigation.addListener('focus', () => {
+      getHoaDonFromCache(tabActive);
+    });
+
+    return unsubscribe; // Cleanup khi component bị unmount
+  }, [navigation, tabActive]);
 
   const createNewInvoice = () => {
     const max = CommonFunc.getMaxNumberFromMaHoaDon(lstHoaDon);
@@ -102,16 +99,12 @@ const TempInvoices = () => {
     });
     setLstHoaDon([newHD, ...lstHoaDon]);
 
-    setIdHoaDonChosing(newHD?.id);
-
     realmQuery.HoaDon_ResetValueForColumn_isOpenLastest(tabActive);
-    realmQuery.InsertTo_HoaDon(db, newHD);
+    realmQuery.InsertTo_HoaDon(newHD);
 
     navigation.navigate(ListBottomTab.PRODUCT, {
-      maHoaDon: newHD?.maHoaDon,
       idHoaDon: newHD?.id,
-      tongThanhToan: 0,
-      idLoaiChungTu: tabActive
+      idLoaiChungTu: tabActive,
     });
   };
 
@@ -122,62 +115,50 @@ const TempInvoices = () => {
 
   const removeInvoice = async (id: string) => {
     realmQuery.RemoveHoaDon_byId(id);
+    realmQuery.DeleteHoaDonChiTiet_byIdHoaDon(id);
     setLstHoaDon(lstHoaDon?.filter(x => x.id !== id));
   };
 
   const goInvoiceDetail = (item: IHoaDonDto) => {
     navigation.navigate(ListInvoiceStack.TEMP_INVOICE_DETAIL, {
       idHoaDon: item?.id,
-      maHoaDon: item?.maHoaDon,
-      tongThanhToan: item?.tongThanhToan,
     });
-    setIdHoaDonChosing(item?.id);
-  };
-
-  const getInforHoadon_byId = async () => {
-    const data = realmQuery.GetHoaDon_byId(idHoaDonChosing);
-    if (data) {
-      setLstHoaDon(
-        lstHoaDon?.map(x => {
-          if (x.id == idHoaDonChosing) {
-            return {...x, tongThanhToan: data?.tongThanhToan};
-          } else {
-            return x;
-          }
-        }),
-      );
-    }
   };
 
   const gotoEdit = (item: IHoaDonDto) => {
-    setIdHoaDonChosing(item?.id);
     navigation.navigate(ListBottomTab.PRODUCT, {
       idHoaDon: item.id,
-      maHoaDon: item.maHoaDon,
-      tongThanhToan: item.tongThanhToan,
+      idLoaiChungTu: tabActive,
     });
   };
 
-  if (lstHoaDon?.length === 0) {
-    return (
-      <View style={styles.container}>
-        <View
-          style={{
-            gap: 12,
-            flex: 1,
-            padding: 20,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'white',
-          }}>
-          <Icon type={IconType.FOUNDATION} name="page-add" size={20} />
-          <Text style={{textAlign: 'center', fontSize: 16}}>
-            Không có hóa đơn tạm
-          </Text>
-        </View>
-      </View>
+  const agreeEditChiTiet = (hdAfter: IHoaDonDto, actionId?: number) => {
+
+    setLstHoaDon(
+      lstHoaDon?.map(x => {
+        if (x.id == hdAfter?.id) {
+          return {
+            ...x,
+            tongTienThue: hdAfter?.tongTienThue,
+            tongTienHangChuaChietKhau: hdAfter?.tongTienHangChuaChietKhau,
+            tongTienHang: hdAfter?.tongTienHang,
+            tongTienHDSauVAT: hdAfter?.tongTienHDSauVAT,
+            tongThanhToan: hdAfter?.tongThanhToan,
+            idKhachHang: hdAfter?.idKhachHang,
+          };
+        } else {
+          return x;
+        }
+      }),
     );
-  }
+
+    if (actionId === ActionType.INSERT) {
+      navigation.navigate(ListBottomTab.PRODUCT, {
+        idHoaDon: hdAfter?.id,
+        idLoaiChungTu: tabActive,
+      });
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -221,82 +202,87 @@ const TempInvoices = () => {
           </Pressable>
         </View>
       </View>
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: 'white',
-        }}>
-        <Input
-          leftIcon={{type: 'ionicon', name: 'search'}}
-          placeholder="Tìm hóa đơn"
-          containerStyle={{
+      {lstHoaDon?.length === 0 ? (
+        <PageEmpty txt="Không có hóa đơn tạm" />
+      ) : (
+        <View
+          style={{
+            flex: 1,
             backgroundColor: 'white',
-            borderRadius: 4,
-            borderColor: '#F5F5F5',
-          }}
-          inputStyle={{fontSize: 14}}
-        />
-        {lstHoaDon?.length > 0 && (
-          <ScrollView>
-            {lstHoaDon?.map(item => (
-              <Pressable
-                style={stylesInvoiceItem.container}
-                key={item?.id}
-                onPress={() => goInvoiceDetail(item)}>
-                <View
-                  style={{
-                    flex: 1,
-                    gap: 15,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}>
-                  <Icon
-                    type="materialicon"
-                    name="delete-outline"
-                    size={24}
-                    color={'#ff944d'}
-                    style={{flex: 1}}
-                    onPress={() => removeInvoice(item?.id)}
-                  />
-                  <View style={stylesInvoiceItem.boxCenter}>
-                    <View style={{flex: 2}}>
-                      <Text style={{fontWeight: 500}}>{item?.maHoaDon}</Text>
-                      <Text style={{color: 'rgb(178, 183, 187)', fontSize: 14}}>
-                        {format(new Date(item.ngayLapHoaDon), 'HH:mm')}
-                      </Text>
+          }}>
+          <Input
+            leftIcon={{type: 'ionicon', name: 'search'}}
+            placeholder="Tìm hóa đơn"
+            containerStyle={{
+              backgroundColor: 'white',
+              borderRadius: 4,
+              borderColor: '#F5F5F5',
+            }}
+            inputStyle={{fontSize: 14}}
+          />
+          {lstHoaDon?.length > 0 && (
+            <ScrollView>
+              {lstHoaDon?.map(item => (
+                <Pressable
+                  style={stylesInvoiceItem.container}
+                  key={item?.id}
+                  onPress={() => goInvoiceDetail(item)}>
+                  <View
+                    style={{
+                      flex: 1,
+                      gap: 15,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}>
+                    <Icon
+                      type="materialicon"
+                      name="delete-outline"
+                      size={24}
+                      color={'#ff944d'}
+                      style={{flex: 1}}
+                      onPress={() => removeInvoice(item?.id)}
+                    />
+                    <View style={stylesInvoiceItem.boxCenter}>
+                      <View style={{flex: 2}}>
+                        <Text style={{fontWeight: 500}}>{item?.maHoaDon}</Text>
+                        <Text
+                          style={{color: 'rgb(178, 183, 187)', fontSize: 14}}>
+                          {format(new Date(item.ngayLapHoaDon), 'HH:mm')}
+                        </Text>
+                      </View>
+                      <View style={{flex: 3}}>
+                        <Text style={{fontWeight: 500, textAlign: 'right'}}>
+                          {new Intl.NumberFormat('vi-VN').format(
+                            item?.tongThanhToan ?? 0,
+                          )}
+                        </Text>
+                        <Text
+                          ellipsizeMode="tail"
+                          numberOfLines={1}
+                          style={{
+                            textAlign: 'right',
+                            color: 'rgb(178, 183, 187)',
+                          }}>
+                          {item?.tenKhachHang}
+                        </Text>
+                      </View>
                     </View>
-                    <View style={{flex: 3}}>
-                      <Text style={{fontWeight: 500, textAlign: 'right'}}>
-                        {new Intl.NumberFormat('vi-VN').format(
-                          item?.tongThanhToan ?? 0,
-                        )}
-                      </Text>
-                      <Text
-                        ellipsizeMode="tail"
-                        numberOfLines={1}
-                        style={{
-                          textAlign: 'right',
-                          color: 'rgb(178, 183, 187)',
-                        }}>
-                        {item?.tenKhachHang}
-                      </Text>
-                    </View>
-                  </View>
 
-                  <Icon
-                    type="antdesign"
-                    name="edit"
-                    size={24}
-                    style={{flex: 1}}
-                    onPress={() => gotoEdit(item)}
-                  />
-                </View>
-              </Pressable>
-            ))}
-          </ScrollView>
-        )}
-      </View>
+                    <Icon
+                      type="antdesign"
+                      name="edit"
+                      size={24}
+                      style={{flex: 1}}
+                      onPress={() => gotoEdit(item)}
+                    />
+                  </View>
+                </Pressable>
+              ))}
+            </ScrollView>
+          )}
+        </View>
+      )}
     </View>
   );
 };

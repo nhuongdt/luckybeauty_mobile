@@ -2,8 +2,7 @@ export type SaleBottomTabParamList = {
   Product: {
     idHoaDon: string;
     idLoaiChungTu?: number;
-    maHoaDon?: string;
-    tongThanhToan?: number;
+    countProduct?: number;
   };
-  InvoiceStackNavigation: undefined
+  InvoiceStackNavigation: undefined,
 };

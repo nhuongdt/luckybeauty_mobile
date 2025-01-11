@@ -19,7 +19,7 @@ enum ListTable {
 const db = realmDatabase;
 
 class realmQuery {
-  Init_DanhMucHangHoa = (db: Realm) => {
+  Init_DanhMucHangHoa = () => {
     const arrProduct: IProductBasic[] = [
       {
         idHangHoa: '1',
@@ -120,10 +120,7 @@ class realmQuery {
     }
     return null;
   };
-  GetListChiTietHoaDon_byIdHoaDon = (
-    db: Realm,
-    idHoaDon: string,
-  ): IHoaDonChiTietDto[] => {
+  GetListChiTietHoaDon_byIdHoaDon = (idHoaDon: string): IHoaDonChiTietDto[] => {
     try {
       const lst = db
         .objects(ListTable.HOA_DON_CHI_TIET)
@@ -136,7 +133,6 @@ class realmQuery {
     return [];
   };
   GetChiTietHoaDon_byIdQuyDoi = (
-    db: Realm,
     idHoaDon: string,
     idDonViQuyDoi: string,
   ): IHoaDonChiTietDto | null => {
@@ -155,7 +151,7 @@ class realmQuery {
 
     return null;
   };
-  InsertTo_HoaDon = (db: Realm, itemNew: HoaDonDto) => {
+  InsertTo_HoaDon = (itemNew: HoaDonDto) => {
     try {
       db.write(() => {
         db.create(ListTable.HOA_DON, {
@@ -189,7 +185,7 @@ class realmQuery {
       console.log('InsertTo_HoaDon ', err);
     }
   };
-  InsertTo_HoaDonChiTiet = (db: Realm, itemNew: IHoaDonChiTietDto) => {
+  InsertTo_HoaDonChiTiet = (itemNew: IHoaDonChiTietDto) => {
     try {
       db.write(() => {
         db.create(ListTable.HOA_DON_CHI_TIET, {
@@ -249,7 +245,7 @@ class realmQuery {
       });
     });
   };
-  UpdateHoaDon = (db: Realm, itemNew: HoaDonDto) => {
+  UpdateHoaDon = (itemNew: HoaDonDto) => {
     try {
       db.write(() => {
         const data = db.objectForPrimaryKey(ListTable.HOA_DON, itemNew?.id);
@@ -287,9 +283,9 @@ class realmQuery {
       }
     });
   };
-  UpdateHD_fromCTHD = (db: Realm, idHoaDon: string): IHoaDonDto | null => {
+  UpdateHD_fromCTHD = (idHoaDon: string): IHoaDonDto | null => {
     try {
-      const lst = this.GetListChiTietHoaDon_byIdHoaDon(db, idHoaDon);
+      const lst = this.GetListChiTietHoaDon_byIdHoaDon(idHoaDon);
       let tongTienHangChuaChietKhau = 0,
         tongChietKhauHang = 0,
         tongTienThue = 0;
@@ -316,7 +312,7 @@ class realmQuery {
         }
         hd.tongThanhToan = hd.tongTienHDSauVAT - tongGiamHD;
 
-        this.UpdateHoaDon(db, hd);
+        this.UpdateHoaDon(hd);
         return hd;
       }
     } catch (err) {
@@ -335,6 +331,18 @@ class realmQuery {
       });
     } catch (err) {
       console.log('RemoveHoaDon_byId ', err);
+    }
+  };
+  DeleteHoaDonChiTiet_byIdHoaDon = (idHoaDon: string) => {
+    try {
+      db.write(() => {
+        const lst = db
+          .objects(ListTable.HOA_DON_CHI_TIET)
+          .filtered(`idHoaDon= '${idHoaDon}'`);
+        db.delete(lst);
+      });
+    } catch (err) {
+      console.log('DeleteHoaDonChiTiet_byId ', err);
     }
   };
   DeleteHoaDonChiTiet_byId = (id: string) => {
