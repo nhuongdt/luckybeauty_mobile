@@ -51,7 +51,7 @@ export default function AppNavigation() {
     setIsLoadingForm(false);
   };
 
-  //if (!isLogin) return <LoginScreen onLoginOK={() => setIsLogin(true)} />;
+  if (!isLogin) return <LoginScreen onLoginOK={() => setIsLogin(true)} />;
 
   const Stack = createNativeStackNavigator<RootStackParamList>();
   return (
@@ -68,11 +68,11 @@ export default function AppNavigation() {
           component={PageNotFound}
           options={{title: 'Page not found'}}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           name={ListRouteApp.CUSTOMER}
           component={Customer}
           options={{headerShown: false}}
-        />
+        /> */}
       </>
     </Stack.Navigator>
   );

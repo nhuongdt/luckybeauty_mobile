@@ -84,7 +84,7 @@ export default function Customer({
     //   return;
     // }
     const getData = setTimeout(async () => {
-      //await jqAutoCustomer();
+      await jqAutoCustomer();
       return () => clearTimeout(getData);
     }, 2000);
   }, [txtSearch]);

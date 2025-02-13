@@ -7,7 +7,7 @@ import {InvoiceStatus} from '../../enum/InvoiceStatus';
 export interface IHoaDonDto extends ICustomerBasicDto {
   id: string;
   idLoaiChungTu: number;
-  idChiNhanh: string;
+  idChiNhanh: string | null;
   idKhachHang: string | null;
   idNhanVien: string | null;
   maHoaDon: string;
@@ -55,7 +55,7 @@ export class HoaDonDto implements IHoaDonDto {
   id: string;
   idLoaiChungTu: number;
   idKhachHang: string | null;
-  idChiNhanh: string;
+  idChiNhanh: string | null;
   idNhanVien: string | null;
   maHoaDon: string;
   ngayLapHoaDon: string;

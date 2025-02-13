@@ -4,7 +4,7 @@ export type InvoiceStackParamList = {
       idHoaDon: string;
       idKhachHang?: string;
     };
-    ThanhToan: {idHoaDon: string};
+    ThanhToan: {idHoaDon: string, tongPhaiTra?: number};
     Product: {
       idHoaDon: string;
       idLoaiChungTu?: number;

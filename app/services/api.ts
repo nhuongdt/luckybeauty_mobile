@@ -1,7 +1,9 @@
 import { mmkvStorage } from "../store/mmkvStore";
 // import { REACT_NATIVE_API_URL } from '@env';
 
-const REACT_NATIVE_API_URL ='https://api.luckybeauty.vn/';
+const REACT_NATIVE_API_URL ='https://api.luckybeauty.vrn/';
+// const REACT_NATIVE_API_URL ='https://fad9-123-24-206-173.ngrok-free.app';
+
 class api {
   headerConfig = () => {
     const accessToken = mmkvStorage.getString("accessToken");

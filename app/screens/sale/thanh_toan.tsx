@@ -1,27 +1,33 @@
-import {RouteProp, useRoute} from '@react-navigation/native';
-import {Input, Text} from '@rneui/themed';
-import {useEffect, useState} from 'react';
-import {
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import {IHoaDonDto} from '../../services/hoadon/dto';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { Image, Input, Text } from '@rneui/themed';
+import { useEffect, useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { IHoaDonDto } from '../../services/hoadon/dto';
 import realmQuery from '../../store/realm/realmQuery';
-import {HinhThucThanhToan} from '../../enum/HinhThucThanhToan';
-import {Button, CheckBox, Icon} from '@rneui/base';
-import {IconType} from '../../enum/IconType';
-import {IQuyChitietDto} from '../../services/so_quy/IQuyChitietDto';
+import { HinhThucThanhToan } from '../../enum/HinhThucThanhToan';
+import { Button, CheckBox, Icon } from '@rneui/base';
+import { IconType } from '../../enum/IconType';
+import { IQuyChitietDto } from '../../services/so_quy/IQuyChitietDto';
 import CommonFunc from '../../utils/CommonFunc';
+import HoaDonService from '../../services/hoadon/HoaDonService';
+import { ListTaiKhoanNganHang } from '../tai_khoan_ngan_hang/list_tai_khoan_ngan_hang';
+import { ITaiKhoanNganHangDto } from '../../services/tai_khoan_ngan_hang/ITaiKhoanNganHangDto';
+import { SimpleDialog } from '../../components/simple_dialog';
+import { IPropsSimpleDialog } from '../../type/IPropsSimpleDialog';
+import SoQuyService from '../../services/so_quy/SoQuyService';
+import { IQuyHoaDonDto } from '../../services/so_quy/IQuyHoaDonDto';
+import ApiConst from '../../const/ApiConst';
+import { LoaiChungTu } from '../../enum/LoaiChungTu';
+import { format } from 'date-fns';
 
 type ThanhToanRouteProp = RouteProp<
-  {params: {idHoaDon: string; tongPhaiTra?: number}},
+  { params: { idHoaDon: string; tongPhaiTra?: number } },
   'params'
 >;
 
 export default function ThanhToan() {
   const route = useRoute<ThanhToanRouteProp>();
-  const {idHoaDon = '', tongPhaiTra = 0} = route.params || {};
+  const { idHoaDon = '', tongPhaiTra = 0 } = route.params || {};
   const [isSaving, setIsSaving] = useState(false);
   const [tienMat, setTienMat] = useState(String(tongPhaiTra));
   const [tienChuyenKhoan, setTienChuyenKhoan] = useState('0');
@@ -30,17 +36,21 @@ export default function ThanhToan() {
   const [soDuTheGiaTri, setSoDuTheGiaTri] = useState('0');
   const [noiDungThu, setNoiDungThu] = useState('');
   const [qrCode, setQRCode] = useState('');
+
+  const [objSimpleDialog, setObjSimpleDialog] = useState<IPropsSimpleDialog>();
+
+  const [laTaiKhoanhChuyenKhoan, setLaTaiKhoanhChuyenKhoan] = useState(false);
+
+  const [isShowModalTaiKhoanNganHang, setIsShowModalTaiKhoanNganHang] =
+    useState(false);
   const [idTaiKhoanChuyenKhoan, setIdTaiKhoanChuyenKhoan] = useState<
     string | null
   >('');
   const [idTaiKhoanPOS, setIdTaiKhoanPOS] = useState<string | null>('');
-
-  const tienKhachDua =
-    CommonFunc.formatNumberToFloat(tienTheGiaTri) +
-    CommonFunc.formatNumberToFloat(tienMat) +
-    CommonFunc.formatNumberToFloat(tienChuyenKhoan) +
-    CommonFunc.formatNumberToFloat(tienQuyeThePos);
-  const tienKhachThieu = tongPhaiTra - tienKhachDua;
+  const [taiKhoanCKChosed, setTaiKhoanCKChosed] =
+    useState<ITaiKhoanNganHangDto>();
+  const [taiKhoanPOSChosed, setTaiKhoanPOSChosed] =
+    useState<ITaiKhoanNganHangDto>();
 
   const [hoadonOpen, setHoaDonOpen] = useState<IHoaDonDto>({
     id: idHoaDon,
@@ -53,18 +63,25 @@ export default function ThanhToan() {
   ]);
 
   const arrPhuongThucTT = [
-    {id: HinhThucThanhToan.TIEN_MAT, text: 'Tiển mặt'},
+    { id: HinhThucThanhToan.TIEN_MAT, text: 'Tiển mặt' },
     {
       id: HinhThucThanhToan.CHUYEN_KHOAN,
       text: 'Chuyển khoản',
     },
-    {id: HinhThucThanhToan.QUYET_THE, text: 'POS'},
+    { id: HinhThucThanhToan.QUYET_THE, text: 'POS' },
   ];
+
+  const tienKhachDua =
+    CommonFunc.formatNumberToFloat(tienTheGiaTri) +
+    CommonFunc.formatNumberToFloat(tienMat) +
+    CommonFunc.formatNumberToFloat(tienChuyenKhoan) +
+    CommonFunc.formatNumberToFloat(tienQuyeThePos);
+  const tienKhachThieu = tongPhaiTra - tienKhachDua;
 
   const GetInforHoadon_fromCache = () => {
     const data = realmQuery.GetHoaDon_byId(idHoaDon);
     if (data !== null) {
-      setHoaDonOpen({...data});
+      setHoaDonOpen({ ...data });
     }
   };
 
@@ -73,37 +90,57 @@ export default function ThanhToan() {
   }, [idHoaDon]);
 
   const changeHinhThucThanhToan = (id: HinhThucThanhToan) => {
+    let arrNew: HinhThucThanhToan[] = [];
     setArrHinhThucChosed(prev => {
       if (prev.includes(id)) {
+        arrNew = prev.filter(item => item !== id);
         return prev.filter(item => item !== id); // Nếu đã chọn thì bỏ chọn
       } else {
+        arrNew = [...prev, id];
         return [...prev, id]; // Nếu chưa chọn thì chọn
       }
     });
-  };
 
-  useEffect(() => {
-    switch (arrHinhThucChosed?.length ?? 0) {
+    switch (arrNew?.length ?? 0) {
       case 0: {
         setTienMat('0');
         setTienChuyenKhoan('0');
         setTienQuyeThePos('0');
       }
       case 1:
-        if (arrHinhThucChosed.includes(HinhThucThanhToan.TIEN_MAT)) {
+        if (arrNew.includes(HinhThucThanhToan.TIEN_MAT)) {
           setTienMat(CommonFunc.formatCurrency(tongPhaiTra));
+          setTienChuyenKhoan('0');
+          setTienQuyeThePos('0');
         } else {
-          if (arrHinhThucChosed.includes(HinhThucThanhToan.CHUYEN_KHOAN)) {
+          if (arrNew.includes(HinhThucThanhToan.CHUYEN_KHOAN)) {
             setTienChuyenKhoan(CommonFunc.formatCurrency(tongPhaiTra));
+            setTienMat('0');
+            setTienQuyeThePos('0');
           } else {
-            if (arrHinhThucChosed.includes(HinhThucThanhToan.QUYET_THE)) {
+            if (arrNew.includes(HinhThucThanhToan.QUYET_THE)) {
               setTienQuyeThePos(CommonFunc.formatCurrency(tongPhaiTra));
+              setTienMat('0');
+              setTienChuyenKhoan('0');
             }
           }
         }
         break;
+      case 2:
+        {
+          if (arrNew.includes(HinhThucThanhToan.TIEN_MAT)) {
+            setTienMat(CommonFunc.formatCurrency(tongPhaiTra));
+            setTienChuyenKhoan('0');
+            setTienQuyeThePos('0');
+          } else {
+            setTienMat('0');
+            setTienChuyenKhoan('0');
+            setTienQuyeThePos('0');
+          }
+        }
+        break;
     }
-  }, [arrHinhThucChosed]);
+  };
 
   const editTienTheGiaTri = (value: string) => {
     let gtri = CommonFunc.formatNumberToFloat(value);
@@ -144,8 +181,109 @@ export default function ThanhToan() {
     }
   };
 
+  const showModalTaiKhoanNganHang = (laChuyenKhoan: boolean) => {
+    setIsShowModalTaiKhoanNganHang(true);
+    setLaTaiKhoanhChuyenKhoan(laChuyenKhoan);
+  };
+
+  const checkSave = () => {
+    if (tienKhachDua === 0) {
+      setObjSimpleDialog({
+        ...objSimpleDialog,
+        isShow: true,
+        title: 'Thông báo',
+        mes: 'Vui lòng nhập số tiền cần thanh toán',
+      });
+      return false;
+    }
+
+    if (
+      CommonFunc.formatNumberToFloat(tienChuyenKhoan) > 0 &&
+      CommonFunc.checkNull_OrEmpty(idTaiKhoanChuyenKhoan)
+    ) {
+      setObjSimpleDialog({
+        ...objSimpleDialog,
+        isShow: true,
+        title: 'Thông báo',
+        mes: 'Vui lòng chọn tài khoản chuyển khoản',
+      });
+      return false;
+    }
+    if (
+      CommonFunc.formatNumberToFloat(tienQuyeThePos) > 0 &&
+      CommonFunc.checkNull_OrEmpty(idTaiKhoanPOS)
+    ) {
+      setObjSimpleDialog({
+        ...objSimpleDialog,
+        isShow: true,
+        title: 'Thông báo',
+        mes: 'Vui lòng chọn tài khoản POS',
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const thanhToan = async () => {
+    const check = checkSave();
+    if (!check) {
+      return;
+    }
+    const lstCTHD = realmQuery.GetListChiTietHoaDon_byIdHoaDon(hoadonOpen?.id);
+    const dataHD = await HoaDonService.InsertHoaDon(hoadonOpen);
+    if (dataHD !== null) {
+      const datHDCT = await HoaDonService.InsertHoaDonChiTiet(
+        dataHD?.id,
+        lstCTHD,
+      );
+
+      if (datHDCT) {
+        const objShareMoney = SoQuyService.ShareMoney({ phaiTT: tongPhaiTra, tienMat: CommonFunc.formatNumberToFloat(tienMat), tienChuyenKhoan: CommonFunc.formatNumberToFloat(tienChuyenKhoan), tienPOS: CommonFunc.formatNumberToFloat(tienQuyeThePos) })
+        const tongThu = objShareMoney.TienMat + objShareMoney.TienChuyenKhoan + objShareMoney.TienPOS;
+        const quyHD: IQuyHoaDonDto = {
+          id: ApiConst.GUID_EMPTY,
+          idChiNhanh: ApiConst.GUID_EMPTY,
+          idNhanVien: ApiConst.GUID_EMPTY,
+          idLoaiChungTu: LoaiChungTu.PHIEU_THU,
+          tongTienThu: tongThu,
+          ngayLapHoaDon: format(hoadonOpen?.ngayLapHoaDon, 'yyyy-MM-dd'),
+          noiDungThu: noiDungThu,
+          hachToanKinhDoanh: true
+        }
+        const dataQuyHD = await SoQuyService.InsertQuyHoaDon(quyHD)
+      }
+    }
+  };
+
+  const agreeChoseTaiKhoanNganHang = (itemChosed: ITaiKhoanNganHangDto) => {
+    setIsShowModalTaiKhoanNganHang(false);
+    if (laTaiKhoanhChuyenKhoan) {
+      setTaiKhoanCKChosed(itemChosed);
+      setIdTaiKhoanChuyenKhoan(itemChosed?.id);
+    } else {
+      setTaiKhoanPOSChosed(itemChosed);
+      setIdTaiKhoanPOS(itemChosed?.id);
+    }
+  };
+
+  const onCloseSimpleDialog = () => {
+    setObjSimpleDialog({ ...objSimpleDialog, isShow: false });
+  };
+
   return (
     <View style={styles.container}>
+      <ListTaiKhoanNganHang
+        isShow={isShowModalTaiKhoanNganHang}
+        onClose={() => setIsShowModalTaiKhoanNganHang(false)}
+        onSave={agreeChoseTaiKhoanNganHang}
+      />
+      <SimpleDialog
+        isShow={objSimpleDialog?.isShow ?? false}
+        title={objSimpleDialog?.title}
+        mes={objSimpleDialog?.mes}
+        onClose={onCloseSimpleDialog}
+      />
       <View style={styles.flexRow}>
         <Text style={styles.textInfor}>Tổng phải trả</Text>
         <Text style={styles.textInfor}>
@@ -154,7 +292,7 @@ export default function ThanhToan() {
           )}
         </Text>
       </View>
-      <View style={{gap: 8}}>
+      <View style={{ gap: 8 }}>
         <Text>Phương thức thanh toán</Text>
         <View
           style={{
@@ -175,12 +313,12 @@ export default function ThanhToan() {
         </View>
       </View>
 
-      <View style={{gap: 20}}>
+      <View style={{ gap: 20 }}>
         {arrHinhThucChosed?.includes(HinhThucThanhToan.TIEN_MAT) && (
           <View style={styles.itemLoaiTien}>
             <Text>Tiền mặt</Text>
             <Input
-              inputStyle={{textAlign: 'right'}}
+              inputStyle={{ textAlign: 'right' }}
               value={tienMat?.toString()}
               onChangeText={txt => editTienMat(txt)}
             />
@@ -188,52 +326,123 @@ export default function ThanhToan() {
         )}
 
         {arrHinhThucChosed?.includes(HinhThucThanhToan.CHUYEN_KHOAN) && (
-          <View style={[styles.flexRow, {gap: 16}]}>
+          <View style={[styles.flexRow, { gap: 8 }]}>
             <View style={styles.itemLoaiTien}>
               <Text>Chuyển khoản</Text>
               <Input
-                inputStyle={{textAlign: 'right'}}
+                inputStyle={{ textAlign: 'right' }}
                 value={tienChuyenKhoan}
+                onChangeText={text =>
+                  setTienChuyenKhoan(
+                    CommonFunc.formatCurrency(
+                      CommonFunc.formatNumberToFloat(text),
+                    ),
+                  )
+                }
               />
             </View>
 
-            <TouchableOpacity style={[styles.flexRow, {width: '40%'}]}>
-              <Text
-                style={{
-                  textDecorationLine: 'underline',
-                  textAlign: 'center',
-                }}>
-                Chọn tài khoản nhận
-              </Text>
-              <Icon
-                size={30}
-                name="keyboard-double-arrow-right"
-                type={IconType.MATERIAL}
-              />
-            </TouchableOpacity>
+            {!CommonFunc.checkNull_OrEmpty(idTaiKhoanChuyenKhoan) ? (
+              <View style={{ width: '40%' }}>
+                <View style={styles.accountItem}>
+                  <Image
+                    style={{ height: 60 }}
+                    source={{ uri: taiKhoanCKChosed?.logoNganHang }}
+                  />
+
+                  <View>
+                    <Text
+                      style={{
+                        fontWeight: 500,
+                        fontSize: 18,
+                        textAlign: 'center',
+                      }}>
+                      {taiKhoanCKChosed?.tenChuThe ?? ''}
+                    </Text>
+                    <Text style={{ color: '#4D4D4D', textAlign: 'center' }}>
+                      {taiKhoanCKChosed?.soTaiKhoan ?? ''}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={[styles.flexRow, { width: '40%' }]}
+                onPress={() => showModalTaiKhoanNganHang(true)}>
+                <Text
+                  style={{
+                    textDecorationLine: 'underline',
+                    textAlign: 'center',
+                  }}>
+                  Chọn tài khoản nhận
+                </Text>
+                <Icon
+                  size={30}
+                  name="keyboard-double-arrow-right"
+                  type={IconType.MATERIAL}
+                />
+              </TouchableOpacity>
+            )}
           </View>
         )}
 
         {arrHinhThucChosed.includes(HinhThucThanhToan.QUYET_THE) && (
-          <View style={[styles.flexRow, {gap: 16}]}>
+          <View style={[styles.flexRow, { gap: 16 }]}>
             <View style={styles.itemLoaiTien}>
               <Text>POS</Text>
-              <Input inputStyle={{textAlign: 'right'}} value={tienQuyeThePos} />
-            </View>
-            <TouchableOpacity style={[styles.flexRow, {width: '40%'}]}>
-              <Text
-                style={{
-                  textDecorationLine: 'underline',
-                  textAlign: 'center',
-                }}>
-                Chọn tài khoản nhận
-              </Text>
-              <Icon
-                size={30}
-                name="keyboard-double-arrow-right"
-                type={IconType.MATERIAL}
+              <Input
+                inputStyle={{ textAlign: 'right' }}
+                value={tienQuyeThePos}
+                onChangeText={text =>
+                  setTienQuyeThePos(
+                    CommonFunc.formatCurrency(
+                      CommonFunc.formatNumberToFloat(text),
+                    ),
+                  )
+                }
               />
-            </TouchableOpacity>
+            </View>
+            {!CommonFunc.checkNull_OrEmpty(idTaiKhoanPOS) ? (
+              <View style={{ width: '40%' }}>
+                <View style={styles.accountItem}>
+                  <Image
+                    style={{ height: 60 }}
+                    source={{ uri: taiKhoanPOSChosed?.logoNganHang }}
+                  />
+
+                  <View>
+                    <Text
+                      style={{
+                        fontWeight: 500,
+                        fontSize: 18,
+                        textAlign: 'center',
+                      }}>
+                      {taiKhoanPOSChosed?.tenChuThe ?? ''}
+                    </Text>
+                    <Text style={{ color: '#4D4D4D', textAlign: 'center' }}>
+                      {taiKhoanPOSChosed?.soTaiKhoan ?? ''}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={[styles.flexRow, { width: '40%' }]}
+                onPress={() => showModalTaiKhoanNganHang(false)}>
+                <Text
+                  style={{
+                    textDecorationLine: 'underline',
+                    textAlign: 'center',
+                  }}>
+                  Chọn tài khoản nhận
+                </Text>
+                <Icon
+                  size={30}
+                  name="keyboard-double-arrow-right"
+                  type={IconType.MATERIAL}
+                />
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </View>
@@ -248,7 +457,9 @@ export default function ThanhToan() {
         }}>
         <Input
           placeholder="Nội dung thanh toán"
-          inputStyle={{fontStyle: 'italic', fontSize: 14}}
+          inputStyle={{ fontStyle: 'italic', fontSize: 14 }}
+          value={noiDungThu}
+          onChangeText={text => setNoiDungThu(text)}
         />
         <View
           style={{
@@ -258,17 +469,19 @@ export default function ThanhToan() {
             borderRadius: 8,
             padding: 12,
           }}>
-          <View style={{gap: 16}}>
+          <View style={{ gap: 16 }}>
             <View style={styles.flexRow}>
-              <View style={{gap: 16}}>
-                <Text style={{fontWeight: 500}}>Tổng khách trả</Text>
-                <Text>Còn thiếu</Text>
+              <View style={{ gap: 16 }}>
+                <Text style={{ fontWeight: 500 }}>Tổng khách trả</Text>
+                <Text>{tienKhachThieu < 0 ? 'Tiền thừa' : 'Còn thiếu'}</Text>
               </View>
-              <View style={{gap: 16}}>
-                <Text style={{fontWeight: 500}}>
+              <View style={{ gap: 16 }}>
+                <Text style={{ fontWeight: 500 }}>
                   {CommonFunc.formatCurrency(tienKhachDua)}
                 </Text>
-                <Text>{CommonFunc.formatCurrency(tienKhachThieu)}</Text>
+                <Text style={{ textAlign: 'right' }}>
+                  {CommonFunc.formatCurrency(Math.abs(tienKhachThieu))}
+                </Text>
               </View>
             </View>
           </View>
@@ -276,9 +489,10 @@ export default function ThanhToan() {
         <Button
           title={'Thanh toán'}
           size="lg"
-          buttonStyle={{backgroundColor: '#FA6800'}}
-          containerStyle={{borderRadius: 8}}
-          titleStyle={{color: 'white'}}
+          buttonStyle={{ backgroundColor: '#FA6800' }}
+          containerStyle={{ borderRadius: 8 }}
+          titleStyle={{ color: 'white' }}
+          onPress={thanhToan}
         />
       </View>
     </View>
@@ -308,5 +522,8 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
     width: '60%',
+  },
+  accountItem: {
+    padding: 5,
   },
 });

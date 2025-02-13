@@ -269,7 +269,7 @@ export const TempInvoiceDetails = () => {
           <View
             style={{
               gap: 12,
-              flex:1,
+              flex: 1,
               alignItems: 'center',
               justifyContent: 'center',
               backgroundColor: 'white',
@@ -384,6 +384,7 @@ export const TempInvoiceDetails = () => {
         onPress={() =>
           navigation.navigate(ListInvoiceStack.THANH_TOAN, {
             idHoaDon: hoadonOpen?.id,
+            tongPhaiTra: hoadonOpen?.tongThanhToan ?? 0,
           })
         }>
         <Icon name="check" color="white" containerStyle={{marginRight: 10}} />

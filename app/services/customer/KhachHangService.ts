@@ -16,7 +16,7 @@ class KhachHangService {
     public async getDetail(id: string): Promise<IKhachHangItemDto> {
         // full infor soLanCheckin, ngayCheckinGanNhat
         const response = await api.get(`api/services/app/KhachHang/GetKhachHangDetail?id=${id}`);
-        return response.data.result;
+        return response;
     }
     // public async GetNhatKyHoatDong_ofKhachHang(id: string): Promise<HoatDongKhachHang[]> {
     //     const response = await api.get(`api/services/app/KhachHang/GetNhatKyHoatDong_ofKhachHang?idKhachHang=${id}`);
@@ -32,7 +32,7 @@ class KhachHangService {
             } as ICreateOrEditKhachHangDto;
         }
         const result = await api.get(`api/services/app/KhachHang/GetKhachHang?id=${id}`);
-        return result.data.result;
+        return result;
     }
     public async delete(id: string) {
         const result = await api.post(`api/services/app/KhachHang/Delete?id=${id}`);
@@ -59,7 +59,7 @@ class KhachHangService {
     }
     jqAutoCustomer = async (input: IPagedKhachHangRequestDto): Promise<IKhachHangItemDto[]> => {
         const result = await api.post(`api/services/app/KhachHang/JqAutoCustomer`, input);
-        return result.data.result;
+        return result;
     };
     async checkExistSoDienThoai(phone: string, id: string | null = null) {
         if (CommonFunc.checkNull(id)) {

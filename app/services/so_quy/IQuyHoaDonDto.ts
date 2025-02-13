@@ -1,3 +1,5 @@
+import { IQuyChitietDto } from "./IQuyChitietDto";
+
 export interface IQuyHoaDonDto {
   id: string;
   idChiNhanh?: string;

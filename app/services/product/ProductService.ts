@@ -1,11 +1,11 @@
 import api from "../api";
-import { IPageResult } from "../commonDto/IPageResultDto";
+import { IPageResultDto } from "../commonDto/IPageResultDto";
 import { IParamSearchProductDto, IProductBasic } from "./dto";
 
 class ProductSevice {
   GetListproduct = async (
     input: IParamSearchProductDto
-  ): Promise<IPageResult<IProductBasic>> => {
+  ): Promise<IPageResultDto<IProductBasic>> => {
     const xx = await api.post(
       `api/services/app/HangHoa/GetDMHangHoa`,
       input
