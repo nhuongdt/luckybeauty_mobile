@@ -5,15 +5,8 @@ import {IHoaDonChiTietDto} from '../../services/hoadon/dto';
 import {PropModal} from '../../type/PropModal';
 import {InvoiceStatus} from '../../enum/InvoiceStatus';
 
-export default function ModalAddGioHang({
-  isShow,
-  objUpdate,
-  onClose,
-  onSave,
-}: PropModal<IHoaDonChiTietDto>) {
-  const [ctDoing, setCTDoing] = useState<IHoaDonChiTietDto>(
-    {} as IHoaDonChiTietDto,
-  );
+export default function ModalAddGioHang({isShow, objUpdate, onClose, onSave}: PropModal<IHoaDonChiTietDto>) {
+  const [ctDoing, setCTDoing] = useState<IHoaDonChiTietDto>({} as IHoaDonChiTietDto);
 
   useEffect(() => {
     if (isShow) {
@@ -38,7 +31,7 @@ export default function ModalAddGioHang({
         thanhTienSauCK: objUpdate?.thanhTienSauCK ?? 0,
         thanhTienSauVAT: objUpdate?.thanhTienSauVAT ?? 0,
         ghiChu: objUpdate?.ghiChu ?? '',
-        trangThai: objUpdate?.trangThai ?? InvoiceStatus.HOAN_THANH,
+        trangThai: objUpdate?.trangThai ?? InvoiceStatus.HOAN_THANH
       });
     }
   }, [isShow]);
@@ -52,7 +45,7 @@ export default function ModalAddGioHang({
       soLuong: slNew,
       thanhTienTruocCK: slNew * (ctDoing?.donGiaTruocCK ?? 0),
       thanhTienSauCK: slNew * (ctDoing?.donGiaSauCK ?? 0),
-      thanhTienSauVAT: slNew * (ctDoing?.donGiaSauVAT ?? 0),
+      thanhTienSauVAT: slNew * (ctDoing?.donGiaSauVAT ?? 0)
     });
   };
 
@@ -67,7 +60,7 @@ export default function ModalAddGioHang({
       soLuong: slNew,
       thanhTienTruocCK: thanhtien,
       thanhTienSauCK: thanhtien,
-      thanhTienSauVAT: thanhtien,
+      thanhTienSauVAT: thanhtien
     });
   };
 
@@ -77,23 +70,15 @@ export default function ModalAddGioHang({
 
   return (
     <View style={styles.container}>
-      <Modal
-        visible={isShow}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={onClose}>
+      <Modal visible={isShow} transparent={true} animationType="slide" onRequestClose={onClose}>
         <View style={styles.modalView}>
-          <Pressable
-            onPress={onClose}
-            style={{position: 'absolute', left: 10, top: 10}}>
+          <Pressable onPress={onClose} style={{position: 'absolute', left: 10, top: 10}}>
             <Icon name="close" size={24} color={'#c0c0c0'} />
           </Pressable>
           <View style={{gap: 16, alignItems: 'center'}}>
             <Text style={styles.productName}>{ctDoing?.tenHangHoa}</Text>
             <Text style={styles.productPrice}>
-              {new Intl.NumberFormat('vi-VN').format(
-                ctDoing?.donGiaTruocCK ?? 0,
-              )}
+              {new Intl.NumberFormat('vi-VN').format(ctDoing?.donGiaTruocCK ?? 0)}
             </Text>
 
             <View
@@ -101,49 +86,33 @@ export default function ModalAddGioHang({
                 gap: 24,
                 flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'center',
+                justifyContent: 'center'
               }}>
               <Text style={{textAlign: 'left'}}>Số lượng</Text>
-              <Icon
-                name="remove-circle-outline"
-                size={30}
-                color={'#ccc'}
-                onPress={giamSoLuong}
-              />
-              <Text style={[styles.productPrice, {textAlign: 'center'}]}>
-                {ctDoing.soLuong}
-              </Text>
-              <Icon
-                name="add-circle-outline"
-                size={30}
-                color={'#ccc'}
-                onPress={tangSoLuong}
-              />
+              <Icon name="remove-circle-outline" size={30} color={'#ccc'} onPress={giamSoLuong} />
+              <Text style={[styles.productPrice, {textAlign: 'center'}]}>{ctDoing.soLuong}</Text>
+              <Icon name="add-circle-outline" size={30} color={'#ccc'} onPress={tangSoLuong} />
             </View>
           </View>
           <View
             style={{
               marginTop: 20,
               borderTopColor: '#cccc',
-              borderTopWidth: 1,
+              borderTopWidth: 1
             }}>
             <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginTop: 20,
+                marginTop: 20
               }}>
               <Text style={[styles.productPrice]}>Thành tiền</Text>
               <Text style={[styles.productName]}>
-                {new Intl.NumberFormat('vi-VN').format(
-                  ctDoing?.thanhTienSauCK ?? 0,
-                )}
+                {new Intl.NumberFormat('vi-VN').format(ctDoing?.thanhTienSauCK ?? 0)}
               </Text>
             </View>
-            <Pressable
-              style={[styles.button, styles.buttonOpen]}
-              onPress={agreeGioHang}>
+            <Pressable style={[styles.button, styles.buttonOpen]} onPress={agreeGioHang}>
               <Text>Thêm vào giỏ hàng</Text>
             </Pressable>
           </View>
@@ -156,7 +125,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   modalView: {
     position: 'relative',
@@ -166,11 +135,11 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 2
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 5,
+    elevation: 5
   },
   productName: {fontSize: 16, fontWeight: '600'},
   productPrice: {fontSize: 14, fontWeight: '500'},
@@ -178,10 +147,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     elevation: 2,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   buttonOpen: {
     backgroundColor: '#ffe4c4',
-    marginTop: 16,
-  },
+    marginTop: 16
+  }
 });

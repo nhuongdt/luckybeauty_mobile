@@ -29,7 +29,7 @@ const InvoiceStackNavigation = () => {
         name={ListInvoiceStack.TEMP_INVOICE}
         component={TempInvoices}
         options={{
-          headerShown: false,
+          headerShown: false
         }}
       />
 
@@ -50,7 +50,7 @@ const InvoiceStackNavigation = () => {
           title: ` ${route?.param?.maHoaDon}`,
           headerTitleAlign: 'center',
           presentation: 'modal',
-          headerStyle: {backgroundColor: '#FFF2CC'},
+          headerStyle: {backgroundColor: '#FFF2CC'}
         })}
       />
       <InvoiceStack.Screen
@@ -60,7 +60,7 @@ const InvoiceStackNavigation = () => {
           title: 'Thanh toán',
           headerTitleAlign: 'center',
           presentation: 'card',
-          headerStyle: {backgroundColor: '#FFF2CC'},
+          headerStyle: {backgroundColor: '#FFF2CC'}
         }}
       />
     </InvoiceStack.Navigator>
@@ -72,10 +72,7 @@ export default function SaleNavigation() {
 
   function getTabBarVisibility(route: any) {
     const routeName = getFocusedRouteNameFromRoute(route) ?? 'Invoices';
-    if (
-      routeName === ListInvoiceStack.TEMP_INVOICE_DETAIL ||
-      routeName === ListInvoiceStack.THANH_TOAN
-    ) {
+    if (routeName === ListInvoiceStack.TEMP_INVOICE_DETAIL || routeName === ListInvoiceStack.THANH_TOAN) {
       return 'none'; // Ẩn TabBar
     }
     return 'flex'; // Hiển thị TabBar
@@ -87,25 +84,25 @@ export default function SaleNavigation() {
       screenOptions={({route}) => ({
         tabBarStyle: {
           display: getTabBarVisibility(route),
-          backgroundColor: '#FFF4E5',
+          backgroundColor: '#FFF4E5'
         },
         tabBarActiveTintColor: 'red',
         tabBarInactiveTintColor: 'gray',
         headerStyle: {
-          backgroundColor: '#FFF4E5',
+          backgroundColor: '#FFF4E5'
         },
         headerTitleAlign: 'center',
         headerTitleStyle: {
           color: 'black',
           fontWeight: 400,
           fontSize: 16,
-          textAlign: 'center',
+          textAlign: 'center'
         },
         headerTintColor: 'white',
         headerShadowVisible: false,
         tabBarLabelStyle: {
-          fontSize: 14,
-        },
+          fontSize: 14
+        }
       })}>
       <Tabs.Screen
         name={ListBottomTab.INVOICE_STACK_NAVIGATION}
@@ -114,13 +111,8 @@ export default function SaleNavigation() {
           tabBarLabel: 'Hóa đơn tạm',
           headerShown: false,
           tabBarIcon: ({color, focused}) => (
-            <Icon
-              type={IconType.IONICON}
-              name={focused ? 'book-outline' : 'book'}
-              color={color}
-              size={24}
-            />
-          ),
+            <Icon type={IconType.IONICON} name={focused ? 'book-outline' : 'book'} color={color} size={24} />
+          )
         })}
       />
       <Tabs.Screen
@@ -131,12 +123,7 @@ export default function SaleNavigation() {
           headerTitleAlign: 'center',
           tabBarLabel: 'Sản phẩm',
           tabBarIcon: ({focused, color}) => (
-            <Icon
-              type={IconType.IONICON}
-              name={focused ? 'list' : 'list-sharp'}
-              color={color}
-              size={24}
-            />
+            <Icon type={IconType.IONICON} name={focused ? 'list' : 'list-sharp'} color={color} size={24} />
           ),
           headerRight: () => (
             <Pressable
@@ -144,7 +131,7 @@ export default function SaleNavigation() {
               onPress={() => {
                 navigation.navigate(ListBottomTab.INVOICE_STACK_NAVIGATION, {
                   screen: ListInvoiceStack.TEMP_INVOICE_DETAIL,
-                  params: {idHoaDon: route.params?.idHoaDon},
+                  params: {idHoaDon: route.params?.idHoaDon}
                 });
               }}>
               {(route.params?.countProduct ?? 0) > 0 && (
@@ -155,13 +142,9 @@ export default function SaleNavigation() {
                 />
               )}
 
-              <Icon
-                name="shopping-basket"
-                type={IconType.FONT_AWESOME_5}
-                color={'blue'}
-              />
+              <Icon name="shopping-basket" type={IconType.FONT_AWESOME_5} color={'blue'} />
             </Pressable>
-          ),
+          )
         })}
       />
     </Tabs.Navigator>

@@ -29,7 +29,7 @@ const tblHoaDon: Realm.ObjectSchema = {
     trangThai: {type: 'int', default: InvoiceStatus.HOAN_THANH},
     maKhachHang: 'string?',
     tenKhachHang: 'string?',
-    soDienThoai: 'string?',
-  },
+    soDienThoai: 'string?'
+  }
 };
 export default tblHoaDon;

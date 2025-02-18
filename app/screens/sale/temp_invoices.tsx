@@ -3,11 +3,7 @@ import {Icon, Button} from '@rneui/themed';
 import {useEffect, useRef, useContext, useState, useCallback} from 'react';
 import uuid from 'react-native-uuid';
 import {format} from 'date-fns';
-import {
-  RouteProp,
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Input, Text} from '@rneui/base';
 import {ListBottomTab} from '../../enum/ListBottomTab';
@@ -22,10 +18,7 @@ import PageEmpty from '../../components/page_empty';
 import {TempInvoiceDetails} from './teamp_invoice_details';
 import {ActionType} from '../../enum/ActionType';
 
-type TempInvoiceProps = NativeStackNavigationProp<
-  InvoiceStackParamList,
-  ListBottomTab.TEMP_INVOICE
->;
+type TempInvoiceProps = NativeStackNavigationProp<InvoiceStackParamList, ListBottomTab.TEMP_INVOICE>;
 
 type TempInvoiceRouteProp = RouteProp<
   {
@@ -42,17 +35,17 @@ const styleHeader = StyleSheet.create({
     minWidth: 120,
     padding: 16,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   boxItemActive: {
-    backgroundColor: '#FA6800',
+    backgroundColor: '#FA6800'
   },
   boxItemNotActive: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#F5F5F5'
   },
   boxAdd: {
-    backgroundColor: 'white',
-  },
+    backgroundColor: 'white'
+  }
 });
 
 const TempInvoices = () => {
@@ -65,7 +58,7 @@ const TempInvoices = () => {
 
   const arrTab = [
     {id: LoaiChungTu.HOA_DON_BAN_LE, text: 'Hóa đơn'},
-    {id: LoaiChungTu.GOI_DICH_VU, text: 'Gói dịch vụ'},
+    {id: LoaiChungTu.GOI_DICH_VU, text: 'Gói dịch vụ'}
   ];
 
   const getHoaDonFromCache = (idLoaiChungTu = LoaiChungTu.HOA_DON_BAN_LE) => {
@@ -88,14 +81,12 @@ const TempInvoices = () => {
   const createNewInvoice = () => {
     const max = CommonFunc.getMaxNumberFromMaHoaDon(lstHoaDon);
     const kiHieuMaChungTu =
-      tabActive == LoaiChungTu.HOA_DON_BAN_LE
-        ? TenLoaiChungTu.HOA_DON_BAN_LE
-        : TenLoaiChungTu.GOI_DICH_VU;
+      tabActive == LoaiChungTu.HOA_DON_BAN_LE ? TenLoaiChungTu.HOA_DON_BAN_LE : TenLoaiChungTu.GOI_DICH_VU;
 
     const newHD = new HoaDonDto({
       id: uuid.v4().toString(),
       idLoaiChungTu: tabActive,
-      maHoaDon: `${kiHieuMaChungTu} ${max}`,
+      maHoaDon: `${kiHieuMaChungTu} ${max}`
     });
     setLstHoaDon([newHD, ...lstHoaDon]);
 
@@ -104,7 +95,7 @@ const TempInvoices = () => {
 
     navigation.navigate(ListBottomTab.PRODUCT, {
       idHoaDon: newHD?.id,
-      idLoaiChungTu: tabActive,
+      idLoaiChungTu: tabActive
     });
   };
 
@@ -121,19 +112,18 @@ const TempInvoices = () => {
 
   const goInvoiceDetail = (item: IHoaDonDto) => {
     navigation.navigate(ListInvoiceStack.TEMP_INVOICE_DETAIL, {
-      idHoaDon: item?.id,
+      idHoaDon: item?.id
     });
   };
 
   const gotoEdit = (item: IHoaDonDto) => {
     navigation.navigate(ListBottomTab.PRODUCT, {
       idHoaDon: item.id,
-      idLoaiChungTu: tabActive,
+      idLoaiChungTu: tabActive
     });
   };
 
   const agreeEditChiTiet = (hdAfter: IHoaDonDto, actionId?: number) => {
-
     setLstHoaDon(
       lstHoaDon?.map(x => {
         if (x.id == hdAfter?.id) {
@@ -144,18 +134,18 @@ const TempInvoices = () => {
             tongTienHang: hdAfter?.tongTienHang,
             tongTienHDSauVAT: hdAfter?.tongTienHDSauVAT,
             tongThanhToan: hdAfter?.tongThanhToan,
-            idKhachHang: hdAfter?.idKhachHang,
+            idKhachHang: hdAfter?.idKhachHang
           };
         } else {
           return x;
         }
-      }),
+      })
     );
 
     if (actionId === ActionType.INSERT) {
       navigation.navigate(ListBottomTab.PRODUCT, {
         idHoaDon: hdAfter?.id,
-        idLoaiChungTu: tabActive,
+        idLoaiChungTu: tabActive
       });
     }
   };
@@ -167,16 +157,14 @@ const TempInvoices = () => {
           flexDirection: 'row',
           justifyContent: 'space-between',
           padding: 8,
-          backgroundColor: '#FFF2CC',
+          backgroundColor: '#FFF2CC'
         }}>
         {arrTab?.map(item => (
           <Pressable
             key={item.id}
             style={[
               styleHeader.boxItem,
-              tabActive === item.id
-                ? styleHeader.boxItemActive
-                : styleHeader.boxItemNotActive,
+              tabActive === item.id ? styleHeader.boxItemActive : styleHeader.boxItemNotActive
             ]}
             onPress={() => onChangeTab(item.id)}>
             <Icon
@@ -188,7 +176,7 @@ const TempInvoices = () => {
             <Text
               style={{
                 color: tabActive === item.id ? 'white' : 'black',
-                fontWeight: 500,
+                fontWeight: 500
               }}>
               {item.text}
             </Text>
@@ -208,7 +196,7 @@ const TempInvoices = () => {
         <View
           style={{
             flex: 1,
-            backgroundColor: 'white',
+            backgroundColor: 'white'
           }}>
           <Input
             leftIcon={{type: 'ionicon', name: 'search'}}
@@ -216,24 +204,21 @@ const TempInvoices = () => {
             containerStyle={{
               backgroundColor: 'white',
               borderRadius: 4,
-              borderColor: '#F5F5F5',
+              borderColor: '#F5F5F5'
             }}
             inputStyle={{fontSize: 14}}
           />
           {lstHoaDon?.length > 0 && (
             <ScrollView>
               {lstHoaDon?.map(item => (
-                <Pressable
-                  style={stylesInvoiceItem.container}
-                  key={item?.id}
-                  onPress={() => goInvoiceDetail(item)}>
+                <Pressable style={stylesInvoiceItem.container} key={item?.id} onPress={() => goInvoiceDetail(item)}>
                   <View
                     style={{
                       flex: 1,
                       gap: 15,
                       flexDirection: 'row',
                       alignItems: 'center',
-                      justifyContent: 'space-between',
+                      justifyContent: 'space-between'
                     }}>
                     <Icon
                       type="materialicon"
@@ -246,36 +231,27 @@ const TempInvoices = () => {
                     <View style={stylesInvoiceItem.boxCenter}>
                       <View style={{flex: 2}}>
                         <Text style={{fontWeight: 500}}>{item?.maHoaDon}</Text>
-                        <Text
-                          style={{color: 'rgb(178, 183, 187)', fontSize: 14}}>
+                        <Text style={{color: 'rgb(178, 183, 187)', fontSize: 14}}>
                           {format(new Date(item.ngayLapHoaDon), 'HH:mm')}
                         </Text>
                       </View>
                       <View style={{flex: 3}}>
                         <Text style={{fontWeight: 500, textAlign: 'right'}}>
-                          {new Intl.NumberFormat('vi-VN').format(
-                            item?.tongThanhToan ?? 0,
-                          )}
+                          {new Intl.NumberFormat('vi-VN').format(item?.tongThanhToan ?? 0)}
                         </Text>
                         <Text
                           ellipsizeMode="tail"
                           numberOfLines={1}
                           style={{
                             textAlign: 'right',
-                            color: 'rgb(178, 183, 187)',
+                            color: 'rgb(178, 183, 187)'
                           }}>
                           {item?.tenKhachHang}
                         </Text>
                       </View>
                     </View>
 
-                    <Icon
-                      type="antdesign"
-                      name="edit"
-                      size={24}
-                      style={{flex: 1}}
-                      onPress={() => gotoEdit(item)}
-                    />
+                    <Icon type="antdesign" name="edit" size={24} style={{flex: 1}} onPress={() => gotoEdit(item)} />
                   </View>
                 </Pressable>
               ))}
@@ -291,20 +267,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'rgb(245, 247, 244)',
-    padding: 8,
-  },
+    padding: 8
+  }
 });
 const stylesInvoiceItem = StyleSheet.create({
   container: {
     backgroundColor: 'white',
     padding: 10,
     borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
+    borderBottomWidth: 1
   },
   boxCenter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    flex: 5,
-  },
+    flex: 5
+  }
 });

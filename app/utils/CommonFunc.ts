@@ -64,13 +64,18 @@ class CommonFunc {
     }
     return '';
   };
+  remove_LastComma = (str: string) => {
+    if (str !== null && str !== undefined && str.length > 1) {
+      return str.replace(/(^[,\s]+)|([,\s]+$)/g, '');
+    } else {
+      return '';
+    }
+  };
   formatNumberToFloat = (objVal: any) => {
     if (objVal === undefined || objVal === null) {
       return 0;
     } else {
-      const value = parseFloat(
-        objVal.toString().replaceAll('.', '').replace(',', '.'),
-      );
+      const value = parseFloat(objVal.toString().replaceAll('.', '').replace(',', '.'));
       if (isNaN(value)) {
         return 0;
       } else {

@@ -30,13 +30,11 @@ export default function AppNavigation() {
       const dataUser = LoginService.checkUser_fromCache();
       console.log('dataUser ', dataUser);
       if (dataUser != null) {
-        const token = await LoginService.checkUserLogin(
-          dataUser,
-          dataUser.tenantId ?? 0,
-        );
+        const token = await LoginService.checkUserLogin(dataUser, dataUser.tenantId ?? 0);
 
         if (token != null) {
           setIsLogin(true);
+          console.log('dataUser ', token.accessToken);
 
           mmkvStorage.set('accessToken', token.accessToken);
         } else {
@@ -57,17 +55,9 @@ export default function AppNavigation() {
   return (
     <Stack.Navigator>
       <>
-        <Stack.Screen
-          name={ListRouteApp.SALE_NAGIGATION}
-          component={SaleNavigation}
-          options={{headerShown: false}}
-        />
+        <Stack.Screen name={ListRouteApp.SALE_NAGIGATION} component={SaleNavigation} options={{headerShown: false}} />
 
-        <Stack.Screen
-          name={ListRouteApp.PAGE_NOT_FOUND}
-          component={PageNotFound}
-          options={{title: 'Page not found'}}
-        />
+        <Stack.Screen name={ListRouteApp.PAGE_NOT_FOUND} component={PageNotFound} options={{title: 'Page not found'}} />
         {/* <Stack.Screen
           name={ListRouteApp.CUSTOMER}
           component={Customer}

@@ -16,20 +16,13 @@ import {ListRouteApp} from '../../enum/ListRouteApp';
 import {PropModal} from '../../type/PropModal';
 import {Icon, Text} from '@rneui/themed';
 import {IconType} from '../../enum/IconType';
+import {ModalTitle} from '../components/ModalTitle';
 
-type CustomerProps = NativeStackNavigationProp<
-  RootStackParamList,
-  ListBottomTab.CUSTOMER
->;
+type CustomerProps = NativeStackNavigationProp<RootStackParamList, ListBottomTab.CUSTOMER>;
 
 type CustomerlRouteProp = RouteProp<{params: {idKhachHang: string}}, 'params'>;
 
-export default function Customer({
-  isShow,
-  objUpdate,
-  onClose,
-  onSave,
-}: PropModal<IKhachHangItemDto>) {
+export default function Customer({isShow, objUpdate, onClose, onSave}: PropModal<IKhachHangItemDto>) {
   const route = useRoute<CustomerlRouteProp>();
   const navigation = useNavigation<CustomerProps>();
   const {idKhachHang = ''} = route?.params || {};
@@ -42,22 +35,22 @@ export default function Customer({
       idKhachHang: '01',
       maKhachHang: 'KH01',
       tenKhachHang: 'Nguyễn Thị Hương Giang',
-      soDienThoai: '97844545',
+      soDienThoai: '97844545'
     },
     {
       id: '04',
       idKhachHang: '04',
       maKhachHang: 'KH04',
       tenKhachHang: 'Hoàng Mai Ngô',
-      soDienThoai: '',
+      soDienThoai: ''
     },
     {
       id: '03',
       idKhachHang: '03',
       maKhachHang: 'KH03',
       tenKhachHang: 'Lê Phương Thao',
-      soDienThoai: '08844545',
-    },
+      soDienThoai: '08844545'
+    }
   ]);
 
   const getListCustomer = () => {
@@ -68,7 +61,7 @@ export default function Customer({
     const param: IPagedKhachHangRequestDto = {
       keyword: txtSearch,
       skipCount: 1,
-      maxResultCount: 5,
+      maxResultCount: 5
     };
     const lst = await KhachHangService.jqAutoCustomer(param);
     setLstCustomer([...lst]);
@@ -96,23 +89,7 @@ export default function Customer({
   return (
     <Modal visible={isShow} animationType="slide" transparent={true}>
       <View style={styles.modalContent}>
-        <View
-          style={{
-            backgroundColor: '#FFF4E5',
-            flexDirection: 'row',
-            alignItems: 'center',
-            padding: 12,
-          }}>
-          <Icon
-            type={IconType.IONICON}
-            name="close"
-            color={'red'}
-            size={24}
-            style={{marginLeft: 8, flex: 1}}
-            onPress={onClose}
-          />
-          <Text style={{textAlign: 'center', flex: 11}}>Chọn khách hàng</Text>
-        </View>
+        <ModalTitle title="Chọn khách hàng" onClose={onClose} />
 
         <SearchBar
           placeholder="Tìm kiếm khách hàng"
@@ -123,15 +100,13 @@ export default function Customer({
             paddingRight: 16,
             borderTopWidth: 0,
             paddingBottom: 0,
-            backgroundColor: 'white',
+            backgroundColor: 'white'
           }}
           inputContainerStyle={{backgroundColor: 'white'}}
         />
         <FlatList
           data={lstCustomer}
-          renderItem={({item}) => (
-            <CustomerItem item={item} choseCustomer={choseCustomer} />
-          )}
+          renderItem={({item}) => <CustomerItem item={item} choseCustomer={choseCustomer} />}
           keyExtractor={item => item.id}
           style={{paddingBottom: 8}}
         />
@@ -145,6 +120,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: 'white',
-    position: 'relative',
-  },
+    position: 'relative'
+  }
 });

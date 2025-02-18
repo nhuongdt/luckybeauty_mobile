@@ -7,7 +7,7 @@ const tblKhachHang: Realm.ObjectSchema = {
     maKhachHang: 'string',
     tenKhachHang: 'string',
     soDienThoai: 'string',
-    avatar: 'string?',
-  },
+    avatar: 'string?'
+  }
 };
 export default tblKhachHang;

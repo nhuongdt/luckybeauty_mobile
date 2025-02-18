@@ -25,8 +25,8 @@ const tblHoaDonChiTiet: Realm.ObjectSchema = {
     donGiaSauVAT: 'float',
     thanhTienSauVAT: 'float',
     ghiChu: 'string?',
-    trangThai: {type: 'int', default: 1},
-  },
+    trangThai: {type: 'int', default: 1}
+  }
 };
 
 export default tblHoaDonChiTiet;

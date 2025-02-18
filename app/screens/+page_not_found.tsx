@@ -6,7 +6,7 @@ export default function PageNotFound({navigation}: any) {
     <View>
       <Button
         title=" Go back to Home screen!"
-        onPress={() => navigation.navigate('SaleNavigation', { screen: 'TempInvoice' })}
+        onPress={() => navigation.navigate('SaleNavigation', {screen: 'TempInvoice'})}
       />
     </View>
   );
@@ -16,12 +16,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#25292e',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
 
   button: {
     fontSize: 20,
     textDecorationLine: 'underline',
-    color: '#fff',
-  },
+    color: '#fff'
+  }
 });

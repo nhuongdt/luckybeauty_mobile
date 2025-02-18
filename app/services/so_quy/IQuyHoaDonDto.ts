@@ -1,4 +1,4 @@
-import { IQuyChitietDto } from "./IQuyChitietDto";
+import {IQuyChitietDto} from './IQuyChitietDto';
 
 export interface IQuyHoaDonDto {
   id: string;
@@ -13,4 +13,3 @@ export interface IQuyHoaDonDto {
   noiDungThu?: string;
   hachToanKinhDoanh?: boolean;
 }
-

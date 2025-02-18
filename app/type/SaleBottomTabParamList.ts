@@ -4,5 +4,5 @@ export type SaleBottomTabParamList = {
     idLoaiChungTu?: number;
     countProduct?: number;
   };
-  InvoiceStackNavigation: undefined,
+  InvoiceStackNavigation: undefined;
 };

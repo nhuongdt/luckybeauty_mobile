@@ -1,13 +1,6 @@
 import {Input, Text} from '@rneui/base';
 import {Button, CheckBox, Icon, SearchBar} from '@rneui/themed';
-import {
-  Image,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import {Image, Modal, Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {IKhachHangItemDto} from '../../services/customer/IKhachHangItemDto';
 import {PropModal} from '../../type/PropModal';
 import {ITaiKhoanNganHangDto} from '../../services/tai_khoan_ngan_hang/ITaiKhoanNganHangDto';
@@ -17,46 +10,37 @@ import TaiKhoanNganHangService from '../../services/tai_khoan_ngan_hang/TaiKhoan
 import {CommonActions} from '@react-navigation/native';
 import CommonFunc from '../../utils/CommonFunc';
 
-export const ListTaiKhoanNganHang = ({
-  isShow,
-  objUpdate,
-  onClose,
-  onSave,
-}: PropModal<ITaiKhoanNganHangDto>) => {
+export const ListTaiKhoanNganHang = ({isShow, objUpdate, onClose, onSave}: PropModal<ITaiKhoanNganHangDto>) => {
   const [txtSearch, setTextSearch] = useState('');
   const [accountBankChosed, setAccountBankChosed] = useState<ITaiKhoanNganHangDto>();
-  const [listBankAccountSearch, setListBankAccountSearch] = useState<
-    ITaiKhoanNganHangDto[]
-  >([]);
-  const [listBankAccount, setListBankAccount] = useState<
-    ITaiKhoanNganHangDto[]
-  >([
+  const [listBankAccountSearch, setListBankAccountSearch] = useState<ITaiKhoanNganHangDto[]>([]);
+  const [listBankAccount, setListBankAccount] = useState<ITaiKhoanNganHangDto[]>([
     {
       id: '1',
       idNganHang: '2',
       tenChuThe: 'NGUYEN THI QUYNH NGA',
       soTaiKhoan: '012345678945613',
-      logoNganHang: 'https://api.vietqr.io/img/KEBHANAHN.png',
+      logoNganHang: 'https://api.vietqr.io/img/KEBHANAHN.png'
     },
     {
       id: '2',
       idNganHang: '1',
       tenChuThe: 'LE THI HUONG GIANG',
       soTaiKhoan: '012345678945613',
-      logoNganHang: 'https://api.vietqr.io/img/SEAB.png',
+      logoNganHang: 'https://api.vietqr.io/img/SEAB.png'
     },
     {
       id: '3',
       idNganHang: '2',
       tenChuThe: 'HOANG CAM LY',
       soTaiKhoan: '012345678945613',
-      logoNganHang: 'https://api.vietqr.io/img/KEBHANAHN.png',
-    },
+      logoNganHang: 'https://api.vietqr.io/img/KEBHANAHN.png'
+    }
   ]);
 
-  useEffect(()=>{
+  useEffect(() => {
     setAccountBankChosed(undefined);
-  },[isShow])
+  }, [isShow]);
 
   const getAllBankAccount = async () => {
     const data = await TaiKhoanNganHangService.GetAllBankAccount();
@@ -79,7 +63,7 @@ export const ListTaiKhoanNganHang = ({
     const arr = listBankAccount?.filter(
       x =>
         CommonFunc.convertString_toEnglish(x.tenChuThe).includes(str) ||
-        CommonFunc.convertString_toEnglish(x.soTaiKhoan).includes(str),
+        CommonFunc.convertString_toEnglish(x.soTaiKhoan).includes(str)
       // CommonFunc.convertString_toEnglish(x.tenNganHang).includes(str)  ||
     );
     setListBankAccountSearch(arr);
@@ -103,7 +87,7 @@ export const ListTaiKhoanNganHang = ({
             backgroundColor: '#FFF4E5',
             flexDirection: 'row',
             alignItems: 'center',
-            padding: 12,
+            padding: 12
           }}>
           <Icon
             type={IconType.IONICON}
@@ -118,7 +102,7 @@ export const ListTaiKhoanNganHang = ({
               textAlign: 'center',
               flex: 11,
               fontWeight: 500,
-              fontSize: 14,
+              fontSize: 14
             }}>
             Chọn tài khoản ngân hàng
           </Text>
@@ -130,7 +114,7 @@ export const ListTaiKhoanNganHang = ({
             paddingRight: 16,
             borderTopWidth: 0,
             paddingBottom: 0,
-            backgroundColor: 'white',
+            backgroundColor: 'white'
           }}
           inputContainerStyle={{backgroundColor: 'white'}}
           value={txtSearch}
@@ -139,49 +123,24 @@ export const ListTaiKhoanNganHang = ({
 
         <ScrollView style={{padding: 16}}>
           {listBankAccountSearch?.map(item => (
-            <Pressable
-              key={item?.id}
-              style={[styles.accountItem]}
-              onPress={() => choseTaiKhoanNganHang(item)}>
-             
-             {accountBankChosed?.id === item.id && (
-                <Icon
-                  type={IconType.IONICON}
-                  name="checkmark"
-                  size={24}
-                  color={'blue'}
-                />
+            <Pressable key={item?.id} style={[styles.accountItem]} onPress={() => choseTaiKhoanNganHang(item)}>
+              {accountBankChosed?.id === item.id && (
+                <Icon type={IconType.IONICON} name="checkmark" size={24} color={'blue'} />
               )}
               <Image style={styles.image} source={{uri: item?.logoNganHang}} />
 
               <View>
-                <Text
-                  style={{fontWeight: 500, fontSize: 18, textAlign: 'center'}}>
-                  {item?.tenChuThe ?? ''}
-                </Text>
-                <Text style={{color: '#4D4D4D', textAlign: 'center'}}>
-                  {item?.soTaiKhoan ?? ''}
-                </Text>
+                <Text style={{fontWeight: 500, fontSize: 18, textAlign: 'center'}}>{item?.tenChuThe ?? ''}</Text>
+                <Text style={{color: '#4D4D4D', textAlign: 'center'}}>{item?.soTaiKhoan ?? ''}</Text>
               </View>
-              
             </Pressable>
           ))}
         </ScrollView>
 
         <View style={styles.button}>
-          <View
-            style={{gap: 10, flexDirection: 'row', justifyContent: 'flex-end'}}>
-            <Button
-              title={'Bỏ qua'}
-              color={'error'}
-              size="lg"
-              onPress={onClose}
-            />
-            <Button
-              title={'Đồng ý'}
-              size="lg"
-              onPress={agreeChoseTaiKhoanNganHang}
-            />
+          <View style={{gap: 10, flexDirection: 'row', justifyContent: 'flex-end'}}>
+            <Button title={'Bỏ qua'} color={'error'} size="lg" onPress={onClose} />
+            <Button title={'Đồng ý'} size="lg" onPress={agreeChoseTaiKhoanNganHang} />
           </View>
         </View>
       </View>
@@ -192,7 +151,7 @@ export const ListTaiKhoanNganHang = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
-    flex: 1,
+    flex: 1
   },
   accountItem: {
     padding: 10,
@@ -200,15 +159,15 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
     position: 'relative',
-    marginTop:16,
+    marginTop: 16
   },
   image: {
-    height: 100,
+    height: 100
   },
   button: {
     position: 'absolute',
     bottom: 16,
     width: '100%',
-    paddingHorizontal: 16,
-  },
+    paddingHorizontal: 16
+  }
 });

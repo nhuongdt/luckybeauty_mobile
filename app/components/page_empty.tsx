@@ -37,6 +37,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'white',
-    position: 'relative',
-  },
+    position: 'relative'
+  }
 });

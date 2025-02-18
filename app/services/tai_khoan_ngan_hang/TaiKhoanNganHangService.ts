@@ -11,28 +11,18 @@ class TaiKhoanNganHangService {
     const xx = await api.get(`api/services/app/TaiKhoanNganHang/GetAll`);
     return xx;
   }
-  async GetAllBankAccount(
-    idChiNhanh = ApiConst.GUID_EMPTY,
-  ): Promise<ITaiKhoanNganHangDto[]> {
-    const xx = await api.get(
-      `api/services/app/TaiKhoanNganHang/GetAllBankAccount?idChiNhanh=${idChiNhanh}`,
-    );
+  async GetAllBankAccount(idChiNhanh = ApiConst.GUID_EMPTY): Promise<ITaiKhoanNganHangDto[]> {
+    const xx = await api.get(`api/services/app/TaiKhoanNganHang/GetAllBankAccount?idChiNhanh=${idChiNhanh}`);
     return xx;
   }
-  GetDefault_TaiKhoanNganHang = async (
-    idChiNhanh = ApiConst.GUID_EMPTY,
-  ): Promise<ITaiKhoanNganHangDto> => {
-    const xx = await api.get(
-      `api/services/app/TaiKhoanNganHang/GetDefault_TaiKhoanNganHang?idChiNhanh=${idChiNhanh}`,
-    );
+  GetDefault_TaiKhoanNganHang = async (idChiNhanh = ApiConst.GUID_EMPTY): Promise<ITaiKhoanNganHangDto> => {
+    const xx = await api.get(`api/services/app/TaiKhoanNganHang/GetDefault_TaiKhoanNganHang?idChiNhanh=${idChiNhanh}`);
     return xx;
   };
-  GetBankAccount_byId = async (
-    idTaiKhoanNganHang: string,
-  ): Promise<ITaiKhoanNganHangDto | null> => {
+  GetBankAccount_byId = async (idTaiKhoanNganHang: string): Promise<ITaiKhoanNganHangDto | null> => {
     try {
       const xx = await api.get(
-        `api/services/app/TaiKhoanNganHang/GetBankAccount_byId?idTaiKhoanNganHang=${idTaiKhoanNganHang}`,
+        `api/services/app/TaiKhoanNganHang/GetBankAccount_byId?idTaiKhoanNganHang=${idTaiKhoanNganHang}`
       );
       return xx;
     } catch (error) {
@@ -40,10 +30,7 @@ class TaiKhoanNganHangService {
     }
   };
   CreateOrEditBankAccount = async (params: any) => {
-    const xx = await api.post(
-      `api/services/app/TaiKhoanNganHang/CreateOrEdit`,
-      params,
-    );
+    const xx = await api.post(`api/services/app/TaiKhoanNganHang/CreateOrEdit`, params);
     return xx;
   };
   // GetQRCode = async (taiKhoanNganHang: ITaiKhoanNganHangDto, tongThanhToan = 0, tenKhachHang = '', maHoaDon = '') => {

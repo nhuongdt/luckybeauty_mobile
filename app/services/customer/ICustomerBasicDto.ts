@@ -4,4 +4,3 @@ export interface ICustomerBasicDto {
   tenKhachHang: string;
   soDienThoai: string;
 }
-

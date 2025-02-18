@@ -1,4 +1,4 @@
-import { IParamSearchDto } from "../commonDto/IParamSearchDto";
+import {IParamSearchDto} from '../commonDto/IParamSearchDto';
 
 export interface IProductBasic {
   idHangHoa: string;
@@ -21,13 +21,7 @@ export class ProductBasicto implements IProductBasic {
   giaBan: number;
   tyLeChuyenDoi?: number;
   tenNhomHang?: string;
-  constructor({
-    idHangHoa = "",
-    idDonViQuyDoi = "",
-    maHangHoa = "",
-    tenHangHoa = "",
-    giaBan = 0,
-  }) {
+  constructor({idHangHoa = '', idDonViQuyDoi = '', maHangHoa = '', tenHangHoa = '', giaBan = 0}) {
     this.idHangHoa = idHangHoa;
     this.idDonViQuyDoi = idDonViQuyDoi;
     this.maHangHoa = maHangHoa;

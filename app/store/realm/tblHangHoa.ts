@@ -9,7 +9,7 @@ const tblHangHoa: Realm.ObjectSchema = {
     tenHangHoa: 'string',
     giaBan: 'float',
     tyLeChuyenDoi: 'float?',
-    tenNhomHang: 'string?',
-  },
+    tenNhomHang: 'string?'
+  }
 };
 export default tblHangHoa;

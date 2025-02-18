@@ -1,6 +1,10 @@
+import {format} from 'date-fns';
+import {DiaryStatus} from '../../enum/DiaryStatus';
+import {LoaiChungTu} from '../../enum/LoaiChungTu';
 import api from '../api';
 import {IQuyChitietDto} from './IQuyChitietDto';
 import {IQuyHoaDonDto} from './IQuyHoaDonDto';
+import CommonFunc from '../../utils/CommonFunc';
 
 class SoQuyService {
   ShareMoney = ({
@@ -10,7 +14,7 @@ class SoQuyService {
     tienTheGiaTri = 0,
     tienMat = 0,
     tienChuyenKhoan = 0,
-    tienPOS = 0,
+    tienPOS = 0
   }) => {
     if (tienCoc >= phaiTT) {
       return {
@@ -19,7 +23,7 @@ class SoQuyService {
         TienMat: 0,
         TienPOS: 0,
         TienChuyenKhoan: 0,
-        TienTheGiaTri: 0,
+        TienTheGiaTri: 0
       };
     } else {
       phaiTT = phaiTT - tienCoc;
@@ -30,7 +34,7 @@ class SoQuyService {
           TienMat: 0,
           TienPOS: 0,
           TienChuyenKhoan: 0,
-          TienTheGiaTri: 0,
+          TienTheGiaTri: 0
         };
       } else {
         phaiTT = phaiTT - tienDiem;
@@ -41,7 +45,7 @@ class SoQuyService {
             TienMat: 0,
             TienPOS: 0,
             TienChuyenKhoan: 0,
-            TienTheGiaTri: Math.abs(phaiTT),
+            TienTheGiaTri: Math.abs(phaiTT)
           };
         } else {
           phaiTT = phaiTT - tienTheGiaTri;
@@ -52,7 +56,7 @@ class SoQuyService {
               TienMat: Math.abs(phaiTT),
               TienPOS: 0,
               TienChuyenKhoan: 0,
-              TienTheGiaTri: tienTheGiaTri,
+              TienTheGiaTri: tienTheGiaTri
             };
           } else {
             phaiTT = phaiTT - tienMat;
@@ -63,7 +67,7 @@ class SoQuyService {
                 TienMat: tienMat,
                 TienPOS: 0,
                 TienChuyenKhoan: Math.abs(phaiTT),
-                TienTheGiaTri: tienTheGiaTri,
+                TienTheGiaTri: tienTheGiaTri
               };
             } else {
               phaiTT = phaiTT - tienChuyenKhoan;
@@ -74,7 +78,7 @@ class SoQuyService {
                   TienMat: tienMat,
                   TienPOS: Math.abs(phaiTT),
                   TienChuyenKhoan: tienChuyenKhoan,
-                  TienTheGiaTri: tienTheGiaTri,
+                  TienTheGiaTri: tienTheGiaTri
                 };
               } else {
                 phaiTT = phaiTT - tienPOS;
@@ -84,7 +88,7 @@ class SoQuyService {
                   TienMat: tienMat,
                   TienPOS: tienPOS,
                   TienChuyenKhoan: tienChuyenKhoan,
-                  TienTheGiaTri: tienTheGiaTri,
+                  TienTheGiaTri: tienTheGiaTri
                 };
               }
             }
@@ -98,19 +102,13 @@ class SoQuyService {
     return result;
   };
   InsertQuyHoaDon = async (input: IQuyHoaDonDto): Promise<IQuyHoaDonDto> => {
-    const result = await api.post(
-      'api/services/app/QuyHoaDon/InsertQuyHoaDon',
-      input,
-    );
+    const result = await api.post('api/services/app/QuyHoaDon/InsertQuyHoaDon', input);
     return result;
   };
-  InsertQuyHoaDonChiTiet = async (
-    idQuyHoaDon: string,
-    input: IQuyChitietDto[],
-  ): Promise<boolean> => {
+  InsertQuyHoaDonChiTiet = async (idQuyHoaDon: string, input: IQuyChitietDto[]): Promise<boolean> => {
     const result = await api.post(
       `api/services/app/QuyHoaDon/InsertQuyHoaDonChiTiet?idQuyHoaDon=${idQuyHoaDon}`,
-      input,
+      input
     );
     return result;
   };

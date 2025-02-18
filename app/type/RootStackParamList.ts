@@ -1,6 +1,5 @@
-
 export type RootStackParamList = {
-    SaleNavigation: undefined;
-    PageNotFound: undefined;
-    Customer: {idKhachHang: string};
-  };
+  SaleNavigation: undefined;
+  PageNotFound: undefined;
+  Customer: {idKhachHang: string};
+};
