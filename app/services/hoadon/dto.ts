@@ -106,7 +106,7 @@ export class HoaDonDto implements IHoaDonDto {
 
     maKhachHang = 'KL',
     tenKhachHang = 'Khách lẻ',
-    soDienThoai = '',
+    soDienThoai = ''
   }) {
     this.id = id;
     this.idLoaiChungTu = idLoaiChungTu;
@@ -186,7 +186,7 @@ export class HoaDonChiTietDto implements IHoaDonChiTietDto {
     idHangHoa = '',
     maHangHoa = '',
     tenHangHoa = '',
-    giaBan = 0,
+    giaBan = 0
   }) {
     this.id = id;
     this.idHoaDon = idHoaDon;
@@ -212,5 +212,65 @@ export class HoaDonChiTietDto implements IHoaDonChiTietDto {
     this.maHangHoa = maHangHoa;
     this.tenHangHoa = tenHangHoa;
     this.giaBan = giaBan;
+
+    Object.defineProperties(this, {
+      thanhTienTruocCK: {
+        get() {
+          if (this._thanhTienTruocCK === undefined) {
+            return this.soLuong * this.donGiaTruocCK;
+          }
+          return this._thanhTienTruocCK;
+        },
+        set(value: number) {
+          this._thanhTienTruocCK = value;
+        }
+      },
+      donGiaSauCK: {
+        get() {
+          if (this.ptChietKhau ?? 0 > 0) {
+            return this.donGiaTruocCK - (this.donGiaTruocCK * (this.ptChietKhau ?? 0)) / 100;
+          }
+          return this.donGiaTruocCK - (this.tienChietKhau ?? 0);
+        }
+        // set(newVal: number) {
+        //     return newVal;
+        // }
+      },
+      // vừa có thể tự động tính toán
+      // nhưng vẫn có thể thay đổi giá trị nếu được gán lại
+      thanhTienSauCK: {
+        get() {
+          if (this._thanhTienSauCK === undefined) {
+            return this.soLuong * this.donGiaSauCK;
+          }
+          return this._thanhTienSauCK;
+        },
+        set(value: number) {
+          this._thanhTienSauCK = value;
+        }
+      },
+      donGiaSauVAT: {
+        get() {
+          if (this.pTThue ?? 0 > 0) {
+            return this.donGiaSauCK + (this.donGiaSauCK * (this.pTThue ?? 0)) / 100;
+          }
+          return this.donGiaSauCK - (this.tienThue ?? 0);
+        }
+        // set(newVal: number) {
+        //     return newVal;
+        // }
+      },
+      thanhTienSauVAT: {
+        get() {
+          if (this._thanhTienSauVAT === undefined) {
+            return this.soLuong * this.donGiaSauVAT;
+          }
+          return this._thanhTienSauVAT;
+        },
+        set(value: number) {
+          this._thanhTienSauVAT = value;
+        }
+      }
+    });
   }
 }
