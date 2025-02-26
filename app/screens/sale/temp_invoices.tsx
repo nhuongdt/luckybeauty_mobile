@@ -1,22 +1,22 @@
-import {View, StyleSheet, Pressable, ScrollView} from 'react-native';
-import {Icon, Button} from '@rneui/themed';
-import {useEffect, useRef, useContext, useState, useCallback} from 'react';
+import { View, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { Icon, Button, Text, useTheme } from '@rneui/themed';
+import { useEffect, useRef, useContext, useState, useCallback } from 'react';
 import uuid from 'react-native-uuid';
-import {format} from 'date-fns';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {Input, Text} from '@rneui/base';
-import {ListBottomTab} from '../../enum/ListBottomTab';
+import { format } from 'date-fns';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Input } from '@rneui/base';
+import { ListBottomTab } from '../../enum/ListBottomTab';
 import realmQuery from '../../store/realm/realmQuery';
-import {HoaDonDto, IHoaDonDto} from '../../services/hoadon/dto';
-import {LoaiChungTu, TenLoaiChungTu} from '../../enum/LoaiChungTu';
+import { HoaDonDto, IHoaDonDto } from '../../services/hoadon/dto';
+import { LoaiChungTu, TenLoaiChungTu } from '../../enum/LoaiChungTu';
 import CommonFunc from '../../utils/CommonFunc';
-import {IconType} from '../../enum/IconType';
-import {InvoiceStackParamList} from '../../type/InvoiceStackParamList';
-import {ListInvoiceStack} from '../../enum/ListInvoiceStack';
+import { IconType } from '../../enum/IconType';
+import { InvoiceStackParamList } from '../../type/InvoiceStackParamList';
+import { ListInvoiceStack } from '../../enum/ListInvoiceStack';
 import PageEmpty from '../../components/page_empty';
-import {TempInvoiceDetails} from './teamp_invoice_details';
-import {ActionType} from '../../enum/ActionType';
+import { TempInvoiceDetails } from './teamp_invoice_details';
+import { ActionType } from '../../enum/ActionType';
 
 type TempInvoiceProps = NativeStackNavigationProp<InvoiceStackParamList, ListBottomTab.TEMP_INVOICE>;
 
@@ -49,6 +49,7 @@ const styleHeader = StyleSheet.create({
 });
 
 const TempInvoices = () => {
+  const { theme } = useTheme();
   const firstLoad = useRef(true);
   const navigation = useNavigation<TempInvoiceProps>();
   const route = useRoute<TempInvoiceRouteProp>();
@@ -57,8 +58,8 @@ const TempInvoices = () => {
   const [tabActive, setTabActive] = useState(LoaiChungTu.HOA_DON_BAN_LE);
 
   const arrTab = [
-    {id: LoaiChungTu.HOA_DON_BAN_LE, text: 'Hóa đơn'},
-    {id: LoaiChungTu.GOI_DICH_VU, text: 'Gói dịch vụ'}
+    { id: LoaiChungTu.HOA_DON_BAN_LE, text: 'Hóa đơn' },
+    { id: LoaiChungTu.GOI_DICH_VU, text: 'Gói dịch vụ' }
   ];
 
   const getHoaDonFromCache = (idLoaiChungTu = LoaiChungTu.HOA_DON_BAN_LE) => {
@@ -151,7 +152,7 @@ const TempInvoices = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View
         style={{
           flexDirection: 'row',
@@ -186,7 +187,7 @@ const TempInvoices = () => {
         <View style={[styleHeader.boxItem, styleHeader.boxAdd]}>
           <Pressable onPress={createNewInvoice}>
             <Icon name="add" size={20} />
-            <Text style={{fontWeight: 500}}>Tạo đơn mới</Text>
+            <Text style={{ fontWeight: 500 }}>Tạo đơn mới</Text>
           </Pressable>
         </View>
       </View>
@@ -199,14 +200,14 @@ const TempInvoices = () => {
             backgroundColor: 'white'
           }}>
           <Input
-            leftIcon={{type: 'ionicon', name: 'search'}}
+            leftIcon={{ type: 'ionicon', name: 'search' }}
             placeholder="Tìm hóa đơn"
             containerStyle={{
               backgroundColor: 'white',
               borderRadius: 4,
               borderColor: '#F5F5F5'
             }}
-            inputStyle={{fontSize: 14}}
+            inputStyle={{ fontSize: 14 }}
           />
           {lstHoaDon?.length > 0 && (
             <ScrollView>
@@ -225,18 +226,18 @@ const TempInvoices = () => {
                       name="delete-outline"
                       size={24}
                       color={'#ff944d'}
-                      style={{flex: 1}}
+                      style={{ flex: 1 }}
                       onPress={() => removeInvoice(item?.id)}
                     />
                     <View style={stylesInvoiceItem.boxCenter}>
-                      <View style={{flex: 2}}>
-                        <Text style={{fontWeight: 500}}>{item?.maHoaDon}</Text>
-                        <Text style={{color: 'rgb(178, 183, 187)', fontSize: 14}}>
+                      <View style={{ flex: 2 }}>
+                        <Text style={{ fontWeight: 500, color: theme.colors.primary }}>{item?.maHoaDon}</Text>
+                        <Text style={{ color: 'rgb(178, 183, 187)', fontSize: 14 }}>
                           {format(new Date(item.ngayLapHoaDon), 'HH:mm')}
                         </Text>
                       </View>
-                      <View style={{flex: 3}}>
-                        <Text style={{fontWeight: 500, textAlign: 'right'}}>
+                      <View style={{ flex: 3 }}>
+                        <Text style={{ fontWeight: 500, textAlign: 'right', color: theme.colors.primary }}>
                           {new Intl.NumberFormat('vi-VN').format(item?.tongThanhToan ?? 0)}
                         </Text>
                         <Text
@@ -251,7 +252,7 @@ const TempInvoices = () => {
                       </View>
                     </View>
 
-                    <Icon type="antdesign" name="edit" size={24} style={{flex: 1}} onPress={() => gotoEdit(item)} />
+                    <Icon type="antdesign" name="edit" size={24} style={{ flex: 1 }} onPress={() => gotoEdit(item)} />
                   </View>
                 </Pressable>
               ))}
@@ -266,7 +267,7 @@ export default TempInvoices;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'rgb(245, 247, 244)',
+    // backgroundColor: 'rgb(245, 247, 244)',
     padding: 8
   }
 });
