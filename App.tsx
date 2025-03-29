@@ -14,7 +14,6 @@ import { Colors, Header } from 'react-native/Libraries/NewAppScreen';
 import AppNavigation from './app/navigation/app_navigation';
 import { ThemeProvider } from '@rneui/themed';
 import { darkTheme, lightTheme } from './app/theme/theme';
-import { RootNavigation } from './app/navigation/root_navigation';
 
 type SectionProps = PropsWithChildren<{
   title: string;

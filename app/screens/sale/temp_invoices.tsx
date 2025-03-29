@@ -3,30 +3,30 @@ import { Icon, Button, Text, useTheme } from '@rneui/themed';
 import { useEffect, useRef, useContext, useState, useCallback } from 'react';
 import uuid from 'react-native-uuid';
 import { format } from 'date-fns';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { CompositeNavigationProp, CompositeScreenProps, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Input } from '@rneui/base';
-import { ListBottomTab } from '../../enum/ListBottomTab';
 import realmQuery from '../../store/realm/realmQuery';
 import { HoaDonDto, IHoaDonDto } from '../../services/hoadon/dto';
 import { LoaiChungTu, TenLoaiChungTu } from '../../enum/LoaiChungTu';
 import CommonFunc from '../../utils/CommonFunc';
 import { IconType } from '../../enum/IconType';
-import { InvoiceStackParamList } from '../../type/InvoiceStackParamList';
-import { ListInvoiceStack } from '../../enum/ListInvoiceStack';
 import PageEmpty from '../../components/page_empty';
 import { TempInvoiceDetails } from './teamp_invoice_details';
 import { ActionType } from '../../enum/ActionType';
+import { SaleManagerStack, SaleManagerTab } from '../../navigation/list_name_route';
+import { SaleManagerStackParamList, SaleManagerTabParamList } from '../../navigation/route_param_list';
+import { BottomTabNavigationProp, BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 
-type TempInvoiceProps = NativeStackNavigationProp<InvoiceStackParamList, ListBottomTab.TEMP_INVOICE>;
+// type TempInvoicekNavigationProps = NativeStackNavigationProp<SaleManagerTabParamList>;
+type TempInvoicekNavigationProps = CompositeNavigationProp<
+  BottomTabNavigationProp<SaleManagerTabParamList, SaleManagerTab.TEMP_INVOICE>,
+  NativeStackNavigationProp<SaleManagerStackParamList>
+>;
 
 type TempInvoiceRouteProp = RouteProp<
-  {
-    params: {
-      idHoaDon: string;
-    };
-  },
-  'params'
+  SaleManagerTabParamList,
+  SaleManagerTab.TEMP_INVOICE
 >;
 
 const styleHeader = StyleSheet.create({
@@ -51,7 +51,7 @@ const styleHeader = StyleSheet.create({
 const TempInvoices = () => {
   const { theme } = useTheme();
   const firstLoad = useRef(true);
-  const navigation = useNavigation<TempInvoiceProps>();
+  const navigation = useNavigation<TempInvoicekNavigationProps>();
   const route = useRoute<TempInvoiceRouteProp>();
 
   const [lstHoaDon, setLstHoaDon] = useState<IHoaDonDto[]>([]);
@@ -94,7 +94,7 @@ const TempInvoices = () => {
     realmQuery.HoaDon_ResetValueForColumn_isOpenLastest(tabActive);
     realmQuery.InsertTo_HoaDon(newHD);
 
-    navigation.navigate(ListBottomTab.PRODUCT, {
+    navigation.navigate(SaleManagerTab.PRODUCT, {
       idHoaDon: newHD?.id,
       idLoaiChungTu: tabActive
     });
@@ -112,13 +112,11 @@ const TempInvoices = () => {
   };
 
   const goInvoiceDetail = (item: IHoaDonDto) => {
-    navigation.navigate(ListInvoiceStack.TEMP_INVOICE_DETAIL, {
-      idHoaDon: item?.id
-    });
+    navigation.navigate(SaleManagerStack.TEMP_INVOICE_DETAIL, { idHoaDon: item.id });
   };
 
   const gotoEdit = (item: IHoaDonDto) => {
-    navigation.navigate(ListBottomTab.PRODUCT, {
+    navigation.navigate(SaleManagerTab.PRODUCT, {
       idHoaDon: item.id,
       idLoaiChungTu: tabActive
     });
@@ -144,7 +142,7 @@ const TempInvoices = () => {
     );
 
     if (actionId === ActionType.INSERT) {
-      navigation.navigate(ListBottomTab.PRODUCT, {
+      navigation.navigate(SaleManagerTab.PRODUCT, {
         idHoaDon: hdAfter?.id,
         idLoaiChungTu: tabActive
       });

@@ -1,21 +1,24 @@
-import {Platform, View, StyleSheet, Image, Text, TextInput, KeyboardAvoidingView, Dimensions} from 'react-native';
-import {Input} from '@rneui/themed';
-import {CheckBox} from '@rneui/themed';
-import {Button} from '@rneui/themed';
-import {FC, useEffect, useState} from 'react';
+import { Platform, View, StyleSheet, Image, Text, TextInput, KeyboardAvoidingView, Dimensions } from 'react-native';
+import { Input } from '@rneui/themed';
+import { CheckBox } from '@rneui/themed';
+import { Button } from '@rneui/themed';
+import { FC, useEffect, useState } from 'react';
 import LoginService from '../services/login/LoginService';
-import {TenantStatus} from '../enum/TenantStatus';
-import {ILoginModel} from '../services/login/LoginDto';
-import {mmkvStorage} from '../store/mmkvStore';
-import {IconType} from '../enum/IconType';
+import { TenantStatus } from '../enum/TenantStatus';
+import { ILoginModel, IUserLoginDto } from '../services/login/LoginDto';
+import { mmkvStorage } from '../store/mmkvStore';
+import { IconType } from '../enum/IconType';
+import ChiNhanhService from '../services/chi_nhanh/ChiNhanhService';
 
 const PlaceholderImage = require('@/assets/images/background-image.png');
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-const LoginScreen: FC<{onLoginOK: () => void}> = ({onLoginOK}) => {
+
+const LoginScreen: FC<{ onLoginOK: (user: IUserLoginDto) => void }> = ({ onLoginOK }) => {
   const [tenancyName, setTenancyName] = useState('');
   const [userName, setUserName] = useState('');
   const [passWord, setPassWord] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({
     userName: '',
     passWord: '',
@@ -31,7 +34,7 @@ const LoginScreen: FC<{onLoginOK: () => void}> = ({onLoginOK}) => {
   }, []);
 
   const validateForm = () => {
-    let errors = {userName: '', passWord: '', tenancyName: ''};
+    let errors = { userName: '', passWord: '', tenancyName: '' };
     if (!userName) errors.userName = 'Vui lòng nhập tên đăng nhập';
     if (!passWord) errors.passWord = 'Vui lòng nhập mật khẩu';
     //if (!tenancyName) errors.tenancyName = "Vui lòng nhập Id cửa hàng";
@@ -81,10 +84,16 @@ const LoginScreen: FC<{onLoginOK: () => void}> = ({onLoginOK}) => {
       const token = await LoginService.checkUserLogin(input, tenantId);
       if (token != null) {
         mmkvStorage.set('accessToken', token.accessToken);
+
+        let idChiNhanh = '';
+        const chiNhanhOfUser = await ChiNhanhService.GetChiNhanhByUser();
+        if (chiNhanhOfUser?.length > 0) {
+          idChiNhanh = chiNhanhOfUser[0].id;
+        }
         if (input.rememberClient) {
           mmkvStorage.set('user', JSON.stringify(input));
         }
-        onLoginOK();
+        onLoginOK({ userName: userName, idChiNhanh: idChiNhanh });
       } else {
         //gotoHome(false);
       }
@@ -96,10 +105,10 @@ const LoginScreen: FC<{onLoginOK: () => void}> = ({onLoginOK}) => {
       <KeyboardAvoidingView style={styles.container}>
         <View style={styles.formContainer}>
           <Image
-            style={{resizeMode: 'stretch', width: 200, height: 50}}
+            style={{ resizeMode: 'stretch', width: 200, height: 50 }}
             source={require('./../assets/images/logo_Luckybeauty_full.png')}
           />
-          <Text style={{fontSize: 20, fontWeight: 500, marginTop: 12}}>Đăng nhập</Text>
+          <Text style={{ fontSize: 20, fontWeight: 500, marginTop: 12 }}>Đăng nhập</Text>
           <View style={styles.inputContainer}>
             <Input
               placeholder="tenant"
@@ -109,11 +118,11 @@ const LoginScreen: FC<{onLoginOK: () => void}> = ({onLoginOK}) => {
               }}
               errorStyle={styles.msgErr}
               errorMessage={errors.tenancyName}
-              inputContainerStyle={{gap: 8}}
+              inputContainerStyle={{ gap: 8 }}
               value={tenancyName}
               onChangeText={text => {
                 setTenancyName(text);
-                setErrors({...errors, tenancyName: ''});
+                setErrors({ ...errors, tenancyName: '' });
               }}
             />
             <Input
@@ -124,11 +133,11 @@ const LoginScreen: FC<{onLoginOK: () => void}> = ({onLoginOK}) => {
               }}
               errorStyle={styles.msgErr}
               errorMessage={errors.userName}
-              inputContainerStyle={{gap: 8}}
+              inputContainerStyle={{ gap: 8 }}
               value={userName}
               onChangeText={text => {
                 setUserName(text);
-                setErrors({...errors, userName: ''});
+                setErrors({ ...errors, userName: '' });
               }}
             />
             <Input
@@ -140,15 +149,16 @@ const LoginScreen: FC<{onLoginOK: () => void}> = ({onLoginOK}) => {
               secureTextEntry
               errorStyle={styles.msgErr}
               errorMessage={errors.passWord}
-              inputContainerStyle={{gap: 8}}
+              inputContainerStyle={{ gap: 8 }}
               value={passWord}
               onChangeText={text => {
                 setPassWord(text);
-                setErrors({...errors, passWord: ''});
+                setErrors({ ...errors, passWord: '' });
               }}
             />
             <View style={[styles.inputBox, styles.checkBoxContainer]}>
-              <CheckBox center title={'Ghi nhớ'} checked={false} containerStyle={{paddingLeft: 0}} />
+              <CheckBox center title={'Ghi nhớ'} checked={rememberMe} containerStyle={{ paddingLeft: 0 }}
+                onPress={() => setRememberMe(!rememberMe)} />
 
               <Text
                 style={{
@@ -165,7 +175,7 @@ const LoginScreen: FC<{onLoginOK: () => void}> = ({onLoginOK}) => {
               title={'Đăng nhập'}
               size="lg"
               onPress={onPressLogin}
-              containerStyle={{marginTop: 20, borderRadius: 4}}
+              containerStyle={{ marginTop: 20, borderRadius: 4 }}
             />
           </View>
         </View>

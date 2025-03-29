@@ -1,35 +1,45 @@
-import {RouteProp, useRoute} from '@react-navigation/native';
-import {Image, Input, Text} from '@rneui/themed';
-import {useEffect, useState} from 'react';
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
-import {IHoaDonDto} from '../../services/hoadon/dto';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { Image, Input, Text } from '@rneui/themed';
+import { useContext, useEffect, useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { IHoaDonDto } from '../../services/hoadon/dto';
 import realmQuery from '../../store/realm/realmQuery';
-import {HinhThucThanhToan} from '../../enum/HinhThucThanhToan';
-import {Button, CheckBox, Icon} from '@rneui/base';
-import {IconType} from '../../enum/IconType';
-import {IQuyChitietDto} from '../../services/so_quy/IQuyChitietDto';
+import { HinhThucThanhToan } from '../../enum/HinhThucThanhToan';
+import { Button, CheckBox, Icon } from '@rneui/base';
+import { IconType } from '../../enum/IconType';
+import { IQuyChitietDto } from '../../services/so_quy/IQuyChitietDto';
 import CommonFunc from '../../utils/CommonFunc';
 import HoaDonService from '../../services/hoadon/HoaDonService';
-import {ListTaiKhoanNganHang} from '../tai_khoan_ngan_hang/list_tai_khoan_ngan_hang';
-import {ITaiKhoanNganHangDto} from '../../services/tai_khoan_ngan_hang/ITaiKhoanNganHangDto';
-import {SimpleDialog} from '../../components/simple_dialog';
-import {IPropsSimpleDialog} from '../../type/IPropsSimpleDialog';
+import { ListTaiKhoanNganHang } from '../tai_khoan_ngan_hang/list_tai_khoan_ngan_hang';
+import { ITaiKhoanNganHangDto } from '../../services/tai_khoan_ngan_hang/ITaiKhoanNganHangDto';
+import { SimpleDialog } from '../../components/simple_dialog';
+import { IPropsSimpleDialog } from '../../type/IPropsSimpleDialog';
 import SoQuyService from '../../services/so_quy/SoQuyService';
-import {IQuyHoaDonDto} from '../../services/so_quy/IQuyHoaDonDto';
+import { IQuyHoaDonDto } from '../../services/so_quy/IQuyHoaDonDto';
 import ApiConst from '../../const/ApiConst';
-import {LoaiChungTu} from '../../enum/LoaiChungTu';
-import {format} from 'date-fns';
+import { LoaiChungTu } from '../../enum/LoaiChungTu';
+import { format } from 'date-fns';
 import NhatKyThaoTacService from '../../services/nhat_ky_su_dung/NhatKyThaoTacService';
-import {INhatKyThaoTacDto} from '../../services/nhat_ky_su_dung/INhatKyThaoTacDto';
-import {DiaryStatus} from '../../enum/DiaryStatus';
+import { INhatKyThaoTacDto } from '../../services/nhat_ky_su_dung/INhatKyThaoTacDto';
+import { DiaryStatus } from '../../enum/DiaryStatus';
+import { SaleManagerStack, SaleManagerTab } from '../../navigation/list_name_route';
+import { SaleManagerStackParamList } from '../../navigation/route_param_list';
+import { UserLoginContext } from '../../store/react_context/UserLogin';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-type ThanhToanRouteProp = RouteProp<{params: {idHoaDon: string; tongPhaiTra?: number}}, 'params'>;
+type ThanhToanRouteProp = RouteProp<
+  SaleManagerStackParamList, SaleManagerStack.THANH_TOAN>;
+type ThanhToanScreenNavigation = NativeStackNavigationProp<
+  SaleManagerStackParamList, SaleManagerStack.THANH_TOAN>;
 
 export default function ThanhToan() {
   const route = useRoute<ThanhToanRouteProp>();
-  const {idHoaDon = '', tongPhaiTra = 0} = route.params || {};
+  const { idHoaDon = '', tongPhaiTra = 0 } = route.params || {};
+  const userLogin = useContext(UserLoginContext);
+
+  const navigation = useNavigation<ThanhToanScreenNavigation>();
   const [isSaving, setIsSaving] = useState(false);
-  const [tienMat, setTienMat] = useState(String(tongPhaiTra));
+  const [tienMat, setTienMat] = useState(CommonFunc.formatCurrency(tongPhaiTra));
   const [tienChuyenKhoan, setTienChuyenKhoan] = useState('0');
   const [tienQuyeThePos, setTienQuyeThePos] = useState('0');
   const [tienTheGiaTri, setTienTheGiaTri] = useState('0');
@@ -54,12 +64,12 @@ export default function ThanhToan() {
   const [arrHinhThucChosed, setArrHinhThucChosed] = useState([HinhThucThanhToan.TIEN_MAT]);
 
   const arrPhuongThucTT = [
-    {id: HinhThucThanhToan.TIEN_MAT, text: 'Tiển mặt'},
+    { id: HinhThucThanhToan.TIEN_MAT, text: 'Tiển mặt' },
     {
       id: HinhThucThanhToan.CHUYEN_KHOAN,
       text: 'Chuyển khoản'
     },
-    {id: HinhThucThanhToan.QUYET_THE, text: 'POS'}
+    { id: HinhThucThanhToan.QUYET_THE, text: 'POS' }
   ];
 
   const tienKhachDua =
@@ -72,7 +82,7 @@ export default function ThanhToan() {
   const GetInforHoadon_fromCache = () => {
     const data = realmQuery.GetHoaDon_byId(idHoaDon);
     if (data !== null) {
-      setHoaDonOpen({...data});
+      setHoaDonOpen({ ...data });
     }
   };
 
@@ -216,10 +226,10 @@ export default function ThanhToan() {
       return;
     }
     const lstCTHD = realmQuery.GetListChiTietHoaDon_byIdHoaDon(hoadonOpen?.id);
+    hoadonOpen.idChiNhanh = userLogin.idChiNhanh;
     const dataHD = await HoaDonService.InsertHoaDon(hoadonOpen);
     if (dataHD !== null) {
       const datHDCT = await HoaDonService.InsertHoaDonChiTiet(dataHD?.id, lstCTHD);
-
       if (datHDCT) {
         const objShareMoney = SoQuyService.ShareMoney({
           phaiTT: tongPhaiTra,
@@ -230,17 +240,26 @@ export default function ThanhToan() {
         const tongThu = objShareMoney.TienMat + objShareMoney.TienChuyenKhoan + objShareMoney.TienPOS;
 
         await saveDiaryHoaDon(dataHD, tongThu);
+
+        setObjSimpleDialog({
+          ...objSimpleDialog,
+          isShow: true,
+          title: 'Thông báo',
+          mes: 'Tạo hóa đơn thành công'
+        });
+
         if (tongThu > 0) {
           const quyHD: IQuyHoaDonDto = {
             id: ApiConst.GUID_EMPTY,
-            idChiNhanh: ApiConst.GUID_EMPTY,
-            idNhanVien: ApiConst.GUID_EMPTY,
+            idChiNhanh: userLogin.idChiNhanh,
+            idNhanVien: null,// todo
             idLoaiChungTu: LoaiChungTu.PHIEU_THU,
             tongTienThu: tongThu,
             ngayLapHoaDon: format(hoadonOpen?.ngayLapHoaDon, 'yyyy-MM-dd'),
             noiDungThu: noiDungThu,
             hachToanKinhDoanh: true
           };
+          console.log('quyHD ', quyHD);
           const dataQuyHD = await SoQuyService.InsertQuyHoaDon(quyHD);
 
           const lstQuyCT = [];
@@ -292,6 +311,13 @@ export default function ThanhToan() {
           await SoQuyService.InsertQuyHoaDonChiTiet(dataQuyHD.id, lstQuyCT);
           await saveDiaryQuyHD(quyHD, lstQuyCT);
         }
+
+        realmQuery.RemoveHoaDon_byId(idHoaDon);
+        realmQuery.DeleteHoaDonChiTiet_byIdHoaDon(idHoaDon);
+
+        navigation.navigate(
+          SaleManagerStack.SALE_MANAGER_TAB,
+          { screen: SaleManagerTab.TEMP_INVOICE, params: { idHoaDon: '' } });
       }
     }
   };
@@ -367,7 +393,7 @@ export default function ThanhToan() {
   };
 
   const onCloseSimpleDialog = () => {
-    setObjSimpleDialog({...objSimpleDialog, isShow: false});
+    setObjSimpleDialog({ ...objSimpleDialog, isShow: false });
   };
 
   return (
@@ -387,7 +413,7 @@ export default function ThanhToan() {
         <Text style={styles.textInfor}>Tổng phải trả</Text>
         <Text style={styles.textInfor}>{new Intl.NumberFormat('vi-VN').format(hoadonOpen?.tongThanhToan ?? 0)}</Text>
       </View>
-      <View style={{gap: 8}}>
+      <View style={{ gap: 8 }}>
         <Text>Phương thức thanh toán</Text>
         <View
           style={{
@@ -408,12 +434,12 @@ export default function ThanhToan() {
         </View>
       </View>
 
-      <View style={{gap: 20}}>
+      <View style={{ gap: 20 }}>
         {arrHinhThucChosed?.includes(HinhThucThanhToan.TIEN_MAT) && (
           <View style={styles.itemLoaiTien}>
             <Text>Tiền mặt</Text>
             <Input
-              inputStyle={{textAlign: 'right'}}
+              inputStyle={{ textAlign: 'right' }}
               value={tienMat?.toString()}
               onChangeText={txt => editTienMat(txt)}
             />
@@ -421,11 +447,11 @@ export default function ThanhToan() {
         )}
 
         {arrHinhThucChosed?.includes(HinhThucThanhToan.CHUYEN_KHOAN) && (
-          <View style={[styles.flexRow, {gap: 8}]}>
+          <View style={[styles.flexRow, { gap: 8 }]}>
             <View style={styles.itemLoaiTien}>
               <Text>Chuyển khoản</Text>
               <Input
-                inputStyle={{textAlign: 'right'}}
+                inputStyle={{ textAlign: 'right' }}
                 value={tienChuyenKhoan}
                 onChangeText={text =>
                   setTienChuyenKhoan(CommonFunc.formatCurrency(CommonFunc.formatNumberToFloat(text)))
@@ -434,9 +460,9 @@ export default function ThanhToan() {
             </View>
 
             {!CommonFunc.checkNull_OrEmpty(idTaiKhoanChuyenKhoan) ? (
-              <View style={{width: '40%'}}>
+              <View style={{ width: '40%' }}>
                 <View style={styles.accountItem}>
-                  <Image style={{height: 60}} source={{uri: taiKhoanCKChosed?.logoNganHang}} />
+                  <Image style={{ height: 60 }} source={{ uri: taiKhoanCKChosed?.logoNganHang }} />
 
                   <View>
                     <Text
@@ -447,13 +473,13 @@ export default function ThanhToan() {
                       }}>
                       {taiKhoanCKChosed?.tenChuThe ?? ''}
                     </Text>
-                    <Text style={{color: '#4D4D4D', textAlign: 'center'}}>{taiKhoanCKChosed?.soTaiKhoan ?? ''}</Text>
+                    <Text style={{ color: '#4D4D4D', textAlign: 'center' }}>{taiKhoanCKChosed?.soTaiKhoan ?? ''}</Text>
                   </View>
                 </View>
               </View>
             ) : (
               <TouchableOpacity
-                style={[styles.flexRow, {width: '40%'}]}
+                style={[styles.flexRow, { width: '40%' }]}
                 onPress={() => showModalTaiKhoanNganHang(true)}>
                 <Text
                   style={{
@@ -469,11 +495,11 @@ export default function ThanhToan() {
         )}
 
         {arrHinhThucChosed.includes(HinhThucThanhToan.QUYET_THE) && (
-          <View style={[styles.flexRow, {gap: 16}]}>
+          <View style={[styles.flexRow, { gap: 16 }]}>
             <View style={styles.itemLoaiTien}>
               <Text>POS</Text>
               <Input
-                inputStyle={{textAlign: 'right'}}
+                inputStyle={{ textAlign: 'right' }}
                 value={tienQuyeThePos}
                 onChangeText={text =>
                   setTienQuyeThePos(CommonFunc.formatCurrency(CommonFunc.formatNumberToFloat(text)))
@@ -481,9 +507,9 @@ export default function ThanhToan() {
               />
             </View>
             {!CommonFunc.checkNull_OrEmpty(idTaiKhoanPOS) ? (
-              <View style={{width: '40%'}}>
+              <View style={{ width: '40%' }}>
                 <View style={styles.accountItem}>
-                  <Image style={{height: 60}} source={{uri: taiKhoanPOSChosed?.logoNganHang}} />
+                  <Image style={{ height: 60 }} source={{ uri: taiKhoanPOSChosed?.logoNganHang }} />
 
                   <View>
                     <Text
@@ -494,13 +520,13 @@ export default function ThanhToan() {
                       }}>
                       {taiKhoanPOSChosed?.tenChuThe ?? ''}
                     </Text>
-                    <Text style={{color: '#4D4D4D', textAlign: 'center'}}>{taiKhoanPOSChosed?.soTaiKhoan ?? ''}</Text>
+                    <Text style={{ color: '#4D4D4D', textAlign: 'center' }}>{taiKhoanPOSChosed?.soTaiKhoan ?? ''}</Text>
                   </View>
                 </View>
               </View>
             ) : (
               <TouchableOpacity
-                style={[styles.flexRow, {width: '40%'}]}
+                style={[styles.flexRow, { width: '40%' }]}
                 onPress={() => showModalTaiKhoanNganHang(false)}>
                 <Text
                   style={{
@@ -526,7 +552,7 @@ export default function ThanhToan() {
         }}>
         <Input
           placeholder="Nội dung thanh toán"
-          inputStyle={{fontStyle: 'italic', fontSize: 14}}
+          inputStyle={{ fontStyle: 'italic', fontSize: 14 }}
           value={noiDungThu}
           onChangeText={text => setNoiDungThu(text)}
         />
@@ -538,15 +564,15 @@ export default function ThanhToan() {
             borderRadius: 8,
             padding: 12
           }}>
-          <View style={{gap: 16}}>
+          <View style={{ gap: 16 }}>
             <View style={styles.flexRow}>
-              <View style={{gap: 16}}>
-                <Text style={{fontWeight: 500}}>Tổng khách trả</Text>
+              <View style={{ gap: 16 }}>
+                <Text style={{ fontWeight: 500 }}>Tổng khách trả</Text>
                 <Text>{tienKhachThieu < 0 ? 'Tiền thừa' : 'Còn thiếu'}</Text>
               </View>
-              <View style={{gap: 16}}>
-                <Text style={{fontWeight: 500}}>{CommonFunc.formatCurrency(tienKhachDua)}</Text>
-                <Text style={{textAlign: 'right'}}>{CommonFunc.formatCurrency(Math.abs(tienKhachThieu))}</Text>
+              <View style={{ gap: 16 }}>
+                <Text style={{ fontWeight: 500 }}>{CommonFunc.formatCurrency(tienKhachDua)}</Text>
+                <Text style={{ textAlign: 'right' }}>{CommonFunc.formatCurrency(Math.abs(tienKhachThieu))}</Text>
               </View>
             </View>
           </View>
@@ -554,9 +580,9 @@ export default function ThanhToan() {
         <Button
           title={'Thanh toán'}
           size="lg"
-          buttonStyle={{backgroundColor: '#FA6800'}}
-          containerStyle={{borderRadius: 8}}
-          titleStyle={{color: 'white'}}
+          buttonStyle={{ backgroundColor: '#FA6800' }}
+          containerStyle={{ borderRadius: 8 }}
+          titleStyle={{ color: 'white' }}
           onPress={thanhToan}
         />
       </View>
