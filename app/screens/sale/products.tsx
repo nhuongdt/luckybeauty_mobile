@@ -31,9 +31,9 @@ const ProductSale = () => {
   const firstLoad = useRef(true);
   const route = useRoute<ProductSaleRouteProp>();
   const navigation = useNavigation<ProductSaleNavigationProps>();
-  const { idLoaiChungTu = LoaiChungTu.HOA_DON_BAN_LE } = route?.params || {};
   const { currentInvoice, setCurrentInvoice } = useSaleManagerStackContext();
   const idHoaDonCurrent = currentInvoice?.idHoaDon ?? '';
+  const idLoaiChungTu = currentInvoice?.idLoaiChungTu ?? LoaiChungTu.HOA_DON_BAN_LE;
 
   const [idHoaDonChosing, setIdHoaDonChosing] = useState('');
   const [isShowModalAddGioHang, setIsShowModalAddGioHang] = useState(false);
@@ -243,6 +243,7 @@ const ProductSale = () => {
     if (hdAfter) {
       setCurrentInvoice({
         ...currentInvoice,
+        idHoaDon: idHoaDon,
         countProduct: lstCTHD?.length ?? 0
       });
     }

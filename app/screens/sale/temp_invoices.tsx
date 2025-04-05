@@ -101,7 +101,8 @@ const TempInvoices = () => {
     setCurrentInvoice({
       ...currentInvoice,
       idHoaDon: newHD?.id,
-      countProduct: 0
+      countProduct: 0,
+      idLoaiChungTu: tabActive
     });
     navigation.navigate(SaleManagerTab.PRODUCT);
   };
@@ -109,6 +110,10 @@ const TempInvoices = () => {
   const onChangeTab = (tabActive: number) => {
     getHoaDonFromCache(tabActive);
     setTabActive(tabActive);
+    setCurrentInvoice({
+      ...currentInvoice,
+      idLoaiChungTu: tabActive,
+    });
   };
 
   const removeInvoice = async (id: string) => {
@@ -212,7 +217,7 @@ const TempInvoices = () => {
         </View>
       </View>
       {lstHoaDon?.length === 0 ? (
-        <PageEmpty txt="Không có hóa đơn tạm" />
+        <PageEmpty txt={`Không có ${tabActive === LoaiChungTu.HOA_DON_BAN_LE ? 'hóa đơn tạm' : 'gói dịch vụ tạm'}`} />
       ) : (
         <View
           style={{
