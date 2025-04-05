@@ -1,4 +1,4 @@
-import {IPagedRequestDto} from '../commonDto/IPagedRequestDto';
+import { IPagedRequestDto } from '../commonDto/IPagedRequestDto';
 
 export interface IPagedKhachHangRequestDto extends IPagedRequestDto {
   loaiDoiTuong?: number;

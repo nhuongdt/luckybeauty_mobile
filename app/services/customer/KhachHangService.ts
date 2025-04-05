@@ -1,12 +1,12 @@
 import ApiConst from '../../const/ApiConst';
 import CommonFunc from '../../utils/CommonFunc';
 import api from '../api';
-import {IFileDto} from '../commonDto/IFileDto';
-import {IFileUploadDto} from '../commonDto/IFileUpload';
-import {IPageResultDto} from '../commonDto/IPageResultDto';
-import {ICreateOrEditKhachHangDto} from './ICreateOrEditKhachHangDto';
-import {IKhachHangItemDto} from './IKhachHangItemDto';
-import {IPagedKhachHangRequestDto} from './IPagedKhachHangRequestDto';
+import { IFileDto } from '../commonDto/IFileDto';
+import { IFileUploadDto } from '../commonDto/IFileUpload';
+import { IPageResultDto } from '../commonDto/IPageResultDto';
+import { ICreateOrEditKhachHangDto } from './ICreateOrEditKhachHangDto';
+import { IKhachHangItemDto } from './IKhachHangItemDto';
+import { IPagedKhachHangRequestDto } from './IPagedKhachHangRequestDto';
 
 class KhachHangService {
   public async createOrEdit(input: ICreateOrEditKhachHangDto): Promise<ICreateOrEditKhachHangDto> {

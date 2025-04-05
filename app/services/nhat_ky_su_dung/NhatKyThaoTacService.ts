@@ -1,5 +1,5 @@
 import api from '../api';
-import {INhatKyThaoTacDto} from './INhatKyThaoTacDto';
+import { INhatKyThaoTacDto } from './INhatKyThaoTacDto';
 
 class NhatKyThaoTacService {
   CreateNhatKyHoatDong = async (input: INhatKyThaoTacDto) => {

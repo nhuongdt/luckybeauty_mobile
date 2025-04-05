@@ -1,6 +1,6 @@
 import ApiConst from '../../const/ApiConst';
 import api from '../api';
-import {ITaiKhoanNganHangDto} from './ITaiKhoanNganHangDto';
+import { ITaiKhoanNganHangDto } from './ITaiKhoanNganHangDto';
 
 class TaiKhoanNganHangService {
   async GetAllBank() {

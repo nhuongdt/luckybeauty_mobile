@@ -1,31 +1,31 @@
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {ListBottomTab} from '../../enum/ListBottomTab';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ListBottomTab } from '../../enum/ListBottomTab';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import Realm from 'realm';
 import realmDatabase from '../../store/realm/database';
-import {FlatList, Modal, StyleSheet, View} from 'react-native';
-import {useEffect, useRef, useState} from 'react';
+import { FlatList, Modal, StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
 import realmQuery from '../../store/realm/realmQuery';
 import KhachHangService from '../../services/customer/KhachHangService';
-import {IPagedKhachHangRequestDto} from '../../services/customer/IPagedKhachHangRequestDto';
-import {IKhachHangItemDto} from '../../services/customer/IKhachHangItemDto';
-import {CustomerItem} from './customer_item';
-import {SearchBar} from '@rneui/base';
-import {RootStackParamList} from '../../type/RootStackParamList';
-import {ListRouteApp} from '../../enum/ListRouteApp';
-import {PropModal} from '../../type/PropModal';
-import {Icon, Text} from '@rneui/themed';
-import {IconType} from '../../enum/IconType';
-import {ModalTitle} from '../components/ModalTitle';
+import { IPagedKhachHangRequestDto } from '../../services/customer/IPagedKhachHangRequestDto';
+import { IKhachHangItemDto } from '../../services/customer/IKhachHangItemDto';
+import { CustomerItem } from './customer_item';
+import { SearchBar } from '@rneui/base';
+import { RootStackParamList } from '../../type/RootStackParamList';
+import { ListRouteApp } from '../../enum/ListRouteApp';
+import { PropModal } from '../../type/PropModal';
+import { Icon, Text } from '@rneui/themed';
+import { IconType } from '../../enum/IconType';
+import { ModalTitle } from '../components/ModalTitle';
 
 type CustomerProps = NativeStackNavigationProp<RootStackParamList, ListBottomTab.CUSTOMER>;
 
-type CustomerlRouteProp = RouteProp<{params: {idKhachHang: string}}, 'params'>;
+type CustomerlRouteProp = RouteProp<{ params: { idKhachHang: string } }, 'params'>;
 
-export default function Customer({isShow, objUpdate, onClose, onSave}: PropModal<IKhachHangItemDto>) {
+export default function Customer({ isShow, objUpdate, onClose, onSave }: PropModal<IKhachHangItemDto>) {
   const route = useRoute<CustomerlRouteProp>();
   const navigation = useNavigation<CustomerProps>();
-  const {idKhachHang = ''} = route?.params || {};
+  const { idKhachHang = '' } = route?.params || {};
   const db = Realm.open(realmDatabase);
   const [txtSearch, setTxtSearch] = useState('');
 
@@ -102,13 +102,17 @@ export default function Customer({isShow, objUpdate, onClose, onSave}: PropModal
             paddingBottom: 0,
             backgroundColor: 'white'
           }}
-          inputContainerStyle={{backgroundColor: 'white'}}
+          inputContainerStyle={{
+            backgroundColor: 'white'
+          }}
         />
         <FlatList
           data={lstCustomer}
-          renderItem={({item}) => <CustomerItem item={item} choseCustomer={choseCustomer} />}
+          renderItem={({ item }) => <CustomerItem item={item} choseCustomer={choseCustomer} />}
           keyExtractor={item => item.id}
-          style={{paddingBottom: 8}}
+          style={{
+            paddingBottom: 8
+          }}
         />
       </View>
     </Modal>

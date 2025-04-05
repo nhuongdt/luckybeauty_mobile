@@ -1,6 +1,6 @@
 import CommonFunc from '../../utils/CommonFunc';
 import api from '../api';
-import {HoaDonDto, IHoaDonChiTietDto} from './dto';
+import { HoaDonDto, IHoaDonChiTietDto } from './dto';
 
 class HoaDonService {
   CreateHoaDon = async (input: any): Promise<HoaDonDto | null> => {

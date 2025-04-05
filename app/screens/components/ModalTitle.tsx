@@ -1,9 +1,12 @@
-import {Icon, Text} from '@rneui/themed';
-import {View} from 'react-native';
-import {IconType} from '../../enum/IconType';
-import {FC} from 'react';
+import { Icon, Text } from '@rneui/themed';
+import { View } from 'react-native';
+import { IconType } from '../../enum/IconType';
+import { FC } from 'react';
 
-export const ModalTitle: FC<{title: string; onClose: () => void}> = ({title, onClose}) => {
+export const ModalTitle: FC<{
+  title: string;
+  onClose: () => void;
+}> = ({ title, onClose }) => {
   return (
     <View
       style={{
@@ -17,10 +20,19 @@ export const ModalTitle: FC<{title: string; onClose: () => void}> = ({title, onC
         name="close"
         color={'red'}
         size={24}
-        style={{marginLeft: 8, flex: 1}}
+        style={{
+          marginLeft: 8,
+          flex: 1
+        }}
         onPress={onClose}
       />
-      <Text style={{textAlign: 'center', flex: 11}}>{title}</Text>
+      <Text
+        style={{
+          textAlign: 'center',
+          flex: 11
+        }}>
+        {title}
+      </Text>
     </View>
   );
 };

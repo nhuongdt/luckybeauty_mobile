@@ -14,6 +14,7 @@ import { Colors, Header } from 'react-native/Libraries/NewAppScreen';
 import AppNavigation from './app/navigation/app_navigation';
 import { ThemeProvider } from '@rneui/themed';
 import { darkTheme, lightTheme } from './app/theme/theme';
+import { AuthProvider } from './app/store/react_context/AuthProvider';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -65,19 +66,23 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'yellow' }}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ThemeProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
-        <NavigationContainer>
-          {/* <RootNavigation /> */}
-          <AppNavigation />
-        </NavigationContainer>
-      </ThemeProvider>
-
-    </SafeAreaView>
+    <AuthProvider>
+      <SafeAreaView
+        style={{
+          flex: 1,
+          backgroundColor: 'yellow'
+        }}>
+        <StatusBar
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={backgroundStyle.backgroundColor}
+        />
+        <ThemeProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
+          <NavigationContainer>
+            <AppNavigation />
+          </NavigationContainer>
+        </ThemeProvider>
+      </SafeAreaView>
+    </AuthProvider>
   );
 }
 

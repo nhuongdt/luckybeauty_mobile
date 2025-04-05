@@ -1,6 +1,6 @@
-import {TenantStatus} from '../../enum/TenantStatus';
-import {mmkvStorage} from '../../store/mmkvStore';
-import {IAuthenResultModel, ILoginModel} from './LoginDto';
+import { TenantStatus } from '../../enum/TenantStatus';
+import { mmkvStorage } from '../../store/mmkvStore';
+import { IAuthenResultModel, ILoginModel } from './LoginDto';
 // import { REACT_NATIVE_API_URL } from '@env';
 
 const REACT_NATIVE_API_URL = 'https://api.luckybeauty.vn/';
@@ -38,7 +38,10 @@ class LoginService {
     } catch (error) {
       console.log('checkExistsTenant ', error);
     }
-    return {state: TenantStatus.NOTFOUND, tenantId: 0};
+    return {
+      state: TenantStatus.NOTFOUND,
+      tenantId: 0
+    };
   };
   checkUserLogin = async (input: ILoginModel, tennatId: number): Promise<IAuthenResultModel | null> => {
     try {

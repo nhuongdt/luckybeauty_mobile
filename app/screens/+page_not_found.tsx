@@ -1,12 +1,16 @@
-import {Button} from 'react-native';
-import {StyleSheet, View} from 'react-native';
+import { Button } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-export default function PageNotFound({navigation}: any) {
+export default function PageNotFound({ navigation }: any) {
   return (
     <View>
       <Button
         title=" Go back to Home screen!"
-        onPress={() => navigation.navigate('SaleNavigation', {screen: 'TempInvoice'})}
+        onPress={() =>
+          navigation.navigate('SaleNavigation', {
+            screen: 'TempInvoice'
+          })
+        }
       />
     </View>
   );

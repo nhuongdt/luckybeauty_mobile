@@ -1,7 +1,7 @@
-import {Button, Dialog, Text} from '@rneui/themed';
-import {IPropsSimpleDialogWithAction} from '../type/IPropsSimpleDialog';
+import { Button, Dialog, Text } from '@rneui/themed';
+import { IPropsSimpleDialogWithAction } from '../type/IPropsSimpleDialog';
 
-export const SimpleDialog = ({isShow, title = '', mes = '', onClose}: IPropsSimpleDialogWithAction) => {
+export const SimpleDialog = ({ isShow, title = '', mes = '', onClose }: IPropsSimpleDialogWithAction) => {
   return (
     <Dialog isVisible={isShow} onBackdropPress={onClose}>
       <Dialog.Title title={title} />

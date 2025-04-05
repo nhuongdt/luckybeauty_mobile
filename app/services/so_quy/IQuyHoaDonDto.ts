@@ -1,8 +1,8 @@
-import {IQuyChitietDto} from './IQuyChitietDto';
+import { IQuyChitietDto } from './IQuyChitietDto';
 
 export interface IQuyHoaDonDto {
   id: string;
-  idChiNhanh?: string;
+  idChiNhanh: string | null;
   idBrandname?: string;
   idNhanVien?: string | null;
   idLoaiChungTu: number;

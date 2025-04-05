@@ -1,16 +1,16 @@
-import {Input, Text} from '@rneui/base';
-import {Button, CheckBox, Icon, SearchBar} from '@rneui/themed';
-import {Image, Modal, Pressable, ScrollView, StyleSheet, View} from 'react-native';
-import {IKhachHangItemDto} from '../../services/customer/IKhachHangItemDto';
-import {PropModal} from '../../type/PropModal';
-import {ITaiKhoanNganHangDto} from '../../services/tai_khoan_ngan_hang/ITaiKhoanNganHangDto';
-import {IconType} from '../../enum/IconType';
-import {useEffect, useState} from 'react';
+import { Input, Text } from '@rneui/base';
+import { Button, CheckBox, Icon, SearchBar } from '@rneui/themed';
+import { Image, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { IKhachHangItemDto } from '../../services/customer/IKhachHangItemDto';
+import { PropModal } from '../../type/PropModal';
+import { ITaiKhoanNganHangDto } from '../../services/tai_khoan_ngan_hang/ITaiKhoanNganHangDto';
+import { IconType } from '../../enum/IconType';
+import { useEffect, useState } from 'react';
 import TaiKhoanNganHangService from '../../services/tai_khoan_ngan_hang/TaiKhoanNganHangService';
-import {CommonActions} from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 import CommonFunc from '../../utils/CommonFunc';
 
-export const ListTaiKhoanNganHang = ({isShow, objUpdate, onClose, onSave}: PropModal<ITaiKhoanNganHangDto>) => {
+export const ListTaiKhoanNganHang = ({ isShow, objUpdate, onClose, onSave }: PropModal<ITaiKhoanNganHangDto>) => {
   const [txtSearch, setTextSearch] = useState('');
   const [accountBankChosed, setAccountBankChosed] = useState<ITaiKhoanNganHangDto>();
   const [listBankAccountSearch, setListBankAccountSearch] = useState<ITaiKhoanNganHangDto[]>([]);
@@ -94,7 +94,10 @@ export const ListTaiKhoanNganHang = ({isShow, objUpdate, onClose, onSave}: PropM
             name="close"
             color={'red'}
             size={24}
-            style={{marginLeft: 8, flex: 1}}
+            style={{
+              marginLeft: 8,
+              flex: 1
+            }}
             onPress={onClose}
           />
           <Text
@@ -116,29 +119,57 @@ export const ListTaiKhoanNganHang = ({isShow, objUpdate, onClose, onSave}: PropM
             paddingBottom: 0,
             backgroundColor: 'white'
           }}
-          inputContainerStyle={{backgroundColor: 'white'}}
+          inputContainerStyle={{
+            backgroundColor: 'white'
+          }}
           value={txtSearch}
           onChangeText={text => searchTaiKhoan(text)}
         />
 
-        <ScrollView style={{padding: 16}}>
+        <ScrollView
+          style={{
+            padding: 16
+          }}>
           {listBankAccountSearch?.map(item => (
             <Pressable key={item?.id} style={[styles.accountItem]} onPress={() => choseTaiKhoanNganHang(item)}>
               {accountBankChosed?.id === item.id && (
                 <Icon type={IconType.IONICON} name="checkmark" size={24} color={'blue'} />
               )}
-              <Image style={styles.image} source={{uri: item?.logoNganHang}} />
+              <Image
+                style={styles.image}
+                source={{
+                  uri: item?.logoNganHang
+                }}
+              />
 
               <View>
-                <Text style={{fontWeight: 500, fontSize: 18, textAlign: 'center'}}>{item?.tenChuThe ?? ''}</Text>
-                <Text style={{color: '#4D4D4D', textAlign: 'center'}}>{item?.soTaiKhoan ?? ''}</Text>
+                <Text
+                  style={{
+                    fontWeight: 500,
+                    fontSize: 18,
+                    textAlign: 'center'
+                  }}>
+                  {item?.tenChuThe ?? ''}
+                </Text>
+                <Text
+                  style={{
+                    color: '#4D4D4D',
+                    textAlign: 'center'
+                  }}>
+                  {item?.soTaiKhoan ?? ''}
+                </Text>
               </View>
             </Pressable>
           ))}
         </ScrollView>
 
         <View style={styles.button}>
-          <View style={{gap: 10, flexDirection: 'row', justifyContent: 'flex-end'}}>
+          <View
+            style={{
+              gap: 10,
+              flexDirection: 'row',
+              justifyContent: 'flex-end'
+            }}>
             <Button title={'Bỏ qua'} color={'error'} size="lg" onPress={onClose} />
             <Button title={'Đồng ý'} size="lg" onPress={agreeChoseTaiKhoanNganHang} />
           </View>

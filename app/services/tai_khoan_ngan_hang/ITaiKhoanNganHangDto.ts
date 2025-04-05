@@ -1,4 +1,4 @@
-import {INganHangDto} from './INganHangDto';
+import { INganHangDto } from './INganHangDto';
 
 export interface ITaiKhoanNganHangDto {
   id: string;

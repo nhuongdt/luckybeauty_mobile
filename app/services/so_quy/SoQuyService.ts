@@ -1,9 +1,9 @@
-import {format} from 'date-fns';
-import {DiaryStatus} from '../../enum/DiaryStatus';
-import {LoaiChungTu} from '../../enum/LoaiChungTu';
+import { format } from 'date-fns';
+import { DiaryStatus } from '../../enum/DiaryStatus';
+import { LoaiChungTu } from '../../enum/LoaiChungTu';
 import api from '../api';
-import {IQuyChitietDto} from './IQuyChitietDto';
-import {IQuyHoaDonDto} from './IQuyHoaDonDto';
+import { IQuyChitietDto } from './IQuyChitietDto';
+import { IQuyHoaDonDto } from './IQuyHoaDonDto';
 import CommonFunc from '../../utils/CommonFunc';
 
 class SoQuyService {

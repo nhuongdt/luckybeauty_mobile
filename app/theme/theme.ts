@@ -1,4 +1,4 @@
-import {createTheme} from '@rneui/themed';
+import { createTheme } from '@rneui/themed';
 // Định nghĩa theme sáng
 export const lightTheme = createTheme({
   mode: 'light', // Chế độ sáng

@@ -1,4 +1,4 @@
-import {ICustomerBasicDto} from './ICustomerBasicDto';
+import { ICustomerBasicDto } from './ICustomerBasicDto';
 
 export interface ICreateOrEditKhachHangDto extends ICustomerBasicDto {
   id: string;

@@ -29,7 +29,9 @@ export const ModalListProduct = ({ isShow, onClose, onSave }: PropModal<IProduct
   }, [paramSearchProduct]);
 
   const getListProduct = async () => {
-    const param = { ...paramSearchProduct };
+    const param = {
+      ...paramSearchProduct
+    };
     param.textSearch = txtSearchProduct;
     const data = await ProductService.GetListproduct(param);
 
@@ -62,42 +64,78 @@ export const ModalListProduct = ({ isShow, onClose, onSave }: PropModal<IProduct
       <View style={styles.container}>
         <ModalTitle title="Chọn hàng bán" onClose={onClose} />
 
-        <View style={{ padding: 8 }}>
+        <View
+          style={{
+            padding: 8
+          }}>
           <Input
             leftIcon={{
               type: IconType.IONICON,
               name: 'search',
               size: 14,
-              style: { color: '#ccc' }
+              style: {
+                color: '#ccc'
+              }
             }}
-            rightIcon={{ type: IconType.IONICON, name: 'add' }}
+            rightIcon={{
+              type: IconType.IONICON,
+              name: 'add'
+            }}
             placeholder="Tìm kiếm sản phẩm"
             containerStyle={{
               borderColor: '#ccc',
               padding: 0
             }}
-            inputStyle={{ fontSize: 14 }}
+            inputStyle={{
+              fontSize: 14
+            }}
           />
 
           {(pageResultProduct?.totalCount ?? 0) == 0 ? (
-            <Text style={{ textAlign: 'center', fontSize: 16 }}>Không có dữ liệu</Text>
+            <Text
+              style={{
+                textAlign: 'center',
+                fontSize: 16
+              }}>
+              Không có dữ liệu
+            </Text>
           ) : (
             <View>
-              <View style={[styles.flexRow, styles.boxContainer, { borderBottomColor: '#ccc', borderBottomWidth: 1 }]}>
+              <View
+                style={[
+                  styles.flexRow,
+                  styles.boxContainer,
+                  {
+                    borderBottomColor: '#ccc',
+                    borderBottomWidth: 1
+                  }
+                ]}>
                 <View style={styles.flexRow}>
                   <Icon type="ionicon" name="filter" />
-                  <Text style={{ paddingLeft: 8 }}>Tất cả</Text>
+                  <Text
+                    style={{
+                      paddingLeft: 8
+                    }}>
+                    Tất cả
+                  </Text>
                 </View>
                 <View style={styles.flexRow}>
                   <Icon type="ionicon" name="checkmark" />
-                  <Text style={{ paddingLeft: 8 }}>Chọn nhiều</Text>
+                  <Text
+                    style={{
+                      paddingLeft: 8
+                    }}>
+                    Chọn nhiều
+                  </Text>
                 </View>
               </View>
               <FlatList
                 data={pageResultProduct?.items}
                 renderItem={({ item }) => <ItemProductSale item={item} choseItem={choseProduct} />}
                 keyExtractor={item => item.idDonViQuyDoi}
-                style={{ paddingBottom: 8 }}
+                style={{
+                  paddingBottom: 8
+                }}
               />
             </View>
           )}

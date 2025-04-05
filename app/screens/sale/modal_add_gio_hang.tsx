@@ -1,11 +1,11 @@
-import {Icon} from '@rneui/base';
-import {useEffect, useState} from 'react';
-import {StyleSheet, Text, View, Pressable, Modal, Image} from 'react-native';
-import {IHoaDonChiTietDto} from '../../services/hoadon/dto';
-import {PropModal} from '../../type/PropModal';
-import {InvoiceStatus} from '../../enum/InvoiceStatus';
+import { Icon } from '@rneui/base';
+import { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, Pressable, Modal, Image } from 'react-native';
+import { IHoaDonChiTietDto } from '../../services/hoadon/dto';
+import { PropModal } from '../../type/PropModal';
+import { InvoiceStatus } from '../../enum/InvoiceStatus';
 
-export default function ModalAddGioHang({isShow, objUpdate, onClose, onSave}: PropModal<IHoaDonChiTietDto>) {
+export default function ModalAddGioHang({ isShow, objUpdate, onClose, onSave }: PropModal<IHoaDonChiTietDto>) {
   const [ctDoing, setCTDoing] = useState<IHoaDonChiTietDto>({} as IHoaDonChiTietDto);
 
   useEffect(() => {
@@ -72,10 +72,20 @@ export default function ModalAddGioHang({isShow, objUpdate, onClose, onSave}: Pr
     <View style={styles.container}>
       <Modal visible={isShow} transparent={true} animationType="slide" onRequestClose={onClose}>
         <View style={styles.modalView}>
-          <Pressable onPress={onClose} style={{position: 'absolute', left: 10, top: 10}}>
+          <Pressable
+            onPress={onClose}
+            style={{
+              position: 'absolute',
+              left: 10,
+              top: 10
+            }}>
             <Icon name="close" size={24} color={'#c0c0c0'} />
           </Pressable>
-          <View style={{gap: 16, alignItems: 'center'}}>
+          <View
+            style={{
+              gap: 16,
+              alignItems: 'center'
+            }}>
             <Text style={styles.productName}>{ctDoing?.tenHangHoa}</Text>
             <Text style={styles.productPrice}>
               {new Intl.NumberFormat('vi-VN').format(ctDoing?.donGiaTruocCK ?? 0)}
@@ -88,9 +98,22 @@ export default function ModalAddGioHang({isShow, objUpdate, onClose, onSave}: Pr
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-              <Text style={{textAlign: 'left'}}>Số lượng</Text>
+              <Text
+                style={{
+                  textAlign: 'left'
+                }}>
+                Số lượng
+              </Text>
               <Icon name="remove-circle-outline" size={30} color={'#ccc'} onPress={giamSoLuong} />
-              <Text style={[styles.productPrice, {textAlign: 'center'}]}>{ctDoing.soLuong}</Text>
+              <Text
+                style={[
+                  styles.productPrice,
+                  {
+                    textAlign: 'center'
+                  }
+                ]}>
+                {ctDoing.soLuong}
+              </Text>
               <Icon name="add-circle-outline" size={30} color={'#ccc'} onPress={tangSoLuong} />
             </View>
           </View>
@@ -141,8 +164,14 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5
   },
-  productName: {fontSize: 16, fontWeight: '600'},
-  productPrice: {fontSize: 14, fontWeight: '500'},
+  productName: {
+    fontSize: 16,
+    fontWeight: '600'
+  },
+  productPrice: {
+    fontSize: 14,
+    fontWeight: '500'
+  },
   button: {
     borderRadius: 20,
     padding: 10,

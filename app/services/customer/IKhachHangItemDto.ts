@@ -1,4 +1,4 @@
-import {ICreateOrEditKhachHangDto} from './ICreateOrEditKhachHangDto';
+import { ICreateOrEditKhachHangDto } from './ICreateOrEditKhachHangDto';
 
 export interface IKhachHangItemDto extends ICreateOrEditKhachHangDto {
   tenLoaiKhachHang?: string;

@@ -1,9 +1,9 @@
 import Realm from 'realm';
 import uuid from 'react-native-uuid';
 
-import {HoaDonDto, IHoaDonChiTietDto, IHoaDonDto} from '../../services/hoadon/dto';
+import { HoaDonDto, IHoaDonChiTietDto, IHoaDonDto } from '../../services/hoadon/dto';
 import realmDatabase from './database';
-import {IProductBasic} from '../../services/product/dto';
+import { IProductBasic } from '../../services/product/dto';
 
 enum ListTable {
   HOA_DON = 'tblHoaDon',

@@ -1,16 +1,16 @@
 export interface ILoginModel {
-    userNameOrEmailAddress: string;
-    password: string;
-    rememberClient: boolean;
-    tenantId?: number;
+  userNameOrEmailAddress: string;
+  password: string;
+  rememberClient: boolean;
+  tenantId?: number;
 }
 export interface IAuthenResultModel {
-    accessToken: string;
-    refreshToken: string;
-    expireInSeconds: boolean;
+  accessToken: string;
+  refreshToken: string;
+  expireInSeconds: boolean;
 }
 
 export interface IUserLoginDto {
-    userName: string;
-    idChiNhanh: string;
+  userName: string;
+  idChiNhanh: string;
 }

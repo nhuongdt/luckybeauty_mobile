@@ -1,14 +1,14 @@
-import {Pressable, StyleSheet, View} from 'react-native';
-import {Avatar, Text} from '@rneui/base';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Avatar, Text } from '@rneui/base';
 import CommonFunc from '../../utils/CommonFunc';
-import {IKhachHangItemDto} from '../../services/customer/IKhachHangItemDto';
+import { IKhachHangItemDto } from '../../services/customer/IKhachHangItemDto';
 
 type PropCustomerItem = {
   item: IKhachHangItemDto;
   choseCustomer: (item: IKhachHangItemDto) => void;
 };
 
-export const CustomerItem = ({item, choseCustomer}: PropCustomerItem) => {
+export const CustomerItem = ({ item, choseCustomer }: PropCustomerItem) => {
   return (
     <Pressable style={styles.customerContainer} key={item.idKhachHang} onPress={() => choseCustomer(item)}>
       <Avatar
@@ -16,15 +16,28 @@ export const CustomerItem = ({item, choseCustomer}: PropCustomerItem) => {
         title={CommonFunc.getFirstLetter(item?.tenKhachHang ?? '')}
         size="medium"
         containerStyle={styles.avatarContainer}
-        titleStyle={{fontWeight: 500}}
+        titleStyle={{
+          fontWeight: 500
+        }}
       />
       <View style={styles.infoContainer}>
-        <View style={{gap: 12}}>
-          <Text style={{fontWeight: 600, fontSize: 16}}>{item?.tenKhachHang}</Text>
+        <View style={{ gap: 12 }}>
+          <Text
+            style={{
+              fontWeight: 600,
+              fontSize: 16
+            }}>
+            {item?.tenKhachHang}
+          </Text>
           <Text>{item.soDienThoai}</Text>
         </View>
-        <View style={{gap: 12}}>
-          <Text style={{fontWeight: 500}}>Điểm: {item?.tongTichDiem ?? 0} </Text>
+        <View style={{ gap: 12 }}>
+          <Text
+            style={{
+              fontWeight: 500
+            }}>
+            Điểm: {item?.tongTichDiem ?? 0}{' '}
+          </Text>
         </View>
       </View>
     </Pressable>

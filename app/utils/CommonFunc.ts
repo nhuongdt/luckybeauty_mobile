@@ -1,5 +1,5 @@
 import ApiConst from '../const/ApiConst';
-import {IHoaDonDto} from '../services/hoadon/dto';
+import { IHoaDonDto } from '../services/hoadon/dto';
 
 class CommonFunc {
   getMaxNumberFromMaHoaDon = (arr: IHoaDonDto[]): number => {
