@@ -1,5 +1,4 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ListBottomTab } from '../../enum/ListBottomTab';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import Realm from 'realm';
 import realmDatabase from '../../store/realm/database';
@@ -11,23 +10,12 @@ import { IPagedKhachHangRequestDto } from '../../services/customer/IPagedKhachHa
 import { IKhachHangItemDto } from '../../services/customer/IKhachHangItemDto';
 import { CustomerItem } from './customer_item';
 import { SearchBar } from '@rneui/base';
-import { RootStackParamList } from '../../type/RootStackParamList';
-import { ListRouteApp } from '../../enum/ListRouteApp';
 import { PropModal } from '../../type/PropModal';
-import { Icon, Text } from '@rneui/themed';
-import { IconType } from '../../enum/IconType';
 import { ModalTitle } from '../components/ModalTitle';
 
-type CustomerProps = NativeStackNavigationProp<RootStackParamList, ListBottomTab.CUSTOMER>;
-
-type CustomerlRouteProp = RouteProp<{ params: { idKhachHang: string } }, 'params'>;
-
 export default function Customer({ isShow, objUpdate, onClose, onSave }: PropModal<IKhachHangItemDto>) {
-  const route = useRoute<CustomerlRouteProp>();
-  const navigation = useNavigation<CustomerProps>();
-  const { idKhachHang = '' } = route?.params || {};
-  const db = Realm.open(realmDatabase);
   const [txtSearch, setTxtSearch] = useState('');
+  const firstLoad = useRef(true);
 
   const [lstCustomer, setLstCustomer] = useState<IKhachHangItemDto[]>([
     {
@@ -53,14 +41,10 @@ export default function Customer({ isShow, objUpdate, onClose, onSave }: PropMod
     }
   ]);
 
-  const getListCustomer = () => {
-    //
-  };
-
   const jqAutoCustomer = async () => {
     const param: IPagedKhachHangRequestDto = {
       keyword: txtSearch,
-      skipCount: 1,
+      skipCount: 0,
       maxResultCount: 5
     };
     const lst = await KhachHangService.jqAutoCustomer(param);
@@ -68,14 +52,17 @@ export default function Customer({ isShow, objUpdate, onClose, onSave }: PropMod
   };
 
   useEffect(() => {
-    getListCustomer();
-  }, []);
+    if (isShow) {
+      jqAutoCustomer();
+    }
+  }, [isShow]);
 
   useEffect(() => {
-    // if (firstLoad) {
-    //   firstLoad.current = false;
-    //   return;
-    // }
+    if (firstLoad.current) {
+      firstLoad.current = false;
+      return;
+    }
+
     const getData = setTimeout(async () => {
       await jqAutoCustomer();
       return () => clearTimeout(getData);

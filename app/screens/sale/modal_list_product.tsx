@@ -11,6 +11,7 @@ import { PropModal } from '../../type/PropModal';
 import { ModalTitle } from '../components/ModalTitle';
 
 export const ModalListProduct = ({ isShow, onClose, onSave }: PropModal<IProductBasic>) => {
+  const firstLoad = useRef(true);
   const [txtSearchProduct, setTxtSearchProduct] = useState('');
   const [pageResultProduct, setPageResultProduct] = useState<IPageResultDto<IProductBasic>>({
     items: [],
@@ -25,8 +26,22 @@ export const ModalListProduct = ({ isShow, onClose, onSave }: PropModal<IProduct
   });
 
   useEffect(() => {
-    getListProduct();
-  }, [paramSearchProduct]);
+    if (isShow) {
+      getListProduct();
+    }
+  }, [isShow]);
+
+  useEffect(() => {
+    if (firstLoad.current) {
+      firstLoad.current = false;
+      return;
+    }
+
+    const getData = setTimeout(async () => {
+      await getListProduct();
+      return () => clearTimeout(getData);
+    }, 2000);
+  }, [txtSearchProduct]);
 
   const getListProduct = async () => {
     const param = {
