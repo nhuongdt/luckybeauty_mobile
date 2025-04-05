@@ -21,18 +21,20 @@ import { IconType } from '../../enum/IconType';
 import { ItemProductSale } from '../components/ItemProductSale';
 import { SaleManagerTabParamList } from '../../navigation/route_param_list';
 import { SaleManagerTab } from '../../navigation/list_name_route';
+import { useSaleManagerStackContext } from '../../store/react_context/SaleManagerStackProvide';
 
-type ProductSaleNavigationProps = NativeStackNavigationProp<
-  SaleManagerTabParamList, SaleManagerTab.PRODUCT>;
+type ProductSaleNavigationProps = NativeStackNavigationProp<SaleManagerTabParamList, SaleManagerTab.PRODUCT>;
 
-type ProductSaleRouteProp = RouteProp<
-  SaleManagerTabParamList, SaleManagerTab.PRODUCT>;
+type ProductSaleRouteProp = RouteProp<SaleManagerTabParamList, SaleManagerTab.PRODUCT>;
 
 const ProductSale = () => {
   const firstLoad = useRef(true);
   const route = useRoute<ProductSaleRouteProp>();
   const navigation = useNavigation<ProductSaleNavigationProps>();
-  const { idHoaDon = '', idLoaiChungTu = LoaiChungTu.HOA_DON_BAN_LE } = route?.params || {};
+  const { idLoaiChungTu = LoaiChungTu.HOA_DON_BAN_LE } = route?.params || {};
+  const { currentInvoice, setCurrentInvoice } = useSaleManagerStackContext();
+  const idHoaDonCurrent = currentInvoice?.idHoaDon ?? '';
+
   const [idHoaDonChosing, setIdHoaDonChosing] = useState('');
   const [isShowModalAddGioHang, setIsShowModalAddGioHang] = useState(false);
   const [txtSearchProduct, setTxtSearchProduct] = useState('');
@@ -58,10 +60,12 @@ const ProductSale = () => {
 
   useEffect(() => {
     getInforHoaDon();
-  }, [idHoaDon]);
+  }, [idHoaDonCurrent]);
 
   const getListProduct = async () => {
-    const param = { ...paramSearchProduct };
+    const param = {
+      ...paramSearchProduct
+    };
     param.textSearch = txtSearchProduct;
     const data = await ProductService.GetListproduct(param);
 
@@ -88,8 +92,8 @@ const ProductSale = () => {
   const getInforHoaDon = () => {
     let idHoaDonChosing = null;
 
-    if (!CommonFunc.checkNull_OrEmpty(idHoaDon)) {
-      const itemHD = realmQuery.GetHoaDon_byId(idHoaDon);
+    if (!CommonFunc.checkNull_OrEmpty(idHoaDonCurrent)) {
+      const itemHD = realmQuery.GetHoaDon_byId(idHoaDonCurrent);
       if (itemHD !== null) {
         idHoaDonChosing = itemHD?.id;
       }
@@ -103,12 +107,15 @@ const ProductSale = () => {
     if (idHoaDonChosing) {
       setIdHoaDonChosing(idHoaDonChosing);
       const lstCTHD = realmQuery.GetListChiTietHoaDon_byIdHoaDon(idHoaDonChosing);
-      navigation.setParams({
+      setCurrentInvoice({
+        ...currentInvoice,
         idHoaDon: idHoaDonChosing,
         countProduct: lstCTHD?.length ?? 0
       });
     } else {
-      navigation.setParams({
+      setCurrentInvoice({
+        ...currentInvoice,
+        idHoaDon: '',
         countProduct: 0
       });
     }
@@ -169,7 +176,7 @@ const ProductSale = () => {
   const choseProduct = async (item: IProductBasic) => {
     const idQuyDoi = item?.idDonViQuyDoi;
 
-    const itemCTHD = realmQuery.GetChiTietHoaDon_byIdQuyDoi(idHoaDon, idQuyDoi);
+    const itemCTHD = realmQuery.GetChiTietHoaDon_byIdQuyDoi(idHoaDonCurrent, idQuyDoi);
 
     if (itemCTHD != null) {
       setCTDoing({
@@ -234,8 +241,9 @@ const ProductSale = () => {
     const lstCTHD = realmQuery.GetListChiTietHoaDon_byIdHoaDon(idHoaDon);
     const hdAfter = realmQuery.UpdateHD_fromCTHD(idHoaDon);
     if (hdAfter) {
-      navigation.setParams({
-        countProduct: lstCTHD?.length
+      setCurrentInvoice({
+        ...currentInvoice,
+        countProduct: lstCTHD?.length ?? 0
       });
     }
   };
@@ -256,20 +264,33 @@ const ProductSale = () => {
             type: IconType.IONICON,
             name: 'search',
             size: 14,
-            style: { color: '#ccc' }
+            style: {
+              color: '#ccc'
+            }
           }}
-          rightIcon={{ type: IconType.IONICON, name: 'add' }}
+          rightIcon={{
+            type: IconType.IONICON,
+            name: 'add'
+          }}
           placeholder="Tìm kiếm sản phẩm"
           containerStyle={{
             // backgroundColor: 'red',
             borderColor: '#ccc',
             padding: 0
           }}
-          inputStyle={{ fontSize: 14 }}
+          inputStyle={{
+            fontSize: 14
+          }}
         />
 
         {(pageResultProduct?.totalCount ?? 0) == 0 ? (
-          <Text style={{ textAlign: 'center', fontSize: 16 }}>Không có dữ liệu</Text>
+          <Text
+            style={{
+              textAlign: 'center',
+              fontSize: 16
+            }}>
+            Không có dữ liệu
+          </Text>
         ) : (
           <View>
             <View
@@ -277,29 +298,57 @@ const ProductSale = () => {
                 styles.flexRow,
                 styles.boxContainer,
                 // do chưa fix dc padding của inputsearch ở trên, nên để margin -20
-                { backgroundColor: 'rgba(0,0,0,.03)', marginTop: -20 }
+                {
+                  backgroundColor: 'rgba(0,0,0,.03)',
+                  marginTop: -20
+                }
               ]}>
               <View style={styles.flexRow}>
                 <Icon type="font-awesome-5" name="user" size={16} />
-                <Text style={{ paddingLeft: 10 }}>Khach le</Text>
+                <Text
+                  style={{
+                    paddingLeft: 10
+                  }}>
+                  Khach le
+                </Text>
               </View>
               <Icon type="material-community" name="chevron-double-right" />
             </View>
-            <View style={[styles.flexRow, styles.boxContainer, { borderBottomColor: '#ccc', borderBottomWidth: 1 }]}>
+            <View
+              style={[
+                styles.flexRow,
+                styles.boxContainer,
+                {
+                  borderBottomColor: '#ccc',
+                  borderBottomWidth: 1
+                }
+              ]}>
               <View style={styles.flexRow}>
                 <Icon type="ionicon" name="filter" />
-                <Text style={{ paddingLeft: 8 }}>Tất cả</Text>
+                <Text
+                  style={{
+                    paddingLeft: 8
+                  }}>
+                  Tất cả
+                </Text>
               </View>
               <View style={styles.flexRow}>
                 <Icon type="ionicon" name="checkmark" />
-                <Text style={{ paddingLeft: 8 }}>Chọn nhiều</Text>
+                <Text
+                  style={{
+                    paddingLeft: 8
+                  }}>
+                  Chọn nhiều
+                </Text>
               </View>
             </View>
             <FlatList
               data={pageResultProduct?.items}
               renderItem={({ item }) => <ItemProductSale item={item} choseItem={choseProduct} />}
               keyExtractor={item => item.idDonViQuyDoi}
-              style={{ paddingBottom: 8 }}
+              style={{
+                paddingBottom: 8
+              }}
             />
           </View>
         )}

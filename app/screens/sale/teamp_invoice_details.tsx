@@ -18,22 +18,25 @@ import { SimpleDialog } from '../../components/simple_dialog';
 import { IPropsSimpleDialog } from '../../type/IPropsSimpleDialog';
 import { SaleManagerStackParamList } from '../../navigation/route_param_list';
 import { SaleManagerStack } from '../../navigation/list_name_route';
+import { useSaleManagerStackContext } from '../../store/react_context/SaleManagerStackProvide';
 
 type ScreensTempInvoiceDetailsNavigationProps = NativeStackNavigationProp<
-  SaleManagerStackParamList, SaleManagerStack.TEMP_INVOICE_DETAIL>;
+  SaleManagerStackParamList,
+  SaleManagerStack.TEMP_INVOICE_DETAIL
+>;
 
-type ScreensTempInvoiceDetailRouteProp = RouteProp<
-  SaleManagerStackParamList, SaleManagerStack.TEMP_INVOICE_DETAIL>;
+type ScreensTempInvoiceDetailRouteProp = RouteProp<SaleManagerStackParamList, SaleManagerStack.TEMP_INVOICE_DETAIL>;
 
 export const TempInvoiceDetails = () => {
   const route = useRoute<ScreensTempInvoiceDetailRouteProp>();
   const navigation = useNavigation<ScreensTempInvoiceDetailsNavigationProps>();
-  const { idHoaDon = '' } = route.params || {};
+  const { currentInvoice, setCurrentInvoice } = useSaleManagerStackContext();
+  const idHoaDon = currentInvoice?.idHoaDon ?? '';
+
   const [txtSearchProduct, setTxtSearchProduct] = useState('');
   const [isShowModalCustomer, setIsShowModalCustomer] = useState(false);
   const [isShowModalAddProduct, setIsShowModalAddProduct] = useState(false);
   const [lstCTHD, setLstCTHD] = useState<IHoaDonChiTietDto[]>([]);
-  // const [lstSearchCTHD, setLstSearchCTHD] = useState<IHoaDonChiTietDto[]>([]);
   const [hoadonOpen, setHoaDonOpen] = useState<IHoaDonDto>({
     id: ''
   } as IHoaDonDto);
@@ -45,14 +48,6 @@ export const TempInvoiceDetails = () => {
     GetDataHoaDon_fromCache(idHoaDon);
   }, [idHoaDon]);
 
-  // useEffect(() => {
-  //   const txt = CommonFunc.convertString_toEnglish(txtSearchProduct);
-  //   const lst = lstCTHD?.filter(
-  //     x => CommonFunc.convertString_toEnglish(x.tenHangHoa).indexOf(txt) > -1,
-  //   );
-  //   setLstSearchCTHD([...lst]);
-  // }, [txtSearchProduct]);
-
   const lstSearchCTHD = lstCTHD?.filter(
     x =>
       CommonFunc.convertString_toEnglish(x.tenHangHoa).indexOf(CommonFunc.convertString_toEnglish(txtSearchProduct)) >
@@ -63,11 +58,15 @@ export const TempInvoiceDetails = () => {
     const hd = realmQuery.GetHoaDon_byId(idHoaDon);
     const lst = realmQuery.GetListChiTietHoaDon_byIdHoaDon(idHoaDon);
     if (hd != null) {
-      setHoaDonOpen({ ...hd });
+      setHoaDonOpen({
+        ...hd
+      });
       setLstCTHD([...lst]);
       getInforCustomer(hd?.idKhachHang ?? '');
 
-      navigation.setOptions({ title: hd?.maHoaDon });
+      navigation.setOptions({
+        title: hd?.maHoaDon
+      });
     }
   };
 
@@ -80,10 +79,14 @@ export const TempInvoiceDetails = () => {
         tenKhachHang: 'Khách lẻ',
         soDienThoai: ''
       };
-      setCustonerChosing({ ...kle });
+      setCustonerChosing({
+        ...kle
+      });
     } else {
       const data = await KhachHangService.getDetail(idKhachHang);
-      setCustonerChosing({ ...data });
+      setCustonerChosing({
+        ...data
+      });
     }
   };
 
@@ -173,6 +176,11 @@ export const TempInvoiceDetails = () => {
       // remove from list
       setLstCTHD(lstCTHD?.filter(x => x.id !== item.id));
       realmQuery.DeleteHoaDonChiTiet_byId(item.id);
+
+      setCurrentInvoice({
+        ...currentInvoice,
+        countProduct: (lstCTHD?.length ?? 0) - 1
+      });
     }
     let tongtien = hoadonOpen.tongTienHang - item?.donGiaSauCK;
     CaculatorHD_byTongTienHang(tongtien);
@@ -183,8 +191,13 @@ export const TempInvoiceDetails = () => {
   };
   const choseCustomer = (cusChosed: IKhachHangItemDto) => {
     setIsShowModalCustomer(false);
-    setCustonerChosing({ ...cusChosed });
-    setHoaDonOpen({ ...hoadonOpen, idKhachHang: cusChosed?.id });
+    setCustonerChosing({
+      ...cusChosed
+    });
+    setHoaDonOpen({
+      ...hoadonOpen,
+      idKhachHang: cusChosed?.id
+    });
     realmQuery.UpdateKhachHang_toHoaDon(hoadonOpen?.id, cusChosed?.id);
   };
 
@@ -225,6 +238,18 @@ export const TempInvoiceDetails = () => {
     }
 
     setIsShowModalAddProduct(false);
+    setCurrentInvoice({
+      ...currentInvoice,
+      countProduct: (lstCTHD?.length ?? 0) + 1
+    });
+  };
+
+  const gotoThanhToan = () => {
+    navigation.navigate(SaleManagerStack.THANH_TOAN);
+    setCurrentInvoice({
+      ...currentInvoice,
+      tongPhaiTra: hoadonOpen?.tongThanhToan ?? 0
+    });
   };
 
   return (
@@ -239,7 +264,12 @@ export const TempInvoiceDetails = () => {
         isShow={objSimpleDialog?.isShow ?? false}
         title={objSimpleDialog?.title}
         mes={objSimpleDialog?.mes}
-        onClose={() => setObjSimpleDialog({ ...objSimpleDialog, isShow: false })}
+        onClose={() =>
+          setObjSimpleDialog({
+            ...objSimpleDialog,
+            isShow: false
+          })
+        }
       />
       <ModalListProduct
         isShow={isShowModalAddProduct}
@@ -249,15 +279,35 @@ export const TempInvoiceDetails = () => {
       <View style={styles.boxCustomer}>
         <View style={styles.boxCustomer_LeftRight}>
           <Icon size={18} type={IconType.FONT_AWESOME_5} name="user" />
-          <View style={{ gap: 8 }}>
-            <Text style={{ fontWeight: 500 }}>{custonerChosing?.tenKhachHang ?? 'Khách lẻ'}</Text>
+          <View
+            style={{
+              gap: 8
+            }}>
+            <Text
+              style={{
+                fontWeight: 500
+              }}>
+              {custonerChosing?.tenKhachHang ?? 'Khách lẻ'}
+            </Text>
             {custonerChosing?.soDienThoai && (
-              <Text style={{ fontSize: 13, color: '#666666' }}>{custonerChosing?.soDienThoai}</Text>
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: '#666666'
+                }}>
+                {custonerChosing?.soDienThoai}
+              </Text>
             )}
           </View>
         </View>
         <Pressable style={styles.boxCustomer_LeftRight} onPress={showModalCustomer}>
-          <Text style={{ textDecorationLine: 'underline', fontSize: 12 }}>Chọn lại khách</Text>
+          <Text
+            style={{
+              textDecorationLine: 'underline',
+              fontSize: 12
+            }}>
+            Chọn lại khách
+          </Text>
           <Icon name="arrow-forward-ios" type={IconType.MATERIAL} size={20} />
         </Pressable>
       </View>
@@ -281,7 +331,9 @@ export const TempInvoiceDetails = () => {
           }}>
           <Icon type={IconType.IONICON} name="search" size={18} />
           <TextInput
-            style={{ marginLeft: 8 }}
+            style={{
+              marginLeft: 8
+            }}
             placeholder="Tìm dịch vụ"
             value={txtSearchProduct}
             onChangeText={text => setTxtSearchProduct(text)}
@@ -318,12 +370,22 @@ export const TempInvoiceDetails = () => {
               backgroundColor: 'white'
             }}>
             <Icon type={IconType.FOUNDATION} name="page-add" size={20} />
-            <Text style={{ textAlign: 'center', fontSize: 16 }}>Chưa có sản phẩm</Text>
+            <Text
+              style={{
+                textAlign: 'center',
+                fontSize: 16
+              }}>
+              Chưa có sản phẩm
+            </Text>
           </View>
         </View>
       ) : (
         <View style={styles.containerDetail}>
-          <View style={{ gap: 8, backgroundColor: 'white' }}>
+          <View
+            style={{
+              gap: 8,
+              backgroundColor: 'white'
+            }}>
             {lstSearchCTHD?.map((item, index) => (
               <View
                 key={item?.id}
@@ -338,14 +400,30 @@ export const TempInvoiceDetails = () => {
                     justifyContent: 'space-between',
                     alignItems: 'center'
                   }}>
-                  <View style={{ gap: 8 }}>
-                    <Text style={{ fontWeight: 500 }}>{item?.tenHangHoa}</Text>
-                    <Text style={{ fontSize: 18, color: 'rgb(178, 183, 187)' }}>
+                  <View
+                    style={{
+                      gap: 8
+                    }}>
+                    <Text
+                      style={{
+                        fontWeight: 500
+                      }}>
+                      {item?.tenHangHoa}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        color: 'rgb(178, 183, 187)'
+                      }}>
                       {new Intl.NumberFormat('vi-VN').format(item?.donGiaSauCK)}
                     </Text>
                   </View>
 
-                  <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      gap: 10
+                    }}>
                     <Icon
                       type={IconType.IONICON}
                       name="remove-circle-outline"
@@ -353,7 +431,12 @@ export const TempInvoiceDetails = () => {
                       color={'#ccc'}
                       onPress={() => giamSoLuong(item)}
                     />
-                    <Text style={{ fontSize: 18 }}>{item?.soLuong}</Text>
+                    <Text
+                      style={{
+                        fontSize: 18
+                      }}>
+                      {item?.soLuong}
+                    </Text>
                     <Icon
                       type={IconType.IONICON}
                       name="add-circle-outline"
@@ -377,19 +460,48 @@ export const TempInvoiceDetails = () => {
             borderWidth: 1,
             borderColor: '#ccc'
           }}>
-          <View style={{ gap: 12 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View
+            style={{
+              gap: 12
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between'
+              }}>
               <Text>Tổng tiền hàng</Text>
-              <Text style={{ fontSize: 18 }}>{new Intl.NumberFormat('vi-VN').format(hoadonOpen?.tongTienHang)}</Text>
+              <Text
+                style={{
+                  fontSize: 18
+                }}>
+                {new Intl.NumberFormat('vi-VN').format(hoadonOpen?.tongTienHang)}
+              </Text>
             </View>
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between'
+              }}>
               <Text>Giảm giá</Text>
-              <Text style={{ fontSize: 18 }}>{new Intl.NumberFormat('vi-VN').format(hoadonOpen?.tongGiamGiaHD)}</Text>
+              <Text
+                style={{
+                  fontSize: 18
+                }}>
+                {new Intl.NumberFormat('vi-VN').format(hoadonOpen?.tongGiamGiaHD)}
+              </Text>
             </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between'
+              }}>
               <Text>Tổng cộng</Text>
-              <Text style={{ fontSize: 18, fontWeight: 500 }}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: 500
+                }}>
                 {new Intl.NumberFormat('vi-VN').format(hoadonOpen?.tongThanhToan)}
               </Text>
             </View>
@@ -397,7 +509,10 @@ export const TempInvoiceDetails = () => {
         </View>
       </View>
       <Button
-        titleStyle={{ fontSize: 18, color: 'white' }}
+        titleStyle={{
+          fontSize: 18,
+          color: 'white'
+        }}
         size="lg"
         containerStyle={{
           position: 'absolute',
@@ -409,13 +524,14 @@ export const TempInvoiceDetails = () => {
           backgroundColor: '#D7681D',
           borderRadius: 4
         }}
-        onPress={() =>
-          navigation.navigate(SaleManagerStack.THANH_TOAN, {
-            idHoaDon: hoadonOpen?.id,
-            tongPhaiTra: hoadonOpen?.tongThanhToan ?? 0
-          })
-        }>
-        <Icon name="check" color="white" containerStyle={{ marginRight: 10 }} />
+        onPress={gotoThanhToan}>
+        <Icon
+          name="check"
+          color="white"
+          containerStyle={{
+            marginRight: 10
+          }}
+        />
         Thanh toán
       </Button>
     </View>

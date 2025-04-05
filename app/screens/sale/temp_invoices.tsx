@@ -3,8 +3,8 @@ import { Icon, Button, Text, useTheme } from '@rneui/themed';
 import { useEffect, useRef, useContext, useState, useCallback } from 'react';
 import uuid from 'react-native-uuid';
 import { format } from 'date-fns';
-import { CompositeNavigationProp, CompositeScreenProps, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
+import { CompositeNavigationProp, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Input } from '@rneui/base';
 import realmQuery from '../../store/realm/realmQuery';
 import { HoaDonDto, IHoaDonDto } from '../../services/hoadon/dto';
@@ -12,11 +12,11 @@ import { LoaiChungTu, TenLoaiChungTu } from '../../enum/LoaiChungTu';
 import CommonFunc from '../../utils/CommonFunc';
 import { IconType } from '../../enum/IconType';
 import PageEmpty from '../../components/page_empty';
-import { TempInvoiceDetails } from './teamp_invoice_details';
 import { ActionType } from '../../enum/ActionType';
 import { SaleManagerStack, SaleManagerTab } from '../../navigation/list_name_route';
 import { SaleManagerStackParamList, SaleManagerTabParamList } from '../../navigation/route_param_list';
-import { BottomTabNavigationProp, BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { useSaleManagerStackContext } from '../../store/react_context/SaleManagerStackProvide';
 
 // type TempInvoicekNavigationProps = NativeStackNavigationProp<SaleManagerTabParamList>;
 type TempInvoicekNavigationProps = CompositeNavigationProp<
@@ -24,10 +24,7 @@ type TempInvoicekNavigationProps = CompositeNavigationProp<
   NativeStackNavigationProp<SaleManagerStackParamList>
 >;
 
-type TempInvoiceRouteProp = RouteProp<
-  SaleManagerTabParamList,
-  SaleManagerTab.TEMP_INVOICE
->;
+type TempInvoiceRouteProp = RouteProp<SaleManagerTabParamList, SaleManagerTab.TEMP_INVOICE>;
 
 const styleHeader = StyleSheet.create({
   boxItem: {
@@ -53,13 +50,20 @@ const TempInvoices = () => {
   const firstLoad = useRef(true);
   const navigation = useNavigation<TempInvoicekNavigationProps>();
   const route = useRoute<TempInvoiceRouteProp>();
+  const { currentInvoice, setCurrentInvoice } = useSaleManagerStackContext();
 
   const [lstHoaDon, setLstHoaDon] = useState<IHoaDonDto[]>([]);
   const [tabActive, setTabActive] = useState(LoaiChungTu.HOA_DON_BAN_LE);
 
   const arrTab = [
-    { id: LoaiChungTu.HOA_DON_BAN_LE, text: 'Hóa đơn' },
-    { id: LoaiChungTu.GOI_DICH_VU, text: 'Gói dịch vụ' }
+    {
+      id: LoaiChungTu.HOA_DON_BAN_LE,
+      text: 'Hóa đơn'
+    },
+    {
+      id: LoaiChungTu.GOI_DICH_VU,
+      text: 'Gói dịch vụ'
+    }
   ];
 
   const getHoaDonFromCache = (idLoaiChungTu = LoaiChungTu.HOA_DON_BAN_LE) => {
@@ -94,10 +98,12 @@ const TempInvoices = () => {
     realmQuery.HoaDon_ResetValueForColumn_isOpenLastest(tabActive);
     realmQuery.InsertTo_HoaDon(newHD);
 
-    navigation.navigate(SaleManagerTab.PRODUCT, {
+    setCurrentInvoice({
+      ...currentInvoice,
       idHoaDon: newHD?.id,
-      idLoaiChungTu: tabActive
+      countProduct: 0
     });
+    navigation.navigate(SaleManagerTab.PRODUCT);
   };
 
   const onChangeTab = (tabActive: number) => {
@@ -112,14 +118,21 @@ const TempInvoices = () => {
   };
 
   const goInvoiceDetail = (item: IHoaDonDto) => {
-    navigation.navigate(SaleManagerStack.TEMP_INVOICE_DETAIL, { idHoaDon: item.id });
+    setCurrentInvoice({
+      ...currentInvoice,
+      idHoaDon: item.id
+    });
+    navigation.navigate(SaleManagerStack.TEMP_INVOICE_DETAIL);
   };
 
   const gotoEdit = (item: IHoaDonDto) => {
-    navigation.navigate(SaleManagerTab.PRODUCT, {
+    const lstCTHD = realmQuery.GetListChiTietHoaDon_byIdHoaDon(item.id);
+    setCurrentInvoice({
+      ...currentInvoice,
       idHoaDon: item.id,
-      idLoaiChungTu: tabActive
+      countProduct: lstCTHD?.length ?? 0
     });
+    navigation.navigate(SaleManagerTab.PRODUCT);
   };
 
   const agreeEditChiTiet = (hdAfter: IHoaDonDto, actionId?: number) => {
@@ -142,15 +155,19 @@ const TempInvoices = () => {
     );
 
     if (actionId === ActionType.INSERT) {
-      navigation.navigate(SaleManagerTab.PRODUCT, {
-        idHoaDon: hdAfter?.id,
-        idLoaiChungTu: tabActive
-      });
+      navigation.navigate(SaleManagerTab.PRODUCT);
+      //setIdHoaDon(hdAfter?.id);
     }
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.background
+        }
+      ]}>
       <View
         style={{
           flexDirection: 'row',
@@ -185,7 +202,12 @@ const TempInvoices = () => {
         <View style={[styleHeader.boxItem, styleHeader.boxAdd]}>
           <Pressable onPress={createNewInvoice}>
             <Icon name="add" size={20} />
-            <Text style={{ fontWeight: 500 }}>Tạo đơn mới</Text>
+            <Text
+              style={{
+                fontWeight: 500
+              }}>
+              Tạo đơn mới
+            </Text>
           </Pressable>
         </View>
       </View>
@@ -198,14 +220,19 @@ const TempInvoices = () => {
             backgroundColor: 'white'
           }}>
           <Input
-            leftIcon={{ type: 'ionicon', name: 'search' }}
+            leftIcon={{
+              type: 'ionicon',
+              name: 'search'
+            }}
             placeholder="Tìm hóa đơn"
             containerStyle={{
               backgroundColor: 'white',
               borderRadius: 4,
               borderColor: '#F5F5F5'
             }}
-            inputStyle={{ fontSize: 14 }}
+            inputStyle={{
+              fontSize: 14
+            }}
           />
           {lstHoaDon?.length > 0 && (
             <ScrollView>
@@ -224,18 +251,41 @@ const TempInvoices = () => {
                       name="delete-outline"
                       size={24}
                       color={'#ff944d'}
-                      style={{ flex: 1 }}
+                      style={{
+                        flex: 1
+                      }}
                       onPress={() => removeInvoice(item?.id)}
                     />
                     <View style={stylesInvoiceItem.boxCenter}>
-                      <View style={{ flex: 2 }}>
-                        <Text style={{ fontWeight: 500, color: theme.colors.primary }}>{item?.maHoaDon}</Text>
-                        <Text style={{ color: 'rgb(178, 183, 187)', fontSize: 14 }}>
+                      <View
+                        style={{
+                          flex: 2
+                        }}>
+                        <Text
+                          style={{
+                            fontWeight: 500,
+                            color: theme.colors.primary
+                          }}>
+                          {item?.maHoaDon}
+                        </Text>
+                        <Text
+                          style={{
+                            color: 'rgb(178, 183, 187)',
+                            fontSize: 14
+                          }}>
                           {format(new Date(item.ngayLapHoaDon), 'HH:mm')}
                         </Text>
                       </View>
-                      <View style={{ flex: 3 }}>
-                        <Text style={{ fontWeight: 500, textAlign: 'right', color: theme.colors.primary }}>
+                      <View
+                        style={{
+                          flex: 3
+                        }}>
+                        <Text
+                          style={{
+                            fontWeight: 500,
+                            textAlign: 'right',
+                            color: theme.colors.primary
+                          }}>
                           {new Intl.NumberFormat('vi-VN').format(item?.tongThanhToan ?? 0)}
                         </Text>
                         <Text
@@ -250,7 +300,15 @@ const TempInvoices = () => {
                       </View>
                     </View>
 
-                    <Icon type="antdesign" name="edit" size={24} style={{ flex: 1 }} onPress={() => gotoEdit(item)} />
+                    <Icon
+                      type="antdesign"
+                      name="edit"
+                      size={24}
+                      style={{
+                        flex: 1
+                      }}
+                      onPress={() => gotoEdit(item)}
+                    />
                   </View>
                 </Pressable>
               ))}
