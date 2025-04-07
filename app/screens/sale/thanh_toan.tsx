@@ -36,6 +36,7 @@ export default function ThanhToan() {
   const { chiNhanhCurrent } = useAuthApp();
   const { currentInvoice, setCurrentInvoice } = useSaleManagerStackContext();
   const idHoaDon = currentInvoice?.idHoaDon ?? '';
+  const idChiNhanhCurrent = chiNhanhCurrent?.id ?? null;
   const tongPhaiTra = currentInvoice?.tongPhaiTra ?? 0;
   const navigation = useNavigation<ThanhToanScreenNavigation>();
   const [isSaving, setIsSaving] = useState(false);
@@ -234,7 +235,7 @@ export default function ThanhToan() {
       return;
     }
     const lstCTHD = realmQuery.GetListChiTietHoaDon_byIdHoaDon(hoadonOpen?.id);
-    hoadonOpen.idChiNhanh = chiNhanhCurrent?.id ?? null;
+    hoadonOpen.idChiNhanh = idChiNhanhCurrent;
     hoadonOpen.maHoaDon = '';
     const dataHD = await HoaDonService.InsertHoaDon(hoadonOpen);
     if (dataHD !== null) {
@@ -260,7 +261,7 @@ export default function ThanhToan() {
         if (tongThu > 0) {
           const quyHD: IQuyHoaDonDto = {
             id: ApiConst.GUID_EMPTY,
-            idChiNhanh: chiNhanhCurrent?.id ?? null,
+            idChiNhanh: idChiNhanhCurrent,
             idNhanVien: null, // todo
             idLoaiChungTu: LoaiChungTu.PHIEU_THU,
             tongTienThu: tongThu,
@@ -347,12 +348,14 @@ export default function ThanhToan() {
     }
     sChiTietHD = '<br /> Chi tiết hóa đơn: ' + sChiTietHD;
     const diary: INhatKyThaoTacDto = {
-      idChiNhanh: ApiConst.GUID_EMPTY,
+      idChiNhanh: idChiNhanhCurrent,
       loaiNhatKy: DiaryStatus.INSERT,
       chucNang: 'Hóa đơn',
       noiDung: `Thêm mới hóa đơn '  ${hoadon?.maHoaDon}`,
       noiDungChiTiet: sNoiDungChiTiet + sChiTietHD
     };
+
+    await NhatKyThaoTacService.CreateNhatKyHoatDong(diary);
   };
 
   const saveDiaryQuyHD = async (quyHD: IQuyHoaDonDto, lstQuyCT: IQuyChitietDto[]) => {
@@ -380,7 +383,7 @@ export default function ThanhToan() {
       <br /> Phương thức thanh toán: ${sPhuongThucTT}`;
 
     const diary: INhatKyThaoTacDto = {
-      idChiNhanh: ApiConst.GUID_EMPTY,
+      idChiNhanh: idChiNhanhCurrent,
       loaiNhatKy: DiaryStatus.INSERT,
       chucNang: 'Sổ quỹ',
       noiDung: `Thêm mới phiếu thu '  ${quyHD?.maHoaDon}`,
@@ -667,15 +670,15 @@ export default function ThanhToan() {
         <Button
           title={'Thanh toán'}
           size="lg"
-          buttonStyle={{
-            backgroundColor: '#FA6800'
-          }}
+          // buttonStyle={{
+          //   backgroundColor: '#FA6800'
+          // }}
           containerStyle={{
             borderRadius: 8
           }}
-          titleStyle={{
-            color: 'white'
-          }}
+          // titleStyle={{
+          //   color: 'white'
+          // }}
           onPress={thanhToan}
         />
       </View>

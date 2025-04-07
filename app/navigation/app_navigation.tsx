@@ -15,17 +15,10 @@ export default function AppNavigation() {
   if (isLogin == null) return null; // Hiển thị màn hình loading nếu chưa check xong
 
   const Stack = createNativeStackNavigator<RootStackParamList>();
+
+  // if (!isLogin) return <LoginScreen />;
   return (
     <Stack.Navigator>
-      {/* {!isLogin ? (
-        <Stack.Screen
-          name={ListRouteApp.LOGIN}
-          component={LoginScreen}
-          options={{
-            headerShown: false
-          }}
-        />
-      ) : ( */}
       <>
         <Stack.Screen
           name={ListRouteApp.MAIN_NAVIGATION}
@@ -42,7 +35,6 @@ export default function AppNavigation() {
           }}
         />
       </>
-      {/* )} */}
     </Stack.Navigator>
   );
 }

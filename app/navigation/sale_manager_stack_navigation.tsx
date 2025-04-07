@@ -13,6 +13,7 @@ import { RouteProp, useNavigation } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import realmQuery from '../store/realm/realmQuery';
 import { SaleManagerStackProvider, useSaleManagerStackContext } from '../store/react_context/SaleManagerStackProvide';
+import { Image, useTheme } from '@rneui/themed';
 
 type SaleManagerTabNavigationProps = DrawerNavigationProp<MainDrawerParamList, MainNavigation.SALE_MANAGER_STACK>;
 
@@ -23,25 +24,31 @@ function SaleManagerTabNavigation() {
   const idHoaDon = currentInvoice?.idHoaDon ?? '';
   const countProduct = currentInvoice?.countProduct ?? 0;
 
+  const { theme } = useTheme();
+
   return (
     <Tabs.Navigator
       screenOptions={{
-        tabBarActiveTintColor: 'red',
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.greyOutline,
         headerStyle: {
-          backgroundColor: '#FFF4E5'
+          backgroundColor: theme.colors.white
         },
         headerTitleAlign: 'center',
         headerTitleStyle: {
-          color: 'black',
+          color: theme.colors.black,
           fontWeight: 400,
           fontSize: 16,
           textAlign: 'center'
         },
-        headerTintColor: 'white', // màu của nút back và màu của tiêu đề
+        headerTintColor: theme.colors.white, // màu của nút back và màu của tiêu đề
         tabBarLabelStyle: {
-          fontSize: 14
+          fontSize: 14,
+          fontWeight: 500
         },
+        // tabBarStyle: {
+        //   backgroundColor: theme.colors.grey5
+        // },
         headerLeft: () => (
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
             <Icon

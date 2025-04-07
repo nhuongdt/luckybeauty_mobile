@@ -52,7 +52,7 @@ const ProductSale = () => {
 
   const [ctDoing, setCTDoing] = useState<IHoaDonChiTietDto>({} as IHoaDonChiTietDto);
 
-  const PageLoad = async () => { };
+  const PageLoad = async () => {};
 
   useEffect(() => {
     PageLoad();

@@ -1,5 +1,16 @@
-import { View, StyleSheet, Image, Text, TextInput, KeyboardAvoidingView, Dimensions } from 'react-native';
-import { Input } from '@rneui/themed';
+import {
+  View,
+  StyleSheet,
+  Image,
+  Text,
+  TextInput,
+  KeyboardAvoidingView,
+  Dimensions,
+  StyleProp,
+  TextStyle,
+  ViewStyle
+} from 'react-native';
+import { FullTheme, Input, useTheme } from '@rneui/themed';
 import { CheckBox } from '@rneui/themed';
 import { Button } from '@rneui/themed';
 import { useContext, useEffect, useState } from 'react';
@@ -8,12 +19,20 @@ import { TenantStatus } from '../enum/TenantStatus';
 import { ILoginModel } from '../services/login/LoginDto';
 import { IconType } from '../enum/IconType';
 import { useAuthApp } from '../store/react_context/AuthProvider';
+import { Theme } from '@rneui/base';
 
 const PlaceholderImage = require('@/assets/images/background-image.png');
 const { width, height } = Dimensions.get('window');
 
+type Styles = {
+  container: StyleProp<ViewStyle>;
+  text: StyleProp<TextStyle>;
+};
+
 const LoginScreen = () => {
   const { login } = useAuthApp();
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   const [tenancyName, setTenancyName] = useState('');
   const [userName, setUserName] = useState('');
   const [passWord, setPassWord] = useState('');
@@ -92,22 +111,12 @@ const LoginScreen = () => {
     <>
       <KeyboardAvoidingView style={styles.container}>
         <View style={styles.formContainer}>
-          <Image
-            style={{
-              resizeMode: 'stretch',
-              width: 200,
-              height: 50
-            }}
-            source={require('./../assets/images/logo_Luckybeauty_full.png')}
-          />
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: 500,
-              marginTop: 12
-            }}>
-            Đăng nhập
-          </Text>
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
+            <Image style={styles.logo} source={require('./../assets/images/app-logo.png')} />
+            <Text style={styles.sologan}>Lucky Beauty</Text>
+          </View>
+
+          <Text style={styles.lblDangNhap}>Đăng nhập</Text>
           <View style={styles.inputContainer}>
             <Input
               placeholder="tenant"
@@ -181,16 +190,7 @@ const LoginScreen = () => {
                 onPress={() => setRememberMe(!rememberMe)}
               />
 
-              <Text
-                style={{
-                  textDecorationColor: 'blue',
-                  textDecorationStyle: 'solid',
-                  textDecorationLine: 'underline',
-                  color: 'blue',
-                  paddingRight: 10
-                }}>
-                Quên mật khẩu
-              </Text>
+              <Text style={styles.linkQuenMatKhau}>Quên mật khẩu</Text>
             </View>
             <Button
               title={'Đăng nhập'}
@@ -210,46 +210,69 @@ const LoginScreen = () => {
 
 export default LoginScreen;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0866ff',
-    justifyContent: 'center' // Căn giữa theo trục dọc
-  },
-  formContainer: {
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 32,
-    flex: 1
-  },
-  inputContainer: {
-    paddingTop: 20,
-    paddingBottom: 20,
-    width: '100%'
-  },
-  checkBoxContainer: {
-    justifyContent: 'space-between'
-  },
-  inputBox: {
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  inputIcon: {
-    color: '#aaa',
-    fontSize: 18,
-    flex: 1
-  },
-  textInput: {
-    width: '100%',
-    flex: 11
-  },
-  msgErr: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: 8
-  }
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.white,
+      justifyContent: 'center' // Căn giữa theo trục dọc
+    },
+    formContainer: {
+      backgroundColor: theme.colors.white,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.greyOutline,
+      borderRadius: 8,
+      padding: 32,
+      flex: 1
+    },
+    logo: {
+      resizeMode: 'stretch',
+      width: 40,
+      height: 40
+    },
+    sologan: {
+      fontSize: 25,
+      fontWeight: 600,
+      color: theme.colors.primary
+    },
+    lblDangNhap: {
+      fontSize: 20,
+      fontWeight: 500,
+      marginTop: 12
+    },
+    linkQuenMatKhau: {
+      textDecorationColor: theme.colors.primary,
+      textDecorationStyle: 'solid',
+      textDecorationLine: 'underline',
+      color: theme.colors.primary,
+      paddingRight: 10
+    },
+    inputContainer: {
+      paddingTop: 20,
+      paddingBottom: 20,
+      width: '100%'
+    },
+    checkBoxContainer: {
+      justifyContent: 'space-between'
+    },
+    inputBox: {
+      flexDirection: 'row',
+      alignItems: 'center'
+    },
+    inputIcon: {
+      color: theme.colors.grey1,
+      fontSize: 18,
+      flex: 1
+    },
+    textInput: {
+      width: '100%',
+      flex: 11
+    },
+    msgErr: {
+      color: theme.colors.error,
+      fontSize: 12,
+      marginTop: 8
+    }
+  });

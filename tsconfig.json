@@ -1,7 +1,8 @@
 {
-  "extends": "@react-native/typescript-config/tsconfig.json"
-  // "compilerOptions": {
-  //   "noUnusedLocals": false, // Không cảnh báo biến cục bộ không sử dụng
-  //   "noUnusedParameters": false // Không cảnh báo tham số không sử dụng
-  // }
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": {
+    //"typeRoots": ["./node_modules/@types", "./src"]
+    // "noUnusedLocals": false, // Không cảnh báo biến cục bộ không sử dụng
+    // "noUnusedParameters": false // Không cảnh báo tham số không sử dụng
+  }
 }

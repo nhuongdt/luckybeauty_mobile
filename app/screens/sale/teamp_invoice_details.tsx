@@ -510,8 +510,8 @@ export const TempInvoiceDetails = () => {
       </View>
       <Button
         titleStyle={{
-          fontSize: 18,
-          color: 'white'
+          fontSize: 18
+          //color: 'white'
         }}
         size="lg"
         containerStyle={{
@@ -521,7 +521,7 @@ export const TempInvoiceDetails = () => {
           padding: 8
         }}
         buttonStyle={{
-          backgroundColor: '#D7681D',
+          //backgroundColor: '#D7681D',
           borderRadius: 4
         }}
         onPress={gotoThanhToan}>
