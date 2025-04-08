@@ -1,11 +1,11 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { Image, Input, Text } from '@rneui/themed';
+import { Image, Input, Text, useTheme } from '@rneui/themed';
 import { useContext, useEffect, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { IHoaDonDto } from '../../services/hoadon/dto';
 import realmQuery from '../../store/realm/realmQuery';
 import { HinhThucThanhToan } from '../../enum/HinhThucThanhToan';
-import { Button, CheckBox, Icon } from '@rneui/base';
+import { Button, CheckBox, Icon, Theme } from '@rneui/base';
 import { IconType } from '../../enum/IconType';
 import { IQuyChitietDto } from '../../services/so_quy/IQuyChitietDto';
 import CommonFunc from '../../utils/CommonFunc';
@@ -33,6 +33,8 @@ type ThanhToanScreenNavigation = NativeStackNavigationProp<SaleManagerStackParam
 
 export default function ThanhToan() {
   const route = useRoute<ThanhToanRouteProp>();
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   const { chiNhanhCurrent } = useAuthApp();
   const { currentInvoice, setCurrentInvoice } = useSaleManagerStackContext();
   const idHoaDon = currentInvoice?.idHoaDon ?? '';
@@ -504,7 +506,7 @@ export default function ThanhToan() {
                     </Text>
                     <Text
                       style={{
-                        color: '#4D4D4D',
+                        color: theme.colors.grey4,
                         textAlign: 'center'
                       }}>
                       {taiKhoanCKChosed?.soTaiKhoan ?? ''}
@@ -574,7 +576,7 @@ export default function ThanhToan() {
                     </Text>
                     <Text
                       style={{
-                        color: '#4D4D4D',
+                        color: theme.colors.grey4,
                         textAlign: 'center'
                       }}>
                       {taiKhoanPOSChosed?.soTaiKhoan ?? ''}
@@ -626,7 +628,7 @@ export default function ThanhToan() {
           style={{
             flex: 1,
             borderWidth: 1,
-            borderColor: 'black',
+            borderColor: theme.colors.black,
             borderRadius: 8,
             padding: 12
           }}>
@@ -670,15 +672,9 @@ export default function ThanhToan() {
         <Button
           title={'Thanh toán'}
           size="lg"
-          // buttonStyle={{
-          //   backgroundColor: '#FA6800'
-          // }}
           containerStyle={{
             borderRadius: 8
           }}
-          // titleStyle={{
-          //   color: 'white'
-          // }}
           onPress={thanhToan}
         />
       </View>
@@ -686,31 +682,32 @@ export default function ThanhToan() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'white',
-    flex: 1,
-    padding: 16,
-    gap: 16
-  },
-  flexRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  textInfor: {
-    fontSize: 18,
-    fontWeight: 600
-  },
-  itemLoaiTien: {
-    padding: 16,
-    borderRadius: 16,
-    justifyContent: 'space-between',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    width: '60%'
-  },
-  accountItem: {
-    padding: 5
-  }
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: theme.colors.white,
+      flex: 1,
+      padding: 16,
+      gap: 16
+    },
+    flexRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center'
+    },
+    textInfor: {
+      fontSize: 18,
+      fontWeight: 600
+    },
+    itemLoaiTien: {
+      padding: 16,
+      borderRadius: 16,
+      justifyContent: 'space-between',
+      borderColor: theme.colors.greyOutline,
+      borderWidth: 1,
+      width: '60%'
+    },
+    accountItem: {
+      padding: 5
+    }
+  });

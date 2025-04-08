@@ -46,9 +46,6 @@ function SaleManagerTabNavigation() {
           fontSize: 14,
           fontWeight: 500
         },
-        // tabBarStyle: {
-        //   backgroundColor: theme.colors.grey5
-        // },
         headerLeft: () => (
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
             <Icon
@@ -95,14 +92,14 @@ function SaleManagerTabNavigation() {
               {(countProduct ?? 0) > 0 && (
                 <Badge
                   value={countProduct}
-                  status="warning"
+                  status="primary"
                   containerStyle={{
                     position: 'absolute',
                     top: 10
                   }}
                 />
               )}
-              <Icon name="shopping-basket" type={IconType.FONT_AWESOME_5} color={'blue'} />
+              <Icon name="shopping-basket" type={IconType.FONT_AWESOME_5} color={theme.colors.primary} />
             </TouchableOpacity>
           )
         })}
@@ -113,13 +110,14 @@ function SaleManagerTabNavigation() {
 
 export function SaleManagerStackNavigation() {
   const Stacks = createNativeStackNavigator<SaleManagerStackParamList>();
+  const { theme } = useTheme();
   return (
     <SaleManagerStackProvider>
       <Stacks.Navigator
         screenOptions={{
           headerTitleAlign: 'center',
           headerStyle: {
-            backgroundColor: '#FFF2CC'
+            backgroundColor: theme.colors.white
           }
         }}>
         <Stacks.Screen

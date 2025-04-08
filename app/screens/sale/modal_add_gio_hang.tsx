@@ -1,11 +1,14 @@
-import { Icon } from '@rneui/base';
+import { Icon, Theme } from '@rneui/base';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Pressable, Modal, Image } from 'react-native';
 import { IHoaDonChiTietDto } from '../../services/hoadon/dto';
 import { PropModal } from '../../type/PropModal';
 import { InvoiceStatus } from '../../enum/InvoiceStatus';
+import { useTheme } from '@rneui/themed';
 
 export default function ModalAddGioHang({ isShow, objUpdate, onClose, onSave }: PropModal<IHoaDonChiTietDto>) {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   const [ctDoing, setCTDoing] = useState<IHoaDonChiTietDto>({} as IHoaDonChiTietDto);
 
   useEffect(() => {
@@ -79,7 +82,7 @@ export default function ModalAddGioHang({ isShow, objUpdate, onClose, onSave }: 
               left: 10,
               top: 10
             }}>
-            <Icon name="close" size={24} color={'#c0c0c0'} />
+            <Icon name="close" size={24} color={theme.colors.grey4} />
           </Pressable>
           <View
             style={{
@@ -114,13 +117,13 @@ export default function ModalAddGioHang({ isShow, objUpdate, onClose, onSave }: 
                 ]}>
                 {ctDoing.soLuong}
               </Text>
-              <Icon name="add-circle-outline" size={30} color={'#ccc'} onPress={tangSoLuong} />
+              <Icon name="add-circle-outline" size={30} color={theme.colors.greyOutline} onPress={tangSoLuong} />
             </View>
           </View>
           <View
             style={{
               marginTop: 20,
-              borderTopColor: '#cccc',
+              borderTopColor: theme.colors.greyOutline,
               borderTopWidth: 1
             }}>
             <View
@@ -136,7 +139,7 @@ export default function ModalAddGioHang({ isShow, objUpdate, onClose, onSave }: 
               </Text>
             </View>
             <Pressable style={[styles.button, styles.buttonOpen]} onPress={agreeGioHang}>
-              <Text>Thêm vào giỏ hàng</Text>
+              <Text style={{ color: theme.colors.white }}>Thêm vào giỏ hàng</Text>
             </Pressable>
           </View>
         </View>
@@ -144,42 +147,43 @@ export default function ModalAddGioHang({ isShow, objUpdate, onClose, onSave }: 
     </View>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  modalView: {
-    position: 'relative',
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 30,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: theme.colors.white,
+      justifyContent: 'center',
+      alignItems: 'center'
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5
-  },
-  productName: {
-    fontSize: 16,
-    fontWeight: '600'
-  },
-  productPrice: {
-    fontSize: 14,
-    fontWeight: '500'
-  },
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-    alignItems: 'center'
-  },
-  buttonOpen: {
-    backgroundColor: '#ffe4c4',
-    marginTop: 16
-  }
-});
+    modalView: {
+      position: 'relative',
+      backgroundColor: theme.colors.white,
+      borderRadius: 20,
+      padding: 30,
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5
+    },
+    productName: {
+      fontSize: 16,
+      fontWeight: '600'
+    },
+    productPrice: {
+      fontSize: 14,
+      fontWeight: '500'
+    },
+    button: {
+      borderRadius: 20,
+      padding: 10,
+      elevation: 2,
+      alignItems: 'center'
+    },
+    buttonOpen: {
+      backgroundColor: theme.colors.primary,
+      marginTop: 16
+    }
+  });

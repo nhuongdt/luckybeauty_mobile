@@ -1,5 +1,5 @@
-import { Input, Text } from '@rneui/base';
-import { Button, CheckBox, Icon, SearchBar } from '@rneui/themed';
+import { Input, Text, Theme } from '@rneui/base';
+import { Button, CheckBox, Icon, SearchBar, useTheme } from '@rneui/themed';
 import { Image, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { IKhachHangItemDto } from '../../services/customer/IKhachHangItemDto';
 import { PropModal } from '../../type/PropModal';
@@ -9,8 +9,11 @@ import { useEffect, useState } from 'react';
 import TaiKhoanNganHangService from '../../services/tai_khoan_ngan_hang/TaiKhoanNganHangService';
 import { CommonActions } from '@react-navigation/native';
 import CommonFunc from '../../utils/CommonFunc';
+import { ModalTitle } from '../components/ModalTitle';
 
 export const ListTaiKhoanNganHang = ({ isShow, objUpdate, onClose, onSave }: PropModal<ITaiKhoanNganHangDto>) => {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   const [txtSearch, setTextSearch] = useState('');
   const [accountBankChosed, setAccountBankChosed] = useState<ITaiKhoanNganHangDto>();
   const [listBankAccountSearch, setListBankAccountSearch] = useState<ITaiKhoanNganHangDto[]>([]);
@@ -81,97 +84,72 @@ export const ListTaiKhoanNganHang = ({ isShow, objUpdate, onClose, onSave }: Pro
 
   return (
     <Modal visible={isShow} transparent={true} animationType="slide">
-      <View style={styles.container}>
-        <View
-          style={{
-            backgroundColor: '#FFF4E5',
-            flexDirection: 'row',
-            alignItems: 'center',
-            padding: 12
-          }}>
-          <Icon
-            type={IconType.IONICON}
-            name="close"
-            color={'red'}
-            size={24}
-            style={{
-              marginLeft: 8,
-              flex: 1
+      <View style={styles.backdrop}>
+        <View style={styles.container}>
+          <ModalTitle title="Chọn tài khoản ngân hàng" onClose={onClose} />
+          <SearchBar
+            placeholder="Tìm kiếm"
+            containerStyle={{
+              paddingLeft: 16,
+              paddingRight: 16,
+              borderTopWidth: 0,
+              paddingBottom: 0,
+              backgroundColor: theme.colors.white
             }}
-            onPress={onClose}
+            inputContainerStyle={{
+              backgroundColor: theme.colors.white
+            }}
+            value={txtSearch}
+            onChangeText={text => searchTaiKhoan(text)}
           />
-          <Text
+
+          <ScrollView
             style={{
-              textAlign: 'center',
-              flex: 11,
-              fontWeight: 500,
-              fontSize: 14
+              padding: 16
             }}>
-            Chọn tài khoản ngân hàng
-          </Text>
-        </View>
-        <SearchBar
-          placeholder="Tìm kiếm"
-          containerStyle={{
-            paddingLeft: 16,
-            paddingRight: 16,
-            borderTopWidth: 0,
-            paddingBottom: 0,
-            backgroundColor: 'white'
-          }}
-          inputContainerStyle={{
-            backgroundColor: 'white'
-          }}
-          value={txtSearch}
-          onChangeText={text => searchTaiKhoan(text)}
-        />
+            {listBankAccountSearch?.map(item => (
+              <Pressable key={item?.id} style={[styles.accountItem]} onPress={() => choseTaiKhoanNganHang(item)}>
+                {accountBankChosed?.id === item.id && (
+                  <Icon type={IconType.IONICON} name="checkmark" size={24} color={theme.colors.primary} />
+                )}
+                <Image
+                  style={styles.image}
+                  source={{
+                    uri: item?.logoNganHang
+                  }}
+                />
 
-        <ScrollView
-          style={{
-            padding: 16
-          }}>
-          {listBankAccountSearch?.map(item => (
-            <Pressable key={item?.id} style={[styles.accountItem]} onPress={() => choseTaiKhoanNganHang(item)}>
-              {accountBankChosed?.id === item.id && (
-                <Icon type={IconType.IONICON} name="checkmark" size={24} color={'blue'} />
-              )}
-              <Image
-                style={styles.image}
-                source={{
-                  uri: item?.logoNganHang
-                }}
-              />
+                <View>
+                  <Text
+                    style={{
+                      fontWeight: 500,
+                      fontSize: 18,
+                      textAlign: 'center'
+                    }}>
+                    {item?.tenChuThe ?? ''}
+                  </Text>
+                  <Text
+                    style={{
+                      color: theme.colors.grey4,
+                      textAlign: 'center'
+                    }}>
+                    {item?.soTaiKhoan ?? ''}
+                  </Text>
+                </View>
+              </Pressable>
+            ))}
+          </ScrollView>
 
-              <View>
-                <Text
-                  style={{
-                    fontWeight: 500,
-                    fontSize: 18,
-                    textAlign: 'center'
-                  }}>
-                  {item?.tenChuThe ?? ''}
-                </Text>
-                <Text
-                  style={{
-                    color: '#4D4D4D',
-                    textAlign: 'center'
-                  }}>
-                  {item?.soTaiKhoan ?? ''}
-                </Text>
-              </View>
-            </Pressable>
-          ))}
-        </ScrollView>
-
-        <View style={styles.button}>
-          <View
-            style={{
-              gap: 10,
-              flexDirection: 'row',
-              justifyContent: 'flex-end'
-            }}>
-            <Button title={'Bỏ qua'} color={'error'} size="lg" onPress={onClose} />
-            <Button title={'Đồng ý'} size="lg" onPress={agreeChoseTaiKhoanNganHang} />
+          <View style={styles.button}>
+            <View
+              style={{
+                gap: 10,
+                flexDirection: 'row',
+                justifyContent: 'flex-end'
+              }}>
+              <Button title={'Bỏ qua'} color={theme.colors.error} size="lg" onPress={onClose} />
+              <Button title={'Đồng ý'} size="lg" onPress={agreeChoseTaiKhoanNganHang} />
+            </View>
           </View>
         </View>
       </View>
@@ -179,26 +157,39 @@ export const ListTaiKhoanNganHang = ({ isShow, objUpdate, onClose, onSave }: Pro
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'white',
-    flex: 1
-  },
-  accountItem: {
-    padding: 10,
-    borderRadius: 8,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    position: 'relative',
-    marginTop: 16
-  },
-  image: {
-    height: 100
-  },
-  button: {
-    position: 'absolute',
-    bottom: 16,
-    width: '100%',
-    paddingHorizontal: 16
-  }
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: theme.colors.grey5,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    container: {
+      backgroundColor: theme.colors.white,
+      flex: 1,
+      width: '100%',
+      height: '100%',
+      borderTopLeftRadius: 16,
+      borderTopRightRadius: 16,
+      marginTop: 12
+    },
+    accountItem: {
+      padding: 10,
+      borderRadius: 8,
+      borderColor: theme.colors.greyOutline,
+      // backgroundColor: theme.colors.white,
+      borderWidth: 1,
+      position: 'relative',
+      marginTop: 16
+    },
+    image: {
+      height: 100
+    },
+    button: {
+      position: 'absolute',
+      bottom: 16,
+      width: '100%',
+      paddingHorizontal: 16
+    }
+  });

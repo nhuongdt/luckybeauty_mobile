@@ -2,7 +2,7 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { Button, Icon, Text } from '@rneui/themed';
+import { Button, Icon, Text, useTheme } from '@rneui/themed';
 import uuid from 'react-native-uuid';
 import realmQuery from '../../store/realm/realmQuery';
 import { HoaDonChiTietDto, IHoaDonChiTietDto, IHoaDonDto } from '../../services/hoadon/dto';
@@ -19,6 +19,7 @@ import { IPropsSimpleDialog } from '../../type/IPropsSimpleDialog';
 import { SaleManagerStackParamList } from '../../navigation/route_param_list';
 import { SaleManagerStack } from '../../navigation/list_name_route';
 import { useSaleManagerStackContext } from '../../store/react_context/SaleManagerStackProvide';
+import { Theme } from '@rneui/base';
 
 type ScreensTempInvoiceDetailsNavigationProps = NativeStackNavigationProp<
   SaleManagerStackParamList,
@@ -28,6 +29,8 @@ type ScreensTempInvoiceDetailsNavigationProps = NativeStackNavigationProp<
 type ScreensTempInvoiceDetailRouteProp = RouteProp<SaleManagerStackParamList, SaleManagerStack.TEMP_INVOICE_DETAIL>;
 
 export const TempInvoiceDetails = () => {
+  const { theme } = useTheme();
+  const styles = createStyle(theme);
   const route = useRoute<ScreensTempInvoiceDetailRouteProp>();
   const navigation = useNavigation<ScreensTempInvoiceDetailsNavigationProps>();
   const { currentInvoice, setCurrentInvoice } = useSaleManagerStackContext();
@@ -293,7 +296,7 @@ export const TempInvoiceDetails = () => {
               <Text
                 style={{
                   fontSize: 13,
-                  color: '#666666'
+                  color: theme.colors.grey5
                 }}>
                 {custonerChosing?.soDienThoai}
               </Text>
@@ -304,7 +307,8 @@ export const TempInvoiceDetails = () => {
           <Text
             style={{
               textDecorationLine: 'underline',
-              fontSize: 12
+              fontSize: 12,
+              color: theme.colors.primary
             }}>
             Chọn lại khách
           </Text>
@@ -320,14 +324,14 @@ export const TempInvoiceDetails = () => {
         <View
           style={{
             borderRadius: 4,
-            borderColor: '#ccc',
+            borderColor: theme.colors.greyOutline,
             borderWidth: 1,
             flex: 3,
             flexDirection: 'row',
             alignItems: 'center',
             paddingHorizontal: 8,
             paddingVertical: 4,
-            backgroundColor: 'white'
+            backgroundColor: theme.colors.white
           }}>
           <Icon type={IconType.IONICON} name="search" size={18} />
           <TextInput
@@ -352,7 +356,7 @@ export const TempInvoiceDetails = () => {
             style={{
               textDecorationLine: 'underline',
               fontSize: 12,
-              color: 'blue',
+              color: theme.colors.primary,
               textAlign: 'center'
             }}>
             Thêm sản phẩm vào giỏ hàng
@@ -367,7 +371,7 @@ export const TempInvoiceDetails = () => {
               flex: 1,
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: 'white'
+              backgroundColor: theme.colors.white
             }}>
             <Icon type={IconType.FOUNDATION} name="page-add" size={20} />
             <Text
@@ -384,14 +388,14 @@ export const TempInvoiceDetails = () => {
           <View
             style={{
               gap: 8,
-              backgroundColor: 'white'
+              backgroundColor: theme.colors.white
             }}>
             {lstSearchCTHD?.map((item, index) => (
               <View
                 key={item?.id}
                 style={{
                   borderBottomWidth: index < lstSearchCTHD?.length - 1 ? 1 : 0,
-                  borderBlockColor: '#ccc',
+                  borderBlockColor: theme.colors.greyOutline,
                   padding: 8
                 }}>
                 <View
@@ -413,7 +417,7 @@ export const TempInvoiceDetails = () => {
                     <Text
                       style={{
                         fontSize: 18,
-                        color: 'rgb(178, 183, 187)'
+                        color: theme.colors.grey4
                       }}>
                       {new Intl.NumberFormat('vi-VN').format(item?.donGiaSauCK)}
                     </Text>
@@ -428,7 +432,7 @@ export const TempInvoiceDetails = () => {
                       type={IconType.IONICON}
                       name="remove-circle-outline"
                       size={30}
-                      color={'#ccc'}
+                      color={theme.colors.greyOutline}
                       onPress={() => giamSoLuong(item)}
                     />
                     <Text
@@ -441,7 +445,7 @@ export const TempInvoiceDetails = () => {
                       type={IconType.IONICON}
                       name="add-circle-outline"
                       size={30}
-                      color={'#ccc'}
+                      color={theme.colors.greyOutline}
                       onPress={() => tangSoLuong(item)}
                     />
                   </View>
@@ -458,7 +462,7 @@ export const TempInvoiceDetails = () => {
             padding: 12,
             borderRadius: 8,
             borderWidth: 1,
-            borderColor: '#ccc'
+            borderColor: theme.colors.greyOutline
           }}>
           <View
             style={{
@@ -511,7 +515,6 @@ export const TempInvoiceDetails = () => {
       <Button
         titleStyle={{
           fontSize: 18
-          //color: 'white'
         }}
         size="lg"
         containerStyle={{
@@ -521,13 +524,12 @@ export const TempInvoiceDetails = () => {
           padding: 8
         }}
         buttonStyle={{
-          //backgroundColor: '#D7681D',
           borderRadius: 4
         }}
         onPress={gotoThanhToan}>
         <Icon
           name="check"
-          color="white"
+          color={theme.colors.white}
           containerStyle={{
             marginRight: 10
           }}
@@ -538,32 +540,33 @@ export const TempInvoiceDetails = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'rgb(245, 247, 244)',
-    flex: 1,
-    position: 'relative'
-  },
-  boxInvoice: {
-    bottom: 75,
-    position: 'absolute',
-    width: '100%',
-    padding: 8,
-    backgroundColor: 'white'
-  },
-  boxCustomer: {
-    paddingHorizontal: 8,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#DAE8FC'
-  },
-  boxCustomer_LeftRight: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center'
-  },
-  containerDetail: {
-    padding: 8
-  }
-});
+const createStyle = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: theme.colors.grey5,
+      flex: 1,
+      position: 'relative'
+    },
+    boxInvoice: {
+      bottom: 75,
+      position: 'absolute',
+      width: '100%',
+      padding: 8,
+      backgroundColor: theme.colors.white
+    },
+    boxCustomer: {
+      paddingHorizontal: 8,
+      paddingVertical: 12,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      backgroundColor: theme.colors.white
+    },
+    boxCustomer_LeftRight: {
+      flexDirection: 'row',
+      gap: 12,
+      alignItems: 'center'
+    },
+    containerDetail: {
+      padding: 8
+    }
+  });

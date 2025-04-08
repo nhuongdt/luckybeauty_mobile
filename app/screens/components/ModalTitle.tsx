@@ -1,5 +1,5 @@
-import { Icon, Text } from '@rneui/themed';
-import { View } from 'react-native';
+import { Icon, Text, useTheme } from '@rneui/themed';
+import { TouchableOpacity, View } from 'react-native';
 import { IconType } from '../../enum/IconType';
 import { FC } from 'react';
 
@@ -7,29 +7,32 @@ export const ModalTitle: FC<{
   title: string;
   onClose: () => void;
 }> = ({ title, onClose }) => {
+  const { theme } = useTheme();
   return (
     <View
       style={{
-        backgroundColor: '#FFF4E5',
-        flexDirection: 'row',
+        backgroundColor: theme.colors.primary,
+        justifyContent: 'center',
         alignItems: 'center',
-        padding: 12
+        position: 'relative',
+        height: 50
       }}>
-      <Icon
-        type={IconType.IONICON}
-        name="close"
-        color={'red'}
-        size={24}
-        style={{
-          marginLeft: 8,
-          flex: 1
-        }}
+      <TouchableOpacity
         onPress={onClose}
-      />
+        style={{
+          position: 'absolute',
+          right: 10,
+          top: 13,
+          zIndex: 1
+        }}>
+        <Icon type={IconType.IONICON} name="close" color={theme.colors.white} size={24} />
+      </TouchableOpacity>
+
       <Text
         style={{
-          textAlign: 'center',
-          flex: 11
+          color: theme.colors.white,
+          fontWeight: 'bold',
+          fontSize: 16
         }}>
         {title}
       </Text>
