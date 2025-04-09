@@ -10,6 +10,8 @@ import realmQuery from '../../store/realm/realmQuery';
 import { PropModal } from '../../type/PropModal';
 import { ModalTitle } from '../components/ModalTitle';
 import { Theme } from '@rneui/base';
+import { BackDropView } from '../../components/back_drop_view';
+import { ModalContainer } from '../../components/modal_container';
 
 export const ModalListProduct = ({ isShow, onClose, onSave }: PropModal<IProductBasic>) => {
   const { theme } = useTheme();
@@ -79,10 +81,9 @@ export const ModalListProduct = ({ isShow, onClose, onSave }: PropModal<IProduct
 
   return (
     <Modal visible={isShow} transparent={true} animationType="slide">
-      <View style={styles.backdrop}>
-        <View style={styles.container}>
+      <BackDropView>
+        <ModalContainer>
           <ModalTitle title="Chọn hàng bán" onClose={onClose} />
-
           <View
             style={{
               padding: 8
@@ -159,19 +160,13 @@ export const ModalListProduct = ({ isShow, onClose, onSave }: PropModal<IProduct
               </View>
             )}
           </View>
-        </View>
-      </View>
+        </ModalContainer>
+      </BackDropView>
     </Modal>
   );
 };
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
-    backdrop: {
-      flex: 1,
-      backgroundColor: theme.colors.grey5,
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
     container: {
       flex: 1,
       backgroundColor: theme.colors.white,

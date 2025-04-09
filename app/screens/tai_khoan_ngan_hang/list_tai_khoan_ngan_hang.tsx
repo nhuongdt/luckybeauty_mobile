@@ -10,6 +10,8 @@ import TaiKhoanNganHangService from '../../services/tai_khoan_ngan_hang/TaiKhoan
 import { CommonActions } from '@react-navigation/native';
 import CommonFunc from '../../utils/CommonFunc';
 import { ModalTitle } from '../components/ModalTitle';
+import { BackDropView } from '../../components/back_drop_view';
+import { ModalContainer } from '../../components/modal_container';
 
 export const ListTaiKhoanNganHang = ({ isShow, objUpdate, onClose, onSave }: PropModal<ITaiKhoanNganHangDto>) => {
   const { theme } = useTheme();
@@ -84,8 +86,8 @@ export const ListTaiKhoanNganHang = ({ isShow, objUpdate, onClose, onSave }: Pro
 
   return (
     <Modal visible={isShow} transparent={true} animationType="slide">
-      <View style={styles.backdrop}>
-        <View style={styles.container}>
+      <BackDropView>
+        <ModalContainer>
           <ModalTitle title="Chọn tài khoản ngân hàng" onClose={onClose} />
           <SearchBar
             placeholder="Tìm kiếm"
@@ -151,34 +153,18 @@ export const ListTaiKhoanNganHang = ({ isShow, objUpdate, onClose, onSave }: Pro
               <Button title={'Đồng ý'} size="lg" onPress={agreeChoseTaiKhoanNganHang} />
             </View>
           </View>
-        </View>
-      </View>
+        </ModalContainer>
+      </BackDropView>
     </Modal>
   );
 };
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
-    backdrop: {
-      flex: 1,
-      backgroundColor: theme.colors.grey5,
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    container: {
-      backgroundColor: theme.colors.white,
-      flex: 1,
-      width: '100%',
-      height: '100%',
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
-      marginTop: 12
-    },
     accountItem: {
       padding: 10,
       borderRadius: 8,
       borderColor: theme.colors.greyOutline,
-      // backgroundColor: theme.colors.white,
       borderWidth: 1,
       position: 'relative',
       marginTop: 16

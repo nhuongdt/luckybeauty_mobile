@@ -1,10 +1,12 @@
 import { Icon, Theme } from '@rneui/base';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Pressable, Modal, Image } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Modal, Image, TouchableOpacity } from 'react-native';
 import { IHoaDonChiTietDto } from '../../services/hoadon/dto';
 import { PropModal } from '../../type/PropModal';
 import { InvoiceStatus } from '../../enum/InvoiceStatus';
 import { useTheme } from '@rneui/themed';
+import { BackDropView } from '../../components/back_drop_view';
+import { ModalContainer } from '../../components/modal_container';
 
 export default function ModalAddGioHang({ isShow, objUpdate, onClose, onSave }: PropModal<IHoaDonChiTietDto>) {
   const { theme } = useTheme();
@@ -72,14 +74,14 @@ export default function ModalAddGioHang({ isShow, objUpdate, onClose, onSave }: 
   };
 
   return (
-    <View style={styles.container}>
-      <Modal visible={isShow} transparent={true} animationType="slide" onRequestClose={onClose}>
+    <Modal visible={isShow} transparent={true} animationType="slide" onRequestClose={onClose}>
+      <BackDropView style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)', justifyContent: 'flex-start' }}>
         <View style={styles.modalView}>
           <Pressable
             onPress={onClose}
             style={{
               position: 'absolute',
-              left: 10,
+              right: 10,
               top: 10
             }}>
             <Icon name="close" size={24} color={theme.colors.grey4} />
@@ -143,30 +145,27 @@ export default function ModalAddGioHang({ isShow, objUpdate, onClose, onSave }: 
             </Pressable>
           </View>
         </View>
-      </Modal>
-    </View>
+      </BackDropView>
+    </Modal>
   );
 }
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
-    container: {
-      backgroundColor: theme.colors.white,
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
     modalView: {
-      position: 'relative',
-      backgroundColor: theme.colors.white,
-      borderRadius: 20,
+      marginTop: 12,
+      borderRadius: 12,
       padding: 30,
-      shadowColor: '#000',
+      width: '98%',
+      shadowColor: '#000', // màu bóng
       shadowOffset: {
+        // độ lệch của bóng
         width: 0,
         height: 2
       },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5
+      shadowOpacity: 0.25, // độ mờ
+      shadowRadius: 4, // bán kính mờ
+      elevation: 5,
+      backgroundColor: theme.colors.white
     },
     productName: {
       fontSize: 16,

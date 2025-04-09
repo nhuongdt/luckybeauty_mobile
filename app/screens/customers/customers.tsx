@@ -13,6 +13,8 @@ import { SearchBar, Theme } from '@rneui/base';
 import { PropModal } from '../../type/PropModal';
 import { ModalTitle } from '../components/ModalTitle';
 import { useTheme } from '@rneui/themed';
+import { ModalContainer } from '../../components/modal_container';
+import { BackDropView } from '../../components/back_drop_view';
 
 export default function Customer({ isShow, objUpdate, onClose, onSave }: PropModal<IKhachHangItemDto>) {
   const { theme } = useTheme();
@@ -78,24 +80,19 @@ export default function Customer({ isShow, objUpdate, onClose, onSave }: PropMod
 
   return (
     <Modal visible={isShow} animationType="slide" transparent={true}>
-      <View style={styles.backdrop}>
-        <View style={styles.modalContent}>
+      <BackDropView>
+        <ModalContainer>
           <ModalTitle title="Chọn khách hàng" onClose={onClose} />
 
           <SearchBar
             placeholder="Tìm kiếm khách hàng"
             value={txtSearch}
             onChangeText={text => setTxtSearch(text)}
-            containerStyle={{
-              paddingLeft: 16,
-              paddingRight: 16,
-              borderTopWidth: 0,
-              paddingBottom: 0,
-              backgroundColor: 'white'
-            }}
+            containerStyle={styles.searchBarConatiner}
             inputContainerStyle={{
               backgroundColor: 'white'
             }}
+            inputStyle={{ fontSize: 14 }}
           />
           <FlatList
             data={lstCustomer}
@@ -105,27 +102,19 @@ export default function Customer({ isShow, objUpdate, onClose, onSave }: PropMod
               paddingBottom: 8
             }}
           />
-        </View>
-      </View>
+        </ModalContainer>
+      </BackDropView>
     </Modal>
   );
 }
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
-    backdrop: {
-      flex: 1,
-      backgroundColor: theme.colors.grey5,
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    modalContent: {
-      width: '100%',
-      height: '100%',
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
-      marginTop: 12, // cách top 1 đoạn để vẫn tạo cảm giác như modal
-      overflow: 'hidden',
+    searchBarConatiner: {
+      paddingLeft: 16,
+      paddingRight: 16,
+      borderTopWidth: 0,
+      paddingBottom: 0,
       backgroundColor: theme.colors.white
     }
   });
