@@ -1,4 +1,4 @@
-import { View, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, StyleSheet, Pressable, ScrollView, TouchableOpacity } from 'react-native';
 import { Icon, Button, Text, useTheme } from '@rneui/themed';
 import { useEffect, useRef, useContext, useState, useCallback } from 'react';
 import uuid from 'react-native-uuid';
@@ -284,6 +284,9 @@ const TempInvoices = () => {
           )}
         </View>
       )}
+      <TouchableOpacity style={{ position: 'absolute', bottom: 80, right: 20 }} onPress={createNewInvoice}>
+        <Icon type={IconType.IONICON} name="add-circle-outline" color={theme.colors.primary} size={50}></Icon>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -294,7 +297,8 @@ const createStyles = (theme: Theme) =>
     container: {
       flex: 1,
       backgroundColor: theme.colors.white,
-      padding: 8
+      padding: 8,
+      position: 'relative'
     },
     tabsContainer: {
       flexDirection: 'row',

@@ -1,13 +1,22 @@
-import { View, StyleSheet, FlatList, Pressable, Dimensions } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  Pressable,
+  Dimensions,
+  TouchableOpacity,
+  Animated,
+  ScrollView
+} from 'react-native';
 import { useEffect, useRef, useState } from 'react';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Icon, Input, SearchBar } from '@rneui/themed';
+import { Button, CheckBox, Icon, Input, SearchBar, useTheme } from '@rneui/themed';
 import uuid from 'react-native-uuid';
-import { Text } from '@rneui/base';
+import { Text, Theme } from '@rneui/base';
 import ModalAddGioHang from './modal_add_gio_hang';
 import realmQuery from '../../store/realm/realmQuery';
-import { HoaDonDto, IHoaDonChiTietDto } from '../../services/hoadon/dto';
+import { HoaDonChiTietDto, HoaDonDto, IHoaDonChiTietDto } from '../../services/hoadon/dto';
 import { InvoiceStatus } from '../../enum/InvoiceStatus';
 import { IParamSearchProductDto, IProductBasic } from '../../services/product/dto';
 import ProductService from '../../services/product/ProductService';
@@ -22,6 +31,9 @@ import { ItemProductSale } from '../components/ItemProductSale';
 import { SaleManagerTabParamList } from '../../navigation/route_param_list';
 import { SaleManagerTab } from '../../navigation/list_name_route';
 import { useSaleManagerStackContext } from '../../store/react_context/SaleManagerStackProvide';
+import { ActionMenu } from '../components/action_menu';
+import { IProductGroupDto } from '../../services/product_group/dto';
+import ProductGroupSevice from '../../services/product_group/ProductGroupSevice';
 
 type ProductSaleNavigationProps = NativeStackNavigationProp<SaleManagerTabParamList, SaleManagerTab.PRODUCT>;
 
@@ -29,15 +41,23 @@ type ProductSaleRouteProp = RouteProp<SaleManagerTabParamList, SaleManagerTab.PR
 
 const ProductSale = () => {
   const firstLoad = useRef(true);
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   const route = useRoute<ProductSaleRouteProp>();
   const navigation = useNavigation<ProductSaleNavigationProps>();
-  const { currentInvoice, setCurrentInvoice } = useSaleManagerStackContext();
+  const { currentInvoice, setCurrentInvoice, setIsHideTab } = useSaleManagerStackContext();
   const idHoaDonCurrent = currentInvoice?.idHoaDon ?? '';
   const idLoaiChungTu = currentInvoice?.idLoaiChungTu ?? LoaiChungTu.HOA_DON_BAN_LE;
 
   const [idHoaDonChosing, setIdHoaDonChosing] = useState('');
   const [isShowModalAddGioHang, setIsShowModalAddGioHang] = useState(false);
   const [txtSearchProduct, setTxtSearchProduct] = useState('');
+  const [isCheckMultipleProduct, setIsCheckMultipleProduct] = useState(false);
+  const [arrIdQuyDoiChosed, setArrIdQuyDoiChosed] = useState<string[]>([]);
+  const [arrIdNhomHangFilter, setArrIdNhomHangFilter] = useState<string[]>([]);
+  const [ctDoing, setCTDoing] = useState<IHoaDonChiTietDto>({} as IHoaDonChiTietDto);
+  const [listGroupProduct, setListGroupProduct] = useState<IProductGroupDto[]>([]);
+
   const [paramSearchProduct, setParamSearchProduct] = useState<IParamSearchProductDto>({
     textSearch: '',
     currentPage: 0,
@@ -50,9 +70,42 @@ const ProductSale = () => {
     totalPage: 0
   });
 
-  const [ctDoing, setCTDoing] = useState<IHoaDonChiTietDto>({} as IHoaDonChiTietDto);
+  const GetAllNhomSanPham = async () => {
+    const lst = await ProductGroupSevice.GetAllNhomHangHoa();
+    if (lst?.length > 0) {
+      setListGroupProduct([...lst]);
+    } else {
+      const arr: IProductGroupDto[] = [
+        {
+          id: '1',
+          tenNhomHang: 'Phẫu thuật thẩm mỹ'
+        },
+        {
+          id: '2',
+          tenNhomHang: 'Gội'
+        },
+        {
+          id: '3',
+          tenNhomHang: 'Phun xăm'
+        },
+        {
+          id: '4',
+          tenNhomHang: 'Sản phẩm chăm sóc sắc đẹp'
+        }
+      ];
+      setListGroupProduct([...arr]);
+    }
+  };
 
-  const PageLoad = async () => {};
+  useEffect(() => {
+    if (setIsHideTab !== undefined) {
+      setIsHideTab(isCheckMultipleProduct);
+    }
+  }, [isCheckMultipleProduct]);
+
+  const PageLoad = async () => {
+    GetAllNhomSanPham();
+  };
 
   useEffect(() => {
     PageLoad();
@@ -173,8 +226,29 @@ const ProductSale = () => {
     }, 2000);
   }, [txtSearchProduct]);
 
+  const choseNhomHangHoa = async (idNhomHang: string) => {
+    setArrIdNhomHangFilter(prev => {
+      if (!prev.includes(idNhomHang)) {
+        return [idNhomHang, ...prev];
+      } else {
+        return prev.filter(x => x !== idNhomHang);
+      }
+    });
+    // todo: get listproduct by arrNhomFilter
+  };
+
   const choseProduct = async (item: IProductBasic) => {
     const idQuyDoi = item?.idDonViQuyDoi;
+    if (isCheckMultipleProduct) {
+      setArrIdQuyDoiChosed(prev => {
+        if (!prev.includes(idQuyDoi)) {
+          return [idQuyDoi, ...prev];
+        } else {
+          return prev.filter(x => x !== idQuyDoi);
+        }
+      });
+      return;
+    }
 
     const itemCTHD = realmQuery.GetChiTietHoaDon_byIdQuyDoi(idHoaDonCurrent, idQuyDoi);
 
@@ -227,6 +301,68 @@ const ProductSale = () => {
     setIsShowModalAddGioHang(true);
   };
 
+  const clickBoChonNhieuSanPham = () => {
+    setIsCheckMultipleProduct(false);
+    setArrIdQuyDoiChosed([]);
+  };
+  const addMultipleProduct = async () => {
+    setIsCheckMultipleProduct(false);
+    setArrIdQuyDoiChosed([]);
+
+    const cthd = realmQuery.GetListChiTietHoaDon_byIdHoaDon(idHoaDonCurrent);
+    const arrIdQuyDoiOld = cthd?.map(x => {
+      return x.idDonViQuyDoi;
+    });
+    const arrIdQuyDoiNew = arrIdQuyDoiChosed?.filter(x => !arrIdQuyDoiOld.includes(x));
+
+    // if exists: increments quantity
+    for (let i = 0; i < arrIdQuyDoiOld.length; i++) {
+      const idQuyDoi = arrIdQuyDoiOld[i];
+      for (let j = 0; j < cthd.length; j++) {
+        const itemCTHD = cthd[j];
+        if (itemCTHD.idDonViQuyDoi === idQuyDoi) {
+          itemCTHD.soLuong += 1;
+          itemCTHD.thanhTienTruocCK += itemCTHD.donGiaTruocCK * itemCTHD.soLuong;
+          itemCTHD.thanhTienSauCK += itemCTHD.donGiaSauCK * itemCTHD.soLuong;
+          itemCTHD.thanhTienSauVAT += itemCTHD.donGiaSauVAT * itemCTHD.soLuong;
+
+          realmQuery.UpdateTo_HoaDonChiTiet(itemCTHD);
+          break;
+        }
+      }
+    }
+    // if not: add new
+    const lstProductNew_fromCache = realmQuery.GetListHangHoa_byArrIdQuyDoi(arrIdQuyDoiNew);
+    for (let i = 0; i < lstProductNew_fromCache.length; i++) {
+      const productNew = lstProductNew_fromCache[i];
+      const newCTHD = new HoaDonChiTietDto({
+        id: uuid.v4().toString(),
+        idHoaDon: idHoaDonCurrent,
+        idDonViQuyDoi: productNew?.idDonViQuyDoi,
+        idHangHoa: productNew?.idHangHoa,
+        maHangHoa: productNew?.maHangHoa,
+        tenHangHoa: productNew?.tenHangHoa,
+        giaBan: productNew?.giaBan ?? 0,
+        soLuong: 1,
+        donGiaTruocCK: productNew?.giaBan ?? 0
+      });
+      cthd.push(newCTHD);
+      realmQuery.InsertTo_HoaDonChiTiet(newCTHD);
+    }
+
+    realmQuery.UpdateHD_fromCTHD(idHoaDonCurrent);
+
+    // get list product from DB (todo)
+    // const arrProduct = await ProductService.GetInforBasic_OfListHangHoa_ByIdQuyDoi(arrIdQuyDoiNew);
+
+    setCurrentInvoice({
+      ...currentInvoice,
+      countProduct: (currentInvoice?.countProduct ?? 0) + (arrIdQuyDoiNew?.length ?? 0)
+    });
+
+    setIsCheckMultipleProduct(false);
+  };
+
   const agreeAddGioHang = async (ctAfter: IHoaDonChiTietDto) => {
     setIsShowModalAddGioHang(false);
 
@@ -260,13 +396,51 @@ const ProductSale = () => {
         onSave={agreeAddGioHang}
       />
       <View style={{ padding: 8 }}>
+        <View style={[styles.flexRow, styles.boxContainer]}>
+          <TouchableOpacity style={styles.flexRow}>
+            <ScrollView horizontal>
+              <Button
+                containerStyle={{ paddingRight: 6, paddingVertical: 6 }}
+                buttonStyle={{
+                  borderRadius: 4,
+                  backgroundColor: arrIdNhomHangFilter?.length > 0 ? theme.colors.disabled : theme.colors.primary
+                }}
+                title={'Tất cả'}></Button>
+              {listGroupProduct?.map(item => (
+                <Button
+                  key={item?.id}
+                  title={item.tenNhomHang}
+                  containerStyle={{ padding: 6 }}
+                  buttonStyle={{
+                    borderRadius: 4,
+                    backgroundColor: arrIdNhomHangFilter?.includes(item?.id)
+                      ? theme.colors.primary
+                      : theme.colors.disabled
+                  }}
+                  onPress={() => choseNhomHangHoa(item?.id)}></Button>
+              ))}
+            </ScrollView>
+            {/* <Text
+              style={{
+                paddingLeft: 8
+              }}>
+              Nhóm hàng:
+            </Text>
+            <Text
+              style={{
+                paddingLeft: 8
+              }}>
+              Tất cả
+            </Text> */}
+          </TouchableOpacity>
+        </View>
         <Input
           leftIcon={{
             type: IconType.IONICON,
             name: 'search',
             size: 14,
             style: {
-              color: '#ccc'
+              color: theme.colors.greyOutline
             }
           }}
           rightIcon={{
@@ -275,8 +449,7 @@ const ProductSale = () => {
           }}
           placeholder="Tìm kiếm sản phẩm"
           containerStyle={{
-            // backgroundColor: 'red',
-            borderColor: '#ccc',
+            borderColor: theme.colors.greyOutline,
             padding: 0
           }}
           inputStyle={{
@@ -295,57 +468,46 @@ const ProductSale = () => {
         ) : (
           <View>
             <View
-              style={[
-                styles.flexRow,
-                styles.boxContainer,
-                // do chưa fix dc padding của inputsearch ở trên, nên để margin -20
-                {
-                  backgroundColor: 'rgba(0,0,0,.03)',
-                  marginTop: -20
-                }
-              ]}>
-              <View style={styles.flexRow}>
-                <Icon type="font-awesome-5" name="user" size={16} />
-                <Text
-                  style={{
-                    paddingLeft: 10
-                  }}>
-                  Khach le
-                </Text>
-              </View>
-              <Icon type="material-community" name="chevron-double-right" />
-            </View>
-            <View
-              style={[
-                styles.flexRow,
-                styles.boxContainer,
-                {
-                  borderBottomColor: '#ccc',
-                  borderBottomWidth: 1
-                }
-              ]}>
-              <View style={styles.flexRow}>
-                <Icon type="ionicon" name="filter" />
-                <Text
-                  style={{
-                    paddingLeft: 8
-                  }}>
-                  Tất cả
-                </Text>
-              </View>
-              <View style={styles.flexRow}>
-                <Icon type="ionicon" name="checkmark" />
-                <Text
-                  style={{
-                    paddingLeft: 8
-                  }}>
-                  Chọn nhiều
-                </Text>
+              style={{
+                padding: 12,
+                marginTop: -20
+              }}>
+              <View style={[styles.flexRow, { justifyContent: 'space-between' }]}>
+                <TouchableOpacity
+                  onPress={() => setIsCheckMultipleProduct(!isCheckMultipleProduct)}
+                  style={styles.flexRow}>
+                  {isCheckMultipleProduct && <Icon type="ionicon" name="checkmark" />}
+                  <Text
+                    style={{
+                      textDecorationLine: 'underline',
+                      color: theme.colors.primary
+                    }}>
+                    Chọn nhiều sản phẩm
+                  </Text>
+                </TouchableOpacity>
+                {isCheckMultipleProduct && (
+                  <TouchableOpacity onPress={clickBoChonNhieuSanPham}>
+                    <Text
+                      style={{
+                        textDecorationLine: 'underline',
+                        color: theme.colors.primary
+                      }}>
+                      Bỏ chọn nhiều
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
             <FlatList
               data={pageResultProduct?.items}
-              renderItem={({ item }) => <ItemProductSale item={item} choseItem={choseProduct} />}
+              renderItem={({ item }) => (
+                <ItemProductSale
+                  item={item}
+                  isShowCheck={isCheckMultipleProduct}
+                  isChosed={arrIdQuyDoiChosed.includes(item.idDonViQuyDoi)}
+                  choseItem={choseProduct}
+                />
+              )}
               keyExtractor={item => item.idDonViQuyDoi}
               style={{
                 paddingBottom: 8
@@ -354,28 +516,42 @@ const ProductSale = () => {
           </View>
         )}
       </View>
+      {isCheckMultipleProduct && (
+        <ActionMenu
+          visible={isCheckMultipleProduct}
+          enable={arrIdQuyDoiChosed?.length > 0}
+          onPress={addMultipleProduct}
+        />
+      )}
     </View>
   );
 };
 export default ProductSale;
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white'
-  },
-  flexRow: {
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  boxContainer: {
-    justifyContent: 'space-between',
-    padding: 10
-  },
-  boxCustomer: {
-    backgroundColor: 'yellow',
-    padding: 8
-  },
-  textRightIcon: {
-    paddingLeft: 8
-  }
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.white,
+      position: 'relative'
+    },
+    flexRow: {
+      flexDirection: 'row',
+      alignItems: 'center'
+    },
+    boxContainer: {
+      justifyContent: 'space-between',
+      padding: 10
+    },
+    textRightIcon: {
+      paddingLeft: 8
+    },
+    actionMenu: {
+      backgroundColor: theme.colors.primary,
+      gap: 8,
+      padding: 10,
+      position: 'absolute',
+      bottom: 0,
+      width: '100%',
+      justifyContent: 'center'
+    }
+  });

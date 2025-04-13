@@ -14,13 +14,14 @@ import { DrawerNavigationProp } from '@react-navigation/drawer';
 import realmQuery from '../store/realm/realmQuery';
 import { SaleManagerStackProvider, useSaleManagerStackContext } from '../store/react_context/SaleManagerStackProvide';
 import { Image, useTheme } from '@rneui/themed';
+import { CustomerTabBar } from './customer_tab_bar';
 
 type SaleManagerTabNavigationProps = DrawerNavigationProp<MainDrawerParamList, MainNavigation.SALE_MANAGER_STACK>;
 
 function SaleManagerTabNavigation() {
   const Tabs = createBottomTabNavigator<SaleManagerTabParamList>();
   const navigation = useNavigation<SaleManagerTabNavigationProps>();
-  const { currentInvoice } = useSaleManagerStackContext();
+  const { currentInvoice, isHideTabs } = useSaleManagerStackContext();
   const idHoaDon = currentInvoice?.idHoaDon ?? '';
   const countProduct = currentInvoice?.countProduct ?? 0;
 
@@ -57,7 +58,8 @@ function SaleManagerTabNavigation() {
             />
           </TouchableOpacity>
         )
-      }}>
+      }}
+      tabBar={props => <CustomerTabBar {...props} />}>
       <Tabs.Screen
         name={SaleManagerTab.TEMP_INVOICE}
         component={TempInvoices}

@@ -11,17 +11,22 @@ type CurrentInvoiceType = {
 type SaleManagerStackContextType = {
   currentInvoice: CurrentInvoiceType | null;
   setCurrentInvoice: (curentInvoice: CurrentInvoiceType | null) => void;
+  isHideTabs?: boolean;
+  setIsHideTab?: (isHide: boolean) => void;
 };
 
 const SaleManagerStackContext = createContext<SaleManagerStackContextType | undefined>(undefined);
 
 export const SaleManagerStackProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentInvoice, setCurrentInvoice] = useState<CurrentInvoiceType | null>(null);
+  const [isHideTabs, setIsHideTab] = useState<boolean>(false);
   return (
     <SaleManagerStackContext.Provider
       value={{
         currentInvoice,
-        setCurrentInvoice
+        setCurrentInvoice,
+        isHideTabs,
+        setIsHideTab
       }}>
       {children}
     </SaleManagerStackContext.Provider>

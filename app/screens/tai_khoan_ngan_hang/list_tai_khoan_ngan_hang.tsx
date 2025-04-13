@@ -114,12 +114,7 @@ export const ListTaiKhoanNganHang = ({ isShow, objUpdate, onClose, onSave }: Pro
                 {accountBankChosed?.id === item.id && (
                   <Icon type={IconType.IONICON} name="checkmark" size={24} color={theme.colors.primary} />
                 )}
-                <Image
-                  style={styles.image}
-                  source={{
-                    uri: item?.logoNganHang
-                  }}
-                />
+                <Image style={styles.image} source={{ uri: item?.logoNganHang }} />
 
                 <View>
                   <Text
@@ -149,8 +144,23 @@ export const ListTaiKhoanNganHang = ({ isShow, objUpdate, onClose, onSave }: Pro
                 flexDirection: 'row',
                 justifyContent: 'flex-end'
               }}>
-              <Button title={'Bỏ qua'} color={theme.colors.error} size="lg" onPress={onClose} />
-              <Button title={'Đồng ý'} size="lg" onPress={agreeChoseTaiKhoanNganHang} />
+              <Button
+                title={'Bỏ qua'}
+                color={theme.colors.error}
+                size="lg"
+                onPress={onClose}
+                containerStyle={{
+                  borderRadius: 4
+                }}
+              />
+              <Button
+                title={'Đồng ý'}
+                size="lg"
+                containerStyle={{
+                  borderRadius: 4
+                }}
+                onPress={agreeChoseTaiKhoanNganHang}
+              />
             </View>
           </View>
         </ModalContainer>
