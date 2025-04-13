@@ -151,7 +151,9 @@ export const ModalListProduct = ({ isShow, onClose, onSave }: PropModal<IProduct
                 </View>
                 <FlatList
                   data={pageResultProduct?.items}
-                  renderItem={({ item }) => <ItemProductSale item={item} choseItem={choseProduct} />}
+                  renderItem={({ item }) => (
+                    <ItemProductSale item={item} isShowCheck={false} choseItem={choseProduct} />
+                  )}
                   keyExtractor={item => item.idDonViQuyDoi}
                   style={{
                     paddingBottom: 8

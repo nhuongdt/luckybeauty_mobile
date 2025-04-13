@@ -21,7 +21,7 @@ type SaleManagerTabNavigationProps = DrawerNavigationProp<MainDrawerParamList, M
 function SaleManagerTabNavigation() {
   const Tabs = createBottomTabNavigator<SaleManagerTabParamList>();
   const navigation = useNavigation<SaleManagerTabNavigationProps>();
-  const { currentInvoice, isHideTabs } = useSaleManagerStackContext();
+  const { currentInvoice } = useSaleManagerStackContext();
   const idHoaDon = currentInvoice?.idHoaDon ?? '';
   const countProduct = currentInvoice?.countProduct ?? 0;
 
