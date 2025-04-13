@@ -72,6 +72,32 @@ class realmQuery {
       console.log(`Init_DanhMucHangHoa ${error}`);
     }
   };
+  GetHangHoa_byIdQuyDoi = (idQuyDoi: string): IProductBasic[] => {
+    try {
+      // realm có thể nhận mảng trực tiếp mà không cần chuyển thành chuỗi
+      const lst = db
+        .objects(ListTable.HANG_HOA)
+        .filtered(`idDonViQuyDoi = $0`, idQuyDoi)
+        .toJSON() as unknown as IProductBasic[];
+      return lst;
+    } catch (error) {
+      console.log(`GetHangHoa_byIdQuyDoi ${error}`);
+    }
+    return [];
+  };
+  GetListHangHoa_byArrIdQuyDoi = (arrIdQuyDoi: string[]): IProductBasic[] => {
+    try {
+      // realm có thể nhận mảng trực tiếp mà không cần chuyển thành chuỗi
+      const lst = db
+        .objects(ListTable.HANG_HOA)
+        .filtered(`idDonViQuyDoi in $0`, arrIdQuyDoi)
+        .toJSON() as unknown as IProductBasic[];
+      return lst;
+    } catch (error) {
+      console.log(`GetListHangHoa_byArrIdQuyDoi ${error}`);
+    }
+    return [];
+  };
   GetListHangHoa_fromCacche = (): IProductBasic[] => {
     try {
       const lst = db.objects(ListTable.HANG_HOA).toJSON() as unknown as IProductBasic[];
@@ -84,7 +110,7 @@ class realmQuery {
   GetListHoaDon_ByLoaiChungTu = (idLoaiChungTu: number): IHoaDonDto[] => {
     const lst = db
       .objects(ListTable.HOA_DON)
-      .filtered(`idLoaiChungTu = ${idLoaiChungTu}`)
+      .filtered(`idLoaiChungTu = $0`, idLoaiChungTu)
       .toJSON() as unknown as IHoaDonDto[];
     return lst;
   };
@@ -116,7 +142,7 @@ class realmQuery {
     try {
       const lst = db
         .objects(ListTable.HOA_DON_CHI_TIET)
-        .filtered(`idHoaDon= '${idHoaDon}'`)
+        .filtered(`idHoaDon= $0`, idHoaDon)
         .toJSON() as unknown as IHoaDonChiTietDto[];
       return lst;
     } catch (err) {
@@ -128,7 +154,7 @@ class realmQuery {
     try {
       const data = db
         .objects(ListTable.HOA_DON_CHI_TIET)
-        .filtered(`idHoaDon= '${idHoaDon}' and idDonViQuyDoi= '${idDonViQuyDoi}'`)[0];
+        .filtered(`idHoaDon= $0 and idDonViQuyDoi= $1`, idHoaDon, idDonViQuyDoi)[0];
       if (data) {
         return data.toJSON() as unknown as IHoaDonChiTietDto;
       }
@@ -221,7 +247,7 @@ class realmQuery {
   };
   HoaDon_ResetValueForColumn_isOpenLastest = (idLoaiChungTu: number) => {
     db.write(() => {
-      const lst = db.objects(ListTable.HOA_DON).filtered(`idLoaiChungTu=${idLoaiChungTu}`);
+      const lst = db.objects(ListTable.HOA_DON).filtered(`idLoaiChungTu= $0`, idLoaiChungTu);
       lst.forEach(item => {
         item.isOpenLastest = false;
       });
@@ -317,7 +343,7 @@ class realmQuery {
   DeleteHoaDonChiTiet_byIdHoaDon = (idHoaDon: string) => {
     try {
       db.write(() => {
-        const lst = db.objects(ListTable.HOA_DON_CHI_TIET).filtered(`idHoaDon= '${idHoaDon}'`);
+        const lst = db.objects(ListTable.HOA_DON_CHI_TIET).filtered(`idHoaDon= $0 `, idHoaDon);
         db.delete(lst);
       });
     } catch (err) {
@@ -341,7 +367,7 @@ class realmQuery {
       db.write(() => {
         const lst = db
           .objects(ListTable.HOA_DON_CHI_TIET)
-          .filtered(`idHoaDon= '${idHoaDon}' and idDonViQuyDoi = '${idDonViQuyDoi}'`);
+          .filtered(`idHoaDon= $0 and idDonViQuyDoi =  $1`, idHoaDon, idDonViQuyDoi);
         db.delete(lst);
       });
     } catch (err) {
