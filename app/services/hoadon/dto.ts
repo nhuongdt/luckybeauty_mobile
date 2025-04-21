@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import dayjs from 'dayjs';
 import { ICustomerBasicDto } from '../customer/ICustomerBasicDto';
 import { IProductBasic } from '../product/dto';
 import { LoaiChungTu } from '../../enum/LoaiChungTu';
@@ -87,7 +87,7 @@ export class HoaDonDto implements IHoaDonDto {
     idKhachHang = null,
     idNhanVien = null,
     maHoaDon = '',
-    ngayLapHoaDon = format(new Date(), 'yyyy-MM-dd HH:mm'),
+    ngayLapHoaDon = dayjs(new Date()).format('yyyy-MM-dd HH:mm'),
     isOpenLastest = true,
     tongTienHangChuaChietKhau = 0,
     ptChietKhauHang = 0,

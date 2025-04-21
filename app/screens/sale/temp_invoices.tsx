@@ -2,7 +2,7 @@ import { View, StyleSheet, Pressable, ScrollView, TouchableOpacity } from 'react
 import { Icon, Button, Text, useTheme } from '@rneui/themed';
 import { useEffect, useRef, useContext, useState, useCallback } from 'react';
 import uuid from 'react-native-uuid';
-import { format } from 'date-fns';
+import dayjs from 'dayjs';
 import { CompositeNavigationProp, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Input, Theme } from '@rneui/base';
@@ -241,7 +241,7 @@ const TempInvoices = () => {
                             color: theme.colors.greyOutline,
                             fontSize: 14
                           }}>
-                          {format(new Date(item.ngayLapHoaDon), 'HH:mm')}
+                          {dayjs(item?.ngayLapHoaDon).format('HH:mm')}
                         </Text>
                       </View>
                       <View

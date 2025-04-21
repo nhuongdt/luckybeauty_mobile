@@ -10,7 +10,7 @@ import { IconType } from '../enum/IconType';
 import LoginScreen from '../screens/login';
 import { useContext } from 'react';
 import { useAuthApp } from '../store/react_context/AuthProvider';
-import { Image, Text, useTheme } from '@rneui/themed';
+import { Avatar, Image, Text, useTheme } from '@rneui/themed';
 
 const Drawer = createDrawerNavigator();
 
@@ -23,17 +23,6 @@ const CustomDrawer = (props: any) => {
       contentContainerStyle={{
         flex: 1
       }}>
-      <View style={{ padding: 16, flexDirection: 'row', alignItems: 'flex-end' }}>
-        <Image
-          style={{
-            resizeMode: 'stretch',
-            width: 30,
-            height: 30
-          }}
-          source={require('./../assets/images/app-logo.png')}
-        />
-        <Text style={{ marginLeft: 12, fontSize: 18, fontWeight: 600, color: 'rgb(49, 157, 255)' }}>Lucky Beauty</Text>
-      </View>
       <DrawerItemList {...props} />
       <View style={{ flex: 1 }} />
       <DrawerItem
@@ -48,19 +37,24 @@ const CustomDrawer = (props: any) => {
 
 export const MainDrawerNavigation = () => {
   const { theme } = useTheme();
+  const { userLogin } = useAuthApp();
 
   return (
     <Drawer.Navigator
       drawerContent={props => <CustomDrawer {...props} />}
       screenOptions={{
         drawerActiveTintColor: theme.colors.primary,
-        drawerActiveBackgroundColor: theme.colors.grey5
+        drawerActiveBackgroundColor: theme.colors.grey5,
+        headerStyle: {
+          backgroundColor: theme.colors.white
+        },
+        headerRight: () => <Avatar size={24} containerStyle={{ backgroundColor: theme.colors.primary }} />
       }}>
       <Drawer.Screen
         name={MainNavigation.DASH_BOARD}
         component={Dashboard}
         options={() => ({
-          title: 'Trang chủ',
+          title: `Hello, ${userLogin}`,
           drawerIcon: ({ focused, color, size }) => (
             <Icon
               type={IconType.IONICON}
@@ -68,6 +62,7 @@ export const MainDrawerNavigation = () => {
               color={focused ? theme.colors.primary : theme.colors.disabled}
             />
           )
+          // headerLeft: () => <Text> Hello, {userLogin}</Text>
         })}
       />
       <Drawer.Screen
@@ -107,5 +102,22 @@ export const MainDrawerNavigation = () => {
 const styles = StyleSheet.create({
   logoutItem: {
     marginBottom: 16
+  },
+  header: {
+    backgroundColor: '#2089dc',
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    marginRight: 10
+  },
+  name: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16
   }
 });

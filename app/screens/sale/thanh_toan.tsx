@@ -18,7 +18,6 @@ import SoQuyService from '../../services/so_quy/SoQuyService';
 import { IQuyHoaDonDto } from '../../services/so_quy/IQuyHoaDonDto';
 import ApiConst from '../../const/ApiConst';
 import { LoaiChungTu } from '../../enum/LoaiChungTu';
-import { format } from 'date-fns';
 import NhatKyThaoTacService from '../../services/nhat_ky_su_dung/NhatKyThaoTacService';
 import { INhatKyThaoTacDto } from '../../services/nhat_ky_su_dung/INhatKyThaoTacDto';
 import { DiaryStatus } from '../../enum/DiaryStatus';
@@ -27,6 +26,8 @@ import { SaleManagerStackParamList } from '../../navigation/route_param_list';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthApp } from '../../store/react_context/AuthProvider';
 import { useSaleManagerStackContext } from '../../store/react_context/SaleManagerStackProvide';
+import dayjs from 'dayjs';
+import { TextLink } from '../components/text_link';
 
 type ThanhToanRouteProp = RouteProp<SaleManagerStackParamList, SaleManagerStack.THANH_TOAN>;
 type ThanhToanScreenNavigation = NativeStackNavigationProp<SaleManagerStackParamList, SaleManagerStack.THANH_TOAN>;
@@ -198,6 +199,11 @@ export default function ThanhToan() {
     setLaTaiKhoanhChuyenKhoan(laChuyenKhoan);
   };
 
+  const changeTaiKhoanNganHang = (laChuyenKhoan: boolean) => {
+    setIsShowModalTaiKhoanNganHang(true);
+    setLaTaiKhoanhChuyenKhoan(laChuyenKhoan);
+  };
+
   const checkSave = () => {
     if (tienKhachDua === 0) {
       setObjSimpleDialog({
@@ -267,7 +273,7 @@ export default function ThanhToan() {
             idNhanVien: null, // todo
             idLoaiChungTu: LoaiChungTu.PHIEU_THU,
             tongTienThu: tongThu,
-            ngayLapHoaDon: format(hoadonOpen?.ngayLapHoaDon, 'yyyy-MM-dd'),
+            ngayLapHoaDon: dayjs(hoadonOpen?.ngayLapHoaDon).format('yyyy-MM-dd'),
             noiDungThu: noiDungThu,
             hachToanKinhDoanh: true
           };
@@ -335,8 +341,9 @@ export default function ThanhToan() {
   };
 
   const saveDiaryHoaDon = async (hoadon: IHoaDonDto, tongthu: number) => {
+    // <br /> Ngày lập: ${format(new Date(hoadon?.ngayLapHoaDon), 'dd/MM/yyyy HH:mm')}
     const sNoiDungChiTiet = `<br /> Mã hóa đơn: ${hoadon?.maHoaDon},
-    <br /> Ngày lập: ${format(hoadon?.ngayLapHoaDon, 'dd/MM/yyyy HH:mm')}
+    <br /> Ngày lập: ${dayjs(hoadonOpen?.ngayLapHoaDon).format('dd/MM/yyyy HH:mm')}
     <br /> Khách hàng: ${hoadonOpen?.tenKhachHang} (${hoadonOpen?.maKhachHang}) 
     <br /> Phải thanh toán: ${CommonFunc.formatCurrency(hoadon?.tongThanhToan)}
     <br /> Đã thanh toán: ${CommonFunc.formatCurrency(tongthu)}`;
@@ -375,10 +382,8 @@ export default function ThanhToan() {
       sPhuongThucTT = 'POS';
     }
     sPhuongThucTT = CommonFunc.remove_LastComma(sPhuongThucTT);
-    const sNoiDungChiTiet = `Mã phiếu: ${quyHD?.maHoaDon} <br /> Ngày lập: ${format(
-      quyHD?.ngayLapHoaDon,
-      'dd/MM/yyyy HH:mm'
-    )}
+    const dateStr = dayjs(hoadonOpen?.ngayLapHoaDon).format('dd/MM/yyyy HH:mm');
+    const sNoiDungChiTiet = `Mã phiếu: ${quyHD?.maHoaDon} <br /> Ngày lập: ${dateStr}
       <br /> Khách hàng: ${hoadonOpen?.tenKhachHang} (${hoadonOpen?.maKhachHang}) 
       <br /> Tổng thu: ${CommonFunc.formatCurrency(quyHD?.tongTienThu)}
       <br /> Nội dung: ${quyHD?.noiDungThu}
@@ -582,6 +587,7 @@ export default function ThanhToan() {
                       {taiKhoanPOSChosed?.soTaiKhoan ?? ''}
                     </Text>
                   </View>
+                  <TextLink lable="Thay đổi" onPress={() => showModalTaiKhoanNganHang(true)} />
                 </View>
               </View>
             ) : (
